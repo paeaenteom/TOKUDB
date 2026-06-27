@@ -229,6 +229,7 @@ footer a:hover{color:var(--cyan)}
     <div class="filebar">
       <span class="fname" id="fname">save.rpgsave</span>
       <span class="badge" id="fmtBadge">JSON</span>
+      <span class="cnt" id="editCnt" style="color:var(--mag)">0개 변경</span>
       <span class="cnt" id="fieldCnt">0 fields</span>
     </div>
 
@@ -295,310 +296,340 @@ footer a:hover{color:var(--cyan)}
 var LZString=function(){var r=String.fromCharCode,o="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=",n="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+-$",e={};function t(r,o){if(!e[r]){e[r]={};for(var n=0;n<r.length;n++)e[r][r.charAt(n)]=n}return e[r][o]}var i={compressToBase64:function(r){if(null==r)return"";var n=i._compress(r,6,function(r){return o.charAt(r)});switch(n.length%4){default:case 0:return n;case 1:return n+"===";case 2:return n+"==";case 3:return n+"="}},decompressFromBase64:function(r){return null==r?"":""==r?null:i._decompress(r.length,32,function(n){return t(o,r.charAt(n))})},compressToUTF16:function(o){return null==o?"":i._compress(o,15,function(o){return r(o+32)})+" "},decompressFromUTF16:function(r){return null==r?"":""==r?null:i._decompress(r.length,16384,function(o){return r.charCodeAt(o)-32})},compressToUint8Array:function(r){for(var o=i.compress(r),n=new Uint8Array(2*o.length),e=0,t=o.length;e<t;e++){var s=o.charCodeAt(e);n[2*e]=s>>>8,n[2*e+1]=s%256}return n},decompressFromUint8Array:function(o){if(null==o)return i.decompress(o);for(var n=new Array(o.length/2),e=0,t=n.length;e<t;e++)n[e]=256*o[2*e]+o[2*e+1];var s=[];return n.forEach(function(o){s.push(r(o))}),i.decompress(s.join(""))},compressToEncodedURIComponent:function(r){return null==r?"":i._compress(r,6,function(r){return n.charAt(r)})},decompressFromEncodedURIComponent:function(r){return null==r?"":""==r?null:(r=r.replace(/ /g,"+"),i._decompress(r.length,32,function(o){return t(n,r.charAt(o))}))},compress:function(o){return i._compress(o,16,function(o){return r(o)})},_compress:function(r,o,n){if(null==r)return"";var e,t,i,s={},u={},a="",p="",c="",l=2,f=3,h=2,d=[],m=0,v=0;for(i=0;i<r.length;i+=1)if(a=r.charAt(i),Object.prototype.hasOwnProperty.call(s,a)||(s[a]=f++,u[a]=!0),p=c+a,Object.prototype.hasOwnProperty.call(s,p))c=p;else{if(Object.prototype.hasOwnProperty.call(u,c)){if(c.charCodeAt(0)<256){for(e=0;e<h;e++)m<<=1,v==o-1?(v=0,d.push(n(m)),m=0):v++;for(t=c.charCodeAt(0),e=0;e<8;e++)m=m<<1|1&t,v==o-1?(v=0,d.push(n(m)),m=0):v++,t>>=1}else{for(t=1,e=0;e<h;e++)m=m<<1|t,v==o-1?(v=0,d.push(n(m)),m=0):v++,t=0;for(t=c.charCodeAt(0),e=0;e<16;e++)m=m<<1|1&t,v==o-1?(v=0,d.push(n(m)),m=0):v++,t>>=1}0==--l&&(l=Math.pow(2,h),h++),delete u[c]}else for(t=s[c],e=0;e<h;e++)m=m<<1|1&t,v==o-1?(v=0,d.push(n(m)),m=0):v++,t>>=1;0==--l&&(l=Math.pow(2,h),h++),s[p]=f++,c=String(a)}if(""!==c){if(Object.prototype.hasOwnProperty.call(u,c)){if(c.charCodeAt(0)<256){for(e=0;e<h;e++)m<<=1,v==o-1?(v=0,d.push(n(m)),m=0):v++;for(t=c.charCodeAt(0),e=0;e<8;e++)m=m<<1|1&t,v==o-1?(v=0,d.push(n(m)),m=0):v++,t>>=1}else{for(t=1,e=0;e<h;e++)m=m<<1|t,v==o-1?(v=0,d.push(n(m)),m=0):v++,t=0;for(t=c.charCodeAt(0),e=0;e<16;e++)m=m<<1|1&t,v==o-1?(v=0,d.push(n(m)),m=0):v++,t>>=1}0==--l&&(l=Math.pow(2,h),h++),delete u[c]}else for(t=s[c],e=0;e<h;e++)m=m<<1|1&t,v==o-1?(v=0,d.push(n(m)),m=0):v++,t>>=1;0==--l&&(l=Math.pow(2,h),h++)}for(t=2,e=0;e<h;e++)m=m<<1|1&t,v==o-1?(v=0,d.push(n(m)),m=0):v++,t>>=1;for(;;){if(m<<=1,v==o-1){d.push(n(m));break}v++}return d.join("")},decompress:function(r){return null==r?"":""==r?null:i._decompress(r.length,32768,function(o){return r.charCodeAt(o)})},_decompress:function(o,n,e){var t,i,s,u,a,p,c,l=[],f=4,h=4,d=3,m="",v=[],g={val:e(0),position:n,index:1};for(t=0;t<3;t+=1)l[t]=t;for(s=0,a=Math.pow(2,2),p=1;p!=a;)u=g.val&g.position,g.position>>=1,0==g.position&&(g.position=n,g.val=e(g.index++)),s|=(u>0?1:0)*p,p<<=1;switch(s){case 0:for(s=0,a=Math.pow(2,8),p=1;p!=a;)u=g.val&g.position,g.position>>=1,0==g.position&&(g.position=n,g.val=e(g.index++)),s|=(u>0?1:0)*p,p<<=1;c=r(s);break;case 1:for(s=0,a=Math.pow(2,16),p=1;p!=a;)u=g.val&g.position,g.position>>=1,0==g.position&&(g.position=n,g.val=e(g.index++)),s|=(u>0?1:0)*p,p<<=1;c=r(s);break;case 2:return""}for(l[3]=c,i=c,v.push(c);;){if(g.index>o)return"";for(s=0,a=Math.pow(2,d),p=1;p!=a;)u=g.val&g.position,g.position>>=1,0==g.position&&(g.position=n,g.val=e(g.index++)),s|=(u>0?1:0)*p,p<<=1;switch(c=s){case 0:for(s=0,a=Math.pow(2,8),p=1;p!=a;)u=g.val&g.position,g.position>>=1,0==g.position&&(g.position=n,g.val=e(g.index++)),s|=(u>0?1:0)*p,p<<=1;l[h++]=r(s),c=h-1,f--;break;case 1:for(s=0,a=Math.pow(2,16),p=1;p!=a;)u=g.val&g.position,g.position>>=1,0==g.position&&(g.position=n,g.val=e(g.index++)),s|=(u>0?1:0)*p,p<<=1;l[h++]=r(s),c=h-1,f--;break;case 2:return v.join("")}if(0==f&&(f=Math.pow(2,d),d++),l[c])m=l[c];else{if(c!==h)return null;m=i+i.charAt(0)}v.push(m),l[h++]=i+m.charAt(0),i=m,0==--f&&(f=Math.pow(2,d),d++)}}};return i}();
 </script>
 
-<!-- @hyrious/marshal (inline) - RPG Maker XP/VX/VXAce -->
+<!-- 에디터 로직 (바이트패치) -->
 <script>
-var marshal=function(u){"use strict";var br=1,vr=2,gr=4,G=Symbol.for("E"),dr=Symbol.for("encoding"),m="__ruby_extends__",F="__ruby_default__",H=Object.getOwnPropertySymbols,S=Object.defineProperty,wr=new TextDecoder,N=r=>wr.decode(r),mr=new TextEncoder,rr=r=>mr.encode(r),pr=r=>{if(typeof r=="object"&&r&&!r[m]){var t=[];return S(r,m,{value:t,configurable:!0}),t}return r&&r[m]},tr=(r,t)=>{S(r,F,{value:t,configurable:!0})},M=class{},k=class extends M{constructor(r){super(),S(this,"class",{value:r,configurable:!0})}},K=class extends M{constructor(r,t){super(),S(this,"class",{value:r,configurable:!0}),t&&S(this,"members",{value:t,configurable:!0})}},z=class extends M{constructor(r){super(),this.name=r}},J=class extends M{constructor(r,t){super(),this.name=r,this.old=t}},Y=class{constructor(r="",t=0){this.source=r,this.options=t}},q=class{constructor(r,t){this.entries=r||[],t!==void 0&&(this.default=t)}},Sr=class extends k{constructor(r,t,a){super(Symbol.for("Range")),this[Symbol.for("begin")]=r,this[Symbol.for("end")]=t,this[Symbol.for("excl")]=a}},D=class{constructor(r){this.value=r,S(this,"isInteger",{value:!0,configurable:!0})}valueOf(){return this.value}},U=class{constructor(r){this.value=r,S(this,"isInteger",{value:!1,configurable:!0})}valueOf(){return this.value}},ar=class{constructor(r,t={}){this.t=0,this.r=r,this.s=[],this.e=[],this.n=t}u(){return this.t<this.r.byteLength}c(){if(this.t+2>=this.r.byteLength)throw new TypeError("marshal data too short");if(this.r.getInt16(this.t)!==1032)throw new TypeError("incompatible marshal file format (can't be read)");this.t+=2;var r=l(this);return this.s.length=0,this.e.length=0,r}},P=r=>{if(r.t>=r.r.byteLength)throw new TypeError("marshal data too short");return r.r.getUint8(r.t++)},Q=(r,t)=>{if(r.t+t>r.r.byteLength)throw new TypeError("marshal data too short");return new Uint8Array(r.r.buffer,r.r.byteOffset+(r.t+=t)-t,t)},d=r=>{if(r.t>=r.r.byteLength)throw new TypeError("marshal data too short");var t=r.r.getInt8(r.t++);if(t===0)return 0;if(-4<=t&&t<=4){for(var a=Math.abs(t),e=(4-a)*8,n=Q(r,a),s=0,E=a-1;E>=0;--E)s=s<<8|n[E];return t>0?s:s<<e>>e}else return t>0?t-5:t+5},W=r=>Q(r,d(r)),T=r=>N(W(r)),v=(r,t)=>(r.e.push(t),t),Er=(r,t)=>(r.s.push(t),t),Rr=r=>{for(var t=P(r),a=d(r)<<1,e=Q(r,a),n=0,s=0;s<a;++s)n+=e[s]*2**(s<<3);return t===43?n:-n},Tr=r=>{var t=T(r);return t==="inf"?1/0:t==="-inf"?-1/0:t==="nan"?NaN:Number(t)},Or=r=>{var t=T(r),a=P(r),e="";return a&1&&(e+="i"),a&4&&(e+="m"),new RegExp(t,e)},sr=(r,t,a,e)=>{var n=typeof t;return n==="symbol"||n==="string"||n==="number"?(e&&n==="symbol"&&(t=Symbol.keyFor(t)),r[t]=a):t instanceof Uint8Array?r[N(t)]=a:(t instanceof D||t instanceof U)&&(r[t.value]=a),r},er=(r,t,a,e)=>{if(e===void 0||e===!1)r[t]=a;else{var n=Symbol.keyFor(t);e===!0?r[n]=a:r[n.replace(/^@/,e)]=a}},l=r=>{var t=P(r),a=r.n.string,e=r.n.numeric==="wrap",n=r.n.regexp==="wrap",s=r.n.ivarToString,E=r.n.known||{};switch(t){case 48:return null;case 84:return!0;case 70:return!1;case 105:var o=d(r);return e?new D(o):o;case 58:return Er(r,Symbol.for(T(r)));case 59:return r.s[d(r)];case 64:return r.e[d(r)];case 73:for(var y=l(r),c=d(r),o=0,f,p;o<c;++o)f=l(r),p=l(r),y instanceof Uint8Array&&(f===G||f===dr)&&a!=="binary"?(f===G?y=N(y):y=new TextDecoder(N(p)).decode(y),r.e[r.e.length-1]=y):y!=null&&er(y,f,p,s);return y;case 101:var w=l(r),y=l(r),j=pr(y);return j&&j.unshift(w),y;case 91:for(var c=d(r),C=v(r,Array(c)),o=0;o<c;++o)C[o]=l(r);return C;case 108:var o=Rr(r);return v(r,e?new D(o):o);case 99:return v(r,new z(T(r)));case 109:case 77:return v(r,new J(T(r),t===77));case 102:var o=Tr(r);return v(r,e?new U(o):o);case 123:case 125:var I=r.n.hash,Fr=r.n.hashSymbolKeysToString;if(I==="map"){for(var c=d(r),$=v(r,new Map),o=0;o<c;++o)$.set(l(r),l(r));return t===125&&tr($,l(r)),$}else if(I==="wrap"){for(var c=d(r),x=v(r,new q([])),o=0;o<c;++o)x.entries.push([l(r),l(r)]);return t===125&&(x.default=l(r)),x}else{for(var c=d(r),_=v(r,{}),o=0;o<c;++o)sr(_,l(r),l(r),Fr);return t===125&&tr(_,l(r)),_}case 111:for(var cr=l(r),hr=E[Symbol.keyFor(cr)],R=v(r,hr?Object.create(hr.prototype):new k(cr)),c=d(r),o=0,f,p;o<c;++o)f=l(r),p=l(r),er(R,f,p,s);return R;case 47:return v(r,n?new Y(T(r),P(r)):Or(r));case 34:return v(r,a==="utf8"?T(r):W(r));case 83:for(var yr=v(r,new K(l(r))),c=d(r),_={},o=0;o<c;++o)sr(_,l(r),l(r));return S(yr,"members",{value:_,configurable:!0}),yr;case 100:case 67:case 117:case 85:var R=v(r,new k(l(r)));return t===100&&(R.data=l(r)),t===67&&(R.wrapped=l(r)),t===117&&(R.userDefined=W(r)),t===85&&(R.userMarshal=l(r)),R}},Ar=r=>{for(var t=new Uint8Array(r.length),a=0;a<r.length;++a)t[a]=r.charCodeAt(a);return t},ir=r=>(typeof r=="string"&&(r=Ar(r)),r instanceof ArrayBuffer?new DataView(r):new DataView(r.buffer,r.byteOffset,r.byteLength));function jr(r,t){return new ar(ir(r),t).c()}function _r(r,t){for(var a=new ar(ir(r),t),e=[];a.u();)e.push(a.c());return e}function Mr(r){if(typeof r!="object"||r===null)return!1;let t=Object.getPrototypeOf(r);return(t===null||t===Object.prototype||Object.getPrototypeOf(t)===null)&&!(Symbol.toStringTag in r)&&!(Symbol.iterator in r)}var or=class{constructor(r={}){this.o=new Uint8Array(16),this.a=0,this.e=new Map,this.s=new Map,this.n=r}i(r){return i(this,4),i(this,8),b(this,r),this.e.clear(),this.s.clear(),this}c(){return this.o.subarray(0,this.a)}},lr=r=>{var t=new Uint8Array(r.o.byteLength<<1);t.set(r.o),r.o=t},i=(r,t)=>{r.a>=r.o.byteLength&&lr(r),r.o[r.a++]=t},X=(r,t)=>{for(;r.a+t.length>=r.o.byteLength;)lr(r);r.o.set(t,r.a),r.a+=t.length},B=(r,t)=>{g(r,t.length),X(r,t)},A=(r,t)=>{B(r,rr(t))},g=(r,t)=>{var a=new Uint8Array(5),e=kr(t,a);X(r,a.subarray(0,e))},kr=(r,t)=>{if(r===0)return t[0]=0,1;if(0<r&&r<123)return t[0]=r+5,1;if(-124<r&&r<0)return t[0]=r-5&255,1;for(var a=1;a<5;++a){if(t[a]=r&255,r>>=8,r===0){t[0]=a;break}if(r===-1){t[0]=-a;break}}return a+1},nr=(r,t)=>{A(r,t!==t?"nan":Number.isFinite(t)?Object.is(t,-0)?"-0":t.toString():t<0?"-inf":"inf")},O=(r,t)=>{r.s.has(t)?(i(r,59),g(r,r.s.get(t))):(i(r,58),B(r,rr(Symbol.keyFor(t))),r.s.set(t,r.s.size))},Z=(r,t)=>{for(var a of t)i(r,101),O(r,a)},L=(r,t,a)=>{a[m]&&Z(r,a[m]),i(r,t),O(r,a.class)},Dr=(r,t)=>{t[m]&&Z(r,t[m]),t.wrapped&&(i(r,67),O(r,t.class))},V=(r,t)=>{var a=H(t),e=a.length,n,s;if(e>0)for(g(r,e),n=0;n<e;++n)O(r,s=a[n]),b(r,t[s]);else g(r,0)},ur=(r,t)=>{i(r,108),i(r,t<0?45:43);var a=[];t=Math.abs(t);do a.push(t&255),t=Math.floor(t/256);while(t);a.length&1&&a.push(0),g(r,a.length>>1),X(r,a)},h=(r,t)=>{r.e.has(t)||r.e.set(t,r.e.size)},fr=(r,t,a)=>{h(r,t),t[m]&&Z(r,t[m]),i(r,111),O(r,Symbol.for(a)),V(r,t)},b=(r,t)=>{var a=r.n.hashStringKeysToSymbol,e=r.n.known||{},n=r.n.unknown;if(t===void 0)throw new TypeError("can't dump undefined");if(t===null)i(r,48);else if(t===!0)i(r,84);else if(t===!1)i(r,70);else if(typeof t=="number")Number.isInteger(t)?-1073741824<=t&&t<1073741824?(i(r,105),g(r,t)):(h(r,t),ur(r,t)):(h(r,t),i(r,102),nr(r,t));else if(t instanceof D){var s=t.value;-1073741824<=s&&s<1073741824?(i(r,105),g(r,s)):(h(r,s),ur(r,s))}else if(t instanceof U){var s=t.value;h(r,s),i(r,102),nr(r,s)}else if(typeof t=="symbol")O(r,t);else if(r.e.has(t))i(r,64),g(r,r.e.get(t));else if(t instanceof k)if(h(r,t),t.data!==void 0)L(r,100,t),b(r,t.data);else if(t.wrapped!==void 0)Dr(r,t),b(r,t.wrapped);else if(t.userDefined){var E=H(t).length>0;E&&i(r,73),L(r,117,t),B(r,t.userDefined),E&&V(r,t)}else t.userMarshal!==void 0?(L(r,85,t),b(r,t.userMarshal)):(L(r,111,t),V(r,t));else if(t instanceof K)h(r,t),L(r,83,t),V(r,t.members);else if(Array.isArray(t)){h(r,t),i(r,91),g(r,t.length);for(var s=0;s<t.length;++s)b(r,t[s])}else if(t instanceof RegExp){h(r,t),i(r,47),A(r,t.source);var c=0;t.flags.includes("i")&&(c|=1),t.flags.includes("m")&&(c|=4),i(r,c)}else if(t instanceof Y)h(r,t),i(r,47),A(r,t.source),i(r,t.options);else if(typeof t=="string")h(r,t),i(r,73),i(r,34),A(r,t),g(r,1),O(r,G),i(r,84);else if(t instanceof Uint8Array)h(r,t),i(r,34),B(r,t);else if(t instanceof z)h(r,t),i(r,99),A(r,t.name);else if(t instanceof J)h(r,t),i(r,t.old?77:109),A(r,t.name);else if(t instanceof q){h(r,t);var f=t.default;i(r,f===void 0?123:125),g(r,t.entries.length);for(var s=0,p=t.entries.length,w,y;s<p;++s)[w,y]=t.entries[s],b(r,w),b(r,y);f!==void 0&&b(r,f)}else if(t instanceof Map){h(r,t);var f=t[F];i(r,f===void 0?123:125),g(r,t.size);for(var[w,y]of t)b(r,w),b(r,y);f!==void 0&&b(r,f)}else if(Mr(t)){h(r,t);var f=t[F];i(r,f===void 0?123:125);var j=Object.keys(t).concat(H(t));g(r,j.length);for(var s=0,p=j.length,w;s<p;++s)w=j[s],b(r,a&&typeof w=="string"?Symbol.for(w):w),b(r,t[w]);f!==void 0&&b(r,f)}else{var C=Object.getPrototypeOf(t);for(var o in e)if(C===e[o].prototype){fr(r,t,o);return}if(n){var I=n(t);if(I){fr(r,t,I);return}}throw new TypeError("can't dump "+typeof t+" "+t)}};function Lr(r,t){return new or(t).i(r).c()}function Ir(r,t){for(var a=new or(t),e=0;e<r.length;++e)a.i(r[e]);return a.c()}return u.RE_EXTENDED=vr,u.RE_IGNORECASE=br,u.RE_MULTILINE=gr,u.RubyBaseObject=M,u.RubyClass=z,u.RubyFloat=U,u.RubyHash=q,u.RubyInteger=D,u.RubyModule=J,u.RubyObject=k,u.RubyRange=Sr,u.RubyRegexp=Y,u.RubyStruct=K,u.S_DEFAULT=F,u.S_EXTENDS=m,u.dump=Lr,u.dumpAll=Ir,u.load=jr,u.loadAll=_r,u}({});
-</script>
+/* ===== 오프셋 추적 Marshal 4.8 파서 (바이트 패치용) ===== */
+function parseMarshal(bytes){
+  var pos=0,symbols,objects;
+  function u8(){return bytes[pos++];}
+  function long(){
+    var c=u8();if(c>127)c-=256;
+    if(c===0)return 0;
+    if(c>0){if(c<=4){var n=0;for(var i=0;i<c;i++)n+=u8()*Math.pow(256,i);return n;}return c-5;}
+    if(c>=-4){var n2=0;for(var j=0;j<-c;j++)n2+=u8()*Math.pow(256,j);return n2-Math.pow(256,-c);}
+    return c+5;
+  }
+  function rd(n){var b=bytes.subarray(pos,pos+n);pos+=n;return b;}
+  function dec(b){try{return new TextDecoder('utf-8',{fatal:false}).decode(b);}catch(e){return '';}}
+  function parse(){
+    var start=pos,t=u8(),node={t:String.fromCharCode(t),start:start,end:0};
+    switch(t){
+      case 0x30:node.type='nil';node.value=null;break;
+      case 0x54:node.type='bool';node.value=true;break;
+      case 0x46:node.type='bool';node.value=false;break;
+      case 0x69:node.type='int';node.value=long();break;
+      case 0x66:{var l=long();var b=rd(l);node.type='float';node.value=parseFloat(dec(b));node.bytes=b;break;}
+      case 0x3a:{var l2=long();var b2=rd(l2);node.type='symbol';node.value=dec(b2);symbols.push(node.value);break;}
+      case 0x3b:{node.type='symlink';node.idx=long();node.value=symbols[node.idx];break;}
+      case 0x40:{node.type='objlink';node.idx=long();break;}
+      case 0x22:{var l3=long();var b3=rd(l3);node.type='string';node.bytes=b3;node.value=dec(b3);objects.push(node);break;}
+      case 0x5b:{objects.push(node);var n=long();node.type='array';node.items=[];for(var i=0;i<n;i++)node.items.push(parse());break;}
+      case 0x7b:{objects.push(node);var n2=long();node.type='hash';node.pairs=[];for(var k=0;k<n2;k++){var kk=parse();var vv=parse();node.pairs.push([kk,vv]);}break;}
+      case 0x7d:{objects.push(node);var n3=long();node.type='hash';node.pairs=[];for(var k2=0;k2<n3;k2++){var kk2=parse();var vv2=parse();node.pairs.push([kk2,vv2]);}node.def=parse();break;}
+      case 0x6f:{objects.push(node);node.cls=parse();var n4=long();node.type='object';node.ivars=[];for(var i4=0;i4<n4;i4++){var ik=parse();var iv=parse();node.ivars.push([ik,iv]);}break;}
+      case 0x49:{node.type='ivar';node.inner=parse();var n5=long();node.ivars=[];for(var i5=0;i5<n5;i5++){var ik5=parse();var iv5=parse();node.ivars.push([ik5,iv5]);}break;}
+      case 0x75:{objects.push(node);node.cls=parse();var l6=long();node.data=rd(l6);node.type='userdef';break;}
+      case 0x55:{objects.push(node);node.cls=parse();node.type='usrmarshal';node.inner=parse();break;}
+      case 0x6c:{objects.push(node);node.type='bignum';node.sign=u8();var l7=long();node.data=rd(l7*2);break;}
+      case 0x65:{node.type='extended';node.mod=parse();node.inner=parse();break;}
+      case 0x63:{var l8=long();node.type='class';node.value=dec(rd(l8));objects.push(node);break;}
+      case 0x6d:{var l9=long();node.type='module';node.value=dec(rd(l9));objects.push(node);break;}
+      case 0x53:{objects.push(node);node.cls=parse();var n6=long();node.type='struct';node.members=[];for(var i6=0;i6<n6;i6++){var mk=parse();var mv=parse();node.members.push([mk,mv]);}break;}
+      case 0x2f:{var la=long();var ba=rd(la);node.opts=u8();node.type='regexp';node.bytes=ba;node.value=dec(ba);objects.push(node);break;}
+      default:throw new Error("Unknown Marshal tag 0x"+t.toString(16)+" at "+(pos-1));
+    }
+    node.end=pos;return node;
+  }
+  var streams=[];
+  while(pos<bytes.length){
+    if(bytes[pos]===4&&bytes[pos+1]===8)pos+=2;
+    else if(streams.length===0)throw new Error("Marshal 헤더(04 08) 없음");
+    else break;
+    symbols=[];objects=[];
+    streams.push(parse());
+  }
+  return streams;
+}
+function encodeLong(n){
+  if(n===0)return [0];
+  if(n>0){if(n<123)return [n+5];var b=[],x=n;while(x>0){b.push(x&0xff);x=Math.floor(x/256);}return [b.length].concat(b);}
+  if(n>-124)return [(n-5)&0xff];
+  var out=[],tmp=n;while(tmp!==-1&&out.length<8){out.push(tmp&0xff);tmp=Math.floor(tmp/256);}
+  return [(256-out.length)&0xff].concat(out);
+}
+function encStringBytes(str){var u=new TextEncoder().encode(str);return [0x22].concat(encodeLong(u.length)).concat(Array.from(u));}
+function encFloatBytes(num){var s=String(num);var u=new TextEncoder().encode(s);return [0x66].concat(encodeLong(u.length)).concat(Array.from(u));}
+function rebuildBytes(orig,edits){
+  edits.sort(function(a,b){return a.start-b.start;});
+  var parts=[],last=0;
+  for(var i=0;i<edits.length;i++){var e=edits[i];parts.push(orig.subarray(last,e.start));parts.push(new Uint8Array(e.newBytes));last=e.end;}
+  parts.push(orig.subarray(last));
+  var tot=0;parts.forEach(function(p){tot+=p.length;});
+  var res=new Uint8Array(tot),o=0;parts.forEach(function(p){res.set(p,o);o+=p.length;});
+  return res;
+}
 
-<!-- 에디터 로직 -->
-<script>
 (function(){
 'use strict';
 var $=function(s){return document.querySelector(s)};
-var RO=marshal.RubyObject, RH=marshal.RubyHash, RF=marshal.RubyFloat, RS=marshal.RubyStruct, RI=marshal.RubyInteger;
 var SEP='\u0001';
-var state={data:null,format:'json',fileName:'save.json',changed:new Set(),isArrayRoot:false};
+var state={mode:'json',data:null,nodes:null,originalBytes:null,format:'json',fileName:'save.json',changed:new Set(),editCount:0};
 
-// ---------- 토스트 ----------
 var toastT;
-function toast(msg,kind){
-  var t=$('#toast');t.textContent=msg;t.className='toast show'+(kind?' '+kind:'');
-  clearTimeout(toastT);toastT=setTimeout(function(){t.className='toast'+(kind?' '+kind:'')},2600);
-}
+function toast(msg,kind){var t=$('#toast');t.textContent=msg;t.className='toast show'+(kind?' '+kind:'');clearTimeout(toastT);toastT=setTimeout(function(){t.className='toast'+(kind?' '+kind:'')},2600);}
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
 
-// ---------- 타입 판별 ----------
-function typeOf(v){
-  if(v===null||v===undefined) return 'null';
-  var t=typeof v;
-  if(t==='boolean'||t==='number'||t==='bigint'||t==='string'||t==='symbol') return t;
-  if(v instanceof Uint8Array) return 'bytes';
-  if(Array.isArray(v)) return 'array';
-  if(RH&&v instanceof RH) return 'hash';
-  if(RO&&v instanceof RO) return 'object';
-  if(RF&&v instanceof RF) return 'float';
-  if(RS&&v instanceof RS) return 'struct';
-  if(t==='object') return 'plain';
-  return 'other';
+/* ========== Marshal 노드 트리 ========== */
+function ivarLabel(node){ // symbol/symlink 키 → @name
+  var v=(node&&node.value!=null)?node.value:'';return String(v);
 }
-function bytesToText(u8){
-  try{var t=new TextDecoder('utf-8',{fatal:false}).decode(u8);var bad=0;
-    for(var i=0;i<t.length;i++){var c=t.charCodeAt(i);if(t[i]==='\uFFFD'||(c<32&&c!==9&&c!==10&&c!==13))bad++;}
-    if(t.length&&bad/t.length<0.1)return t;}catch(e){}
-  return null;
+function mKeyLabel(node){
+  if(!node)return '?';
+  if(node.type==='symbol'||node.type==='symlink')return ':'+String(node.value).replace(/^@/,'');
+  if(node.type==='string')return '"'+node.value+'"';
+  if(node.type==='int'||node.type==='float')return String(node.value);
+  if(node.type==='bool')return String(node.value);
+  if(node.type==='nil')return 'nil';
+  if(node.type==='array')return '[배열]';
+  if(node.type==='object')return '<'+mClassName(node)+'>';
+  return node.type;
 }
-function bytesToHex(u8){var h=[],n=Math.min(u8.length,48);for(var i=0;i<n;i++)h.push(('0'+u8[i].toString(16)).slice(-2));return h.join(' ')+(u8.length>n?' … ('+u8.length+'B)':'');}
-function isContainer(t){return t==='array'||t==='hash'||t==='object'||t==='plain'||t==='struct'}
-
-function className(v){
-  try{var c=v['class']||v.class;if(c&&c.description)return c.description;if(c)return String(c).replace(/^Symbol\(|\)$/g,'');}catch(e){}
+function mClassName(node){
+  if(node.cls){if(node.cls.value!=null)return String(node.cls.value);}
   return 'Object';
 }
-function ivarName(sym){var d=sym.description||sym.toString();return d.replace(/^Symbol\(|\)$/g,'');}
-function isIvar(sym){var d=sym.description||sym.toString();d=d.replace(/^Symbol\(|\)$/g,'');return d.charAt(0)==='@';}
-function keyLabelOf(k){
-  var t=typeOf(k);
-  if(t==='symbol')return ':'+ivarName(k).replace(/^@/,'');
-  if(t==='string')return '"'+k+'"';
-  if(t==='array')return '['+k.map(keyLabelOf).join(', ')+']';
-  if(t==='object')return '<'+className(k)+'>';
-  if(t==='null')return 'nil';
-  return String(k);
+function unwrap(node){ // ivar/extended는 inner를 투명하게
+  var n=node;
+  while(n&&(n.type==='ivar'||n.type==='extended')&&n.inner)n=n.inner;
+  return n;
 }
-
-// ---------- 자식 추출 (truncate + setter 클로저) ----------
-var ARR_LIMIT=2000;
-function childrenOf(v){
-  var t=typeOf(v),out=[];
-  if(t==='array'){
-    var lim=Math.min(v.length,ARR_LIMIT);
-    for(var i=0;i<lim;i++)(function(i){out.push({key:String(i),label:'['+i+']',value:v[i],set:function(nv){v[i]=nv}})})(i);
-    if(v.length>lim)out.push({key:'_more',label:'… 외 '+(v.length-lim)+'개',value:null,set:null,info:true});
-  }else if(t==='plain'){
-    Object.keys(v).forEach(function(k){out.push({key:k,label:k,value:v[k],set:function(nv){v[k]=nv}})});
-  }else if(t==='object'){
-    Object.getOwnPropertySymbols(v).forEach(function(sym){
-      if(!isIvar(sym))return;
-      out.push({key:ivarName(sym),label:ivarName(sym),value:v[sym],set:function(nv){v[sym]=nv}});
-    });
-    // 드물게 일반 키 ivar (class 제외)
-    Object.keys(v).forEach(function(k){if(k==='class')return;out.push({key:k,label:k,value:v[k],set:function(nv){v[k]=nv}})});
-  }else if(t==='hash'){
-    var ents=v.entries||[];
-    for(var j=0;j<ents.length;j++)(function(j){
-      out.push({key:'#'+j,label:keyLabelOf(ents[j][0]),value:ents[j][1],set:function(nv){ents[j][1]=nv}});
-    })(j);
-  }else if(t==='struct'){
-    Object.getOwnPropertySymbols(v).forEach(function(sym){
-      out.push({key:ivarName(sym),label:ivarName(sym),value:v[sym],set:function(nv){v[sym]=nv}});
-    });
-  }
+function mIsContainer(node){var n=unwrap(node);return n&&(n.type==='array'||n.type==='hash'||n.type==='object'||n.type==='struct'||n.type==='usrmarshal');}
+function mChildren(node){
+  var n=unwrap(node),out=[];
+  if(n.type==='array'){var lim=Math.min(n.items.length,2000);for(var i=0;i<lim;i++)(function(i){out.push({label:'['+i+']',node:n.items[i]})})(i);if(n.items.length>lim)out.push({label:'…',info:'외 '+(n.items.length-lim)+'개'});}
+  else if(n.type==='hash'){for(var j=0;j<n.pairs.length;j++)(function(j){out.push({label:mKeyLabel(n.pairs[j][0]),node:n.pairs[j][1]})})(j);}
+  else if(n.type==='object'||n.type==='struct'){var arr=n.ivars||n.members;for(var k=0;k<arr.length;k++)(function(k){out.push({label:ivarLabel(arr[k][0]),node:arr[k][1]})})(k);}
+  else if(n.type==='usrmarshal'){out.push({label:'(내용)',node:n.inner});}
   return out;
 }
-function childCount(v){
-  var t=typeOf(v);
-  if(t==='array')return v.length;
-  if(t==='plain')return Object.keys(v).length;
-  if(t==='hash')return (v.entries||[]).length;
-  if(t==='object'||t==='struct')return Object.getOwnPropertySymbols(v).filter(isIvar).length;
-  return 0;
-}
+function mCount(node){var n=unwrap(node);if(n.type==='array')return n.items.length;if(n.type==='hash')return n.pairs.length;if(n.type==='object'||n.type==='struct')return (n.ivars||n.members).length;if(n.type==='usrmarshal')return 1;return 0;}
 
-// ---------- 필드 카운트 (순환 방어) ----------
 var fieldCount=0;
-function countFields(v,seen,depth){
-  var t=typeOf(v);
-  if(!isContainer(t)){fieldCount++;return;}
-  if(depth>60||seen.has(v))return;
-  seen.add(v);
-  childrenOf(v).forEach(function(ch){if(!ch.info)countFields(ch.value,seen,depth+1)});
-  seen.delete(v);
+function mCountFields(node,seen,depth){
+  var n=unwrap(node);if(!n)return;
+  if(!mIsContainer(n)){fieldCount++;return;}
+  if(depth>60||seen.has(n))return;seen.add(n);
+  mChildren(n).forEach(function(ch){if(!ch.info)mCountFields(ch.node,seen,depth+1)});
 }
 
-// ---------- 트리 빌드 (참조 클로저 + 순환 방어 + lazy 미사용) ----------
-function makeLeaf(value,set,label,pathStr,info){
-  var t=typeOf(value);
-  var row=document.createElement('div');
-  row.className='leaf';row.dataset.path=pathStr;row.dataset.key=label;row.dataset.type=t;
-  row.dataset.val=(t==='symbol')?ivarName(value):(value===null?'null':String(value));
-  if(state.changed.has(pathStr))row.classList.add('changed');
+function markEdit(node,disp,bytes){node._edited=true;node._bytes=bytes;state.editCount++;}
 
+function buildMLeaf(node,label,pathStr){
+  var n=unwrap(node);
+  var row=document.createElement('div');row.className='leaf';row.dataset.path=pathStr;row.dataset.key=label;row.dataset.type=n.type;
+  row.dataset.val=(n.value!=null)?String(n.value):(n.type==='nil'?'null':n.type);
+  if(n._edited)row.classList.add('changed');
   var k=document.createElement('span');k.className='k';k.textContent=label;
   var col=document.createElement('span');col.className='col';col.textContent=':';
   row.appendChild(k);row.appendChild(col);
 
-  if(info){var sp=document.createElement('span');sp.className='t-null';sp.textContent=value||'';row.appendChild(sp);return row;}
-
-  if(t==='boolean'){
-    var sel=document.createElement('select');sel.className='val t-boolean';
-    sel.innerHTML='<option value="true">true</option><option value="false">false</option>';
-    sel.value=String(value);
-    sel.addEventListener('change',function(){set(sel.value==='true');mark(row,pathStr,sel.value)});
-    row.appendChild(sel);
-  }else if(t==='number'){
-    var inp=document.createElement('input');inp.className='val t-number';inp.type='number';inp.step='any';inp.value=value;
-    inp.addEventListener('change',function(){var n=inp.value===''?0:Number(inp.value);if(isNaN(n))return;set(n);mark(row,pathStr,n)});
+  if(n.type==='int'){
+    var inp=document.createElement('input');inp.className='val t-number';inp.type='number';inp.step='1';inp.value=n.value;
+    inp.addEventListener('change',function(){var v=Math.round(Number(inp.value));if(isNaN(v))return;markEdit(n,v,[0x69].concat(encodeLong(v)));mk(row,pathStr,v)});
     row.appendChild(inp);
-  }else if(t==='bigint'){
-    var inb=document.createElement('input');inb.className='val t-number';inb.type='text';inb.value=value.toString();
-    inb.addEventListener('change',function(){try{var b=BigInt(inb.value.trim());set(b);mark(row,pathStr,b.toString())}catch(e){toast('정수만 입력 가능','err')}});
-    row.appendChild(inb);
-  }else if(t==='string'){
-    var ins=document.createElement('input');ins.className='val t-string';ins.type='text';ins.value=value;
-    ins.addEventListener('change',function(){set(ins.value);mark(row,pathStr,ins.value)});
+  }else if(n.type==='float'){
+    var inf=document.createElement('input');inf.className='val t-number';inf.type='text';inf.value=n.value;
+    inf.addEventListener('change',function(){var v=Number(inf.value);if(isNaN(v)){toast('숫자만 입력','err');return;}markEdit(n,v,encFloatBytes(v));mk(row,pathStr,v)});
+    row.appendChild(inf);
+  }else if(n.type==='string'){
+    var ins=document.createElement('input');ins.className='val t-string';ins.type='text';ins.value=n.value;
+    ins.addEventListener('change',function(){markEdit(n,ins.value,encStringBytes(ins.value));mk(row,pathStr,ins.value)});
     row.appendChild(ins);
-  }else if(t==='symbol'){
-    var ss=document.createElement('span');ss.className='t-null';ss.textContent=':'+ivarName(value).replace(/^@/,'');row.appendChild(ss);
-  }else if(t==='bytes'){
-    var txt=bytesToText(value);
-    if(txt!==null){
-      var inby=document.createElement('input');inby.className='val t-string';inby.type='text';inby.value=txt;row.dataset.val=txt;
-      inby.addEventListener('change',function(){set(new TextEncoder().encode(inby.value));mark(row,pathStr,inby.value)});
-      row.appendChild(inby);
-    }else{
-      var hx=document.createElement('span');hx.className='t-null';hx.style.color='var(--txt-mute)';hx.textContent=bytesToHex(value);row.dataset.val=bytesToHex(value);row.appendChild(hx);
-    }
-  }else if(t==='float'){
-    var sf=document.createElement('span');sf.className='t-null';sf.textContent='Float '+(value.toString?value.toString():'');row.appendChild(sf);
+  }else if(n.type==='bool'){
+    var sel=document.createElement('select');sel.className='val t-boolean';sel.innerHTML='<option value="true">true</option><option value="false">false</option>';sel.value=String(n.value);
+    sel.addEventListener('change',function(){var v=sel.value==='true';markEdit(n,v,[v?0x54:0x46]);mk(row,pathStr,v)});
+    row.appendChild(sel);
+  }else if(n.type==='symbol'||n.type==='symlink'){
+    var ss=document.createElement('span');ss.className='t-null';ss.style.color='var(--cyan)';ss.textContent=':'+String(n.value).replace(/^@/,'');row.appendChild(ss);
+  }else if(n.type==='objlink'){
+    var so=document.createElement('span');so.className='t-null';so.textContent='↩ 참조 #'+n.idx;row.appendChild(so);
+  }else if(n.type==='userdef'){
+    var su=document.createElement('span');su.className='t-null';su.style.color='var(--gold)';su.textContent='⛁ '+mClassName(n)+' ('+(n.data?n.data.length:0)+'B, 읽기전용)';row.appendChild(su);
+  }else if(n.type==='bignum'){
+    var sb=document.createElement('span');sb.className='t-null';sb.textContent='(큰 정수)';row.appendChild(sb);
   }else{
-    var sn=document.createElement('span');sn.className='t-null';sn.textContent=(t==='null')?'null':('<'+t+'>');row.appendChild(sn);
+    var sn=document.createElement('span');sn.className='t-null';sn.textContent=(n.type==='nil')?'null':('<'+n.type+'>');row.appendChild(sn);
   }
   return row;
 }
-function mark(row,pathStr,val){row.dataset.val=String(val);state.changed.add(pathStr);row.classList.add('changed');applyFilter();}
+function mk(row,pathStr,val){row.dataset.val=String(val);row.classList.add('changed');updateEditBadge();applyFilter();}
 
-function buildContainer(value,label,pathStr,depth,seen){
-  var t=typeOf(value);
-  var det=document.createElement('details');
-  if(depth<1)det.open=true;
+function buildMContainer(node,label,pathStr,depth,seen){
+  var n=unwrap(node);
+  var det=document.createElement('details');if(depth<1)det.open=true;
   var sum=document.createElement('summary');
   var tw=document.createElement('span');tw.className='tw';tw.textContent='▶';
   var ks=document.createElement('span');ks.className='k';ks.textContent=label;
   var meta=document.createElement('span');meta.className='meta';
-  var n=childCount(value);
-  if(t==='array')meta.textContent=' [ '+n+' ]';
-  else if(t==='object')meta.innerHTML=' <span class="cls">'+esc(className(value))+'</span> { '+n+' }';
-  else if(t==='struct')meta.innerHTML=' <span class="cls">'+esc(className(value))+'</span> ( '+n+' )';
-  else if(t==='hash')meta.textContent=' Hash { '+n+' }';
-  else meta.textContent=' { '+n+' }';
-  sum.appendChild(tw);sum.appendChild(ks);sum.appendChild(meta);
-  det.appendChild(sum);
+  var c=mCount(n);
+  if(n.type==='array')meta.textContent=' [ '+c+' ]';
+  else if(n.type==='object'||n.type==='struct')meta.innerHTML=' <span class="cls">'+esc(mClassName(n))+'</span> { '+c+' }';
+  else if(n.type==='hash')meta.textContent=' Hash { '+c+' }';
+  else if(n.type==='usrmarshal')meta.innerHTML=' <span class="cls">'+esc(mClassName(n))+'</span>';
+  sum.appendChild(tw);sum.appendChild(ks);sum.appendChild(meta);det.appendChild(sum);
 
-  if(seen.has(value)){
-    var c=document.createElement('div');c.className='leaf';c.innerHTML='<span class="t-null">↻ 순환참조 (이미 위에 표시됨)</span>';
-    det.appendChild(c);return det;
-  }
-  if(depth>60){var d2=document.createElement('div');d2.className='leaf';d2.innerHTML='<span class="t-null">… 너무 깊음</span>';det.appendChild(d2);return det;}
-
-  var nseen=new Set(seen);nseen.add(value);
-  var kids=childrenOf(value);
-  // 큰 컨테이너는 펼칠 때 1회 빌드 (lazy)
+  if(seen.has(n)){var c1=document.createElement('div');c1.className='leaf';c1.innerHTML='<span class="t-null">↻ 순환</span>';det.appendChild(c1);return det;}
+  if(depth>60){var c2=document.createElement('div');c2.className='leaf';c2.innerHTML='<span class="t-null">…</span>';det.appendChild(c2);return det;}
+  var ns=new Set(seen);ns.add(n);
+  var kids=mChildren(n);
   if(kids.length>120&&depth>=1){
     var built=false;
-    det.addEventListener('toggle',function(){
-      if(det.open&&!built){built=true;kids.forEach(function(ch){det.appendChild(buildNode(ch.value,ch.set,ch.label,pathStr+SEP+ch.key,depth+1,nseen,ch.info))})}
-    });
+    det.addEventListener('toggle',function(){if(det.open&&!built){built=true;kids.forEach(function(ch){det.appendChild(buildMNode(ch,pathStr,depth+1,ns))})}});
   }else{
-    kids.forEach(function(ch){det.appendChild(buildNode(ch.value,ch.set,ch.label,pathStr+SEP+ch.key,depth+1,nseen,ch.info))});
+    kids.forEach(function(ch){det.appendChild(buildMNode(ch,pathStr,depth+1,ns))});
   }
   return det;
 }
-function buildNode(value,set,label,pathStr,depth,seen,info){
-  if(!info&&isContainer(typeOf(value)))return buildContainer(value,label,pathStr,depth,seen);
-  return makeLeaf(value,set,label,pathStr,info);
+function buildMNode(ch,parentPath,depth,seen){
+  var pathStr=parentPath+SEP+ch.label;
+  if(ch.info){var row=document.createElement('div');row.className='leaf';row.dataset.key=ch.label;row.dataset.val='';row.innerHTML='<span class="k">'+esc(ch.label)+'</span><span class="t-null"> '+esc(ch.info)+'</span>';return row;}
+  if(mIsContainer(ch.node))return buildMContainer(ch.node,ch.label,pathStr,depth,seen);
+  return buildMLeaf(ch.node,ch.label,pathStr);
 }
 
-function render(){
-  fieldCount=0;countFields(state.data,new Set(),0);
+function renderMarshal(){
+  fieldCount=0;state.nodes.forEach(function(s){mCountFields(s,new Set(),0)});
   $('#fieldCnt').textContent=fieldCount.toLocaleString()+' fields';
   var tree=$('#tree');tree.innerHTML='';
-  var root=state.data;
-  var kids=childrenOf(root);
-  if(kids.length===0){tree.innerHTML='<div class="empty">빈 데이터입니다.</div>';return;}
-  var seen=new Set([root]);
-  kids.forEach(function(ch){tree.appendChild(buildNode(ch.value,ch.set,ch.label,ch.key,0,seen,ch.info))});
+  var seen=new Set();
+  state.nodes.forEach(function(stream,i){
+    var label=state.nodes.length>1?('스트림 '+i):'세이브 데이터';
+    tree.appendChild(buildMNode({label:label,node:stream},'',0,seen));
+  });
+}
+function collectMEdits(){
+  var edits=[],seen=new Set();
+  function w(node){if(!node||typeof node!=='object'||seen.has(node))return;seen.add(node);
+    if(node._edited)edits.push({start:node.start,end:node.end,newBytes:node._bytes});
+    if(node.items)node.items.forEach(w);
+    if(node.pairs)node.pairs.forEach(function(p){w(p[0]);w(p[1])});
+    if(node.ivars)node.ivars.forEach(function(p){w(p[0]);w(p[1])});
+    if(node.members)node.members.forEach(function(p){w(p[0]);w(p[1])});
+    if(node.inner)w(node.inner);if(node.cls)w(node.cls);if(node.mod)w(node.mod);if(node.def)w(node.def);
+  }
+  state.nodes.forEach(w);return edits;
 }
 
-// ---------- 검색/필터 ----------
-var mode='partial',typeF='all';
+/* ========== JSON 트리 (MV/MZ/JSON) ========== */
+function jType(v){if(v===null||v===undefined)return 'null';var t=typeof v;if(t==='boolean'||t==='number'||t==='string')return t;if(Array.isArray(v))return 'array';if(v instanceof Uint8Array)return 'bytes';if(t==='object')return 'plain';return 'other';}
+function jIsContainer(t){return t==='array'||t==='plain';}
+function jChildren(v){var t=jType(v),out=[];
+  if(t==='array'){var lim=Math.min(v.length,2000);for(var i=0;i<lim;i++)(function(i){out.push({key:String(i),label:'['+i+']',value:v[i],set:function(nv){v[i]=nv}})})(i);if(v.length>lim)out.push({key:'_m',label:'…',value:'외 '+(v.length-lim)+'개',info:true});}
+  else if(t==='plain'){Object.keys(v).forEach(function(k){out.push({key:k,label:k,value:v[k],set:function(nv){v[k]=nv}})});}
+  return out;}
+function jCount(v){var t=jType(v);if(t==='array')return v.length;if(t==='plain')return Object.keys(v).length;return 0;}
+function jCountFields(v,seen,depth){var t=jType(v);if(!jIsContainer(t)){fieldCount++;return;}if(depth>60||seen.has(v))return;seen.add(v);jChildren(v).forEach(function(c){if(!c.info)jCountFields(c.value,seen,depth+1)});}
+function jLeaf(value,set,label,pathStr,info){
+  var t=jType(value);var row=document.createElement('div');row.className='leaf';row.dataset.path=pathStr;row.dataset.key=label;row.dataset.type=t;
+  row.dataset.val=value===null?'null':String(value);if(state.changed.has(pathStr))row.classList.add('changed');
+  var k=document.createElement('span');k.className='k';k.textContent=label;var col=document.createElement('span');col.className='col';col.textContent=':';row.appendChild(k);row.appendChild(col);
+  if(info){var sp=document.createElement('span');sp.className='t-null';sp.textContent=value||'';row.appendChild(sp);return row;}
+  if(t==='boolean'){var sel=document.createElement('select');sel.className='val t-boolean';sel.innerHTML='<option value="true">true</option><option value="false">false</option>';sel.value=String(value);sel.addEventListener('change',function(){set(sel.value==='true');jmk(row,pathStr,sel.value)});row.appendChild(sel);}
+  else if(t==='number'){var inp=document.createElement('input');inp.className='val t-number';inp.type='number';inp.step='any';inp.value=value;inp.addEventListener('change',function(){var n=inp.value===''?0:Number(inp.value);if(isNaN(n))return;set(n);jmk(row,pathStr,n)});row.appendChild(inp);}
+  else if(t==='string'){var ins=document.createElement('input');ins.className='val t-string';ins.type='text';ins.value=value;ins.addEventListener('change',function(){set(ins.value);jmk(row,pathStr,ins.value)});row.appendChild(ins);}
+  else{var sn=document.createElement('span');sn.className='t-null';sn.textContent=(t==='null')?'null':('<'+t+'>');row.appendChild(sn);}
+  return row;
+}
+function jmk(row,pathStr,val){row.dataset.val=String(val);state.changed.add(pathStr);row.classList.add('changed');updateEditBadge();applyFilter();}
+function jContainer(value,label,pathStr,depth,seen){
+  var t=jType(value);var det=document.createElement('details');if(depth<1)det.open=true;
+  var sum=document.createElement('summary');var tw=document.createElement('span');tw.className='tw';tw.textContent='▶';var ks=document.createElement('span');ks.className='k';ks.textContent=label;var meta=document.createElement('span');meta.className='meta';
+  var n=jCount(value);meta.textContent=t==='array'?(' [ '+n+' ]'):(' { '+n+' }');
+  sum.appendChild(tw);sum.appendChild(ks);sum.appendChild(meta);det.appendChild(sum);
+  if(seen.has(value)){var c1=document.createElement('div');c1.className='leaf';c1.innerHTML='<span class="t-null">↻</span>';det.appendChild(c1);return det;}
+  var ns=new Set(seen);ns.add(value);var kids=jChildren(value);
+  if(kids.length>120&&depth>=1){var built=false;det.addEventListener('toggle',function(){if(det.open&&!built){built=true;kids.forEach(function(ch){det.appendChild(jNode(ch.value,ch.set,ch.label,pathStr+SEP+ch.key,depth+1,ns,ch.info))})}});}
+  else{kids.forEach(function(ch){det.appendChild(jNode(ch.value,ch.set,ch.label,pathStr+SEP+ch.key,depth+1,ns,ch.info))});}
+  return det;
+}
+function jNode(value,set,label,pathStr,depth,seen,info){if(!info&&jIsContainer(jType(value)))return jContainer(value,label,pathStr,depth,seen);return jLeaf(value,set,label,pathStr,info);}
+function renderJSON(){
+  fieldCount=0;jCountFields(state.data,new Set(),0);$('#fieldCnt').textContent=fieldCount.toLocaleString()+' fields';
+  var tree=$('#tree');tree.innerHTML='';var kids=jChildren(state.data);
+  if(kids.length===0){tree.innerHTML='<div class="empty">빈 데이터</div>';return;}
+  var seen=new Set([state.data]);
+  kids.forEach(function(ch){tree.appendChild(jNode(ch.value,ch.set,ch.label,ch.key,0,seen,ch.info))});
+}
+
+function render(){if(state.mode==='marshal')renderMarshal();else renderJSON();}
+function updateEditBadge(){var c=state.mode==='marshal'?state.editCount:state.changed.size;var el=$('#editCnt');if(el)el.textContent=c+'개 변경';}
+
+/* ========== 검색 (공통) ========== */
+var fmode='partial',typeF='all';
 function applyFilter(){
-  var q=$('#q').value.trim().toLowerCase();
-  var changedOnly=$('#changedOnly').checked;
-  var noFilter=!q&&typeF==='all'&&!changedOnly;
-  var tree=$('#tree');
+  var q=$('#q').value.trim().toLowerCase();var changedOnly=$('#changedOnly').checked;
+  var noFilter=!q&&typeF==='all'&&!changedOnly;var tree=$('#tree');
   tree.querySelectorAll('.leaf').forEach(function(row){
     var ok=true;
-    if(q){var k=(row.dataset.key||'').toLowerCase();var v=(row.dataset.val||'').toLowerCase();
-      ok=mode==='full'?(k===q||v===q):(k.indexOf(q)>-1||v.indexOf(q)>-1);}
-    if(ok&&typeF!=='all'){var ty=row.dataset.type;ok=(ty===typeF)||(typeF==='number'&&ty==='bigint');}
-    if(ok&&changedOnly)ok=state.changed.has(row.dataset.path);
-    row.dataset.match=ok?'1':'0';
-    row.style.display=(noFilter||ok)?'':'none';
-    if(state.changed.has(row.dataset.path))row.classList.add('changed');else row.classList.remove('changed');
+    if(q){var k=(row.dataset.key||'').toLowerCase();var v=(row.dataset.val||'').toLowerCase();ok=fmode==='full'?(k===q||v===q):(k.indexOf(q)>-1||v.indexOf(q)>-1);}
+    if(ok&&typeF!=='all'){var ty=row.dataset.type;ok=(ty===typeF)||(typeF==='number'&&ty==='float');}
+    if(ok&&changedOnly)ok=row.classList.contains('changed');
+    row.dataset.match=ok?'1':'0';row.style.display=(noFilter||ok)?'':'none';
   });
   var groups=Array.prototype.slice.call(tree.querySelectorAll('details')).reverse();
-  groups.forEach(function(d){
-    if(noFilter){d.style.display='';return;}
-    var hasLeaf=d.querySelector('.leaf[data-match="1"]');
-    var hasGroup=false;
-    d.querySelectorAll(':scope > details').forEach(function(c){if(c.style.display!=='none')hasGroup=true});
-    var show=hasLeaf||hasGroup;d.style.display=show?'':'none';if(show)d.open=true;
-  });
+  groups.forEach(function(d){if(noFilter){d.style.display='';return;}var hl=d.querySelector('.leaf[data-match="1"]');var hg=false;d.querySelectorAll(':scope > details').forEach(function(c){if(c.style.display!=='none')hg=true});var show=hl||hg;d.style.display=show?'':'none';if(show)d.open=true;});
 }
 
-// ---------- 디코드 ----------
+/* ========== 디코드 ========== */
 function tryDecodeText(text){
   try{var d=JSON.parse(text);if(d&&typeof d==='object')return{data:d,format:'json'};}catch(e){}
   try{var s=LZString.decompressFromBase64(text.trim());if(s){var d2=JSON.parse(s);if(d2&&typeof d2==='object')return{data:d2,format:'lz-b64'};}}catch(e){}
   try{var s3=LZString.decompressFromEncodedURIComponent(text.trim());if(s3){var d3=JSON.parse(s3);if(d3&&typeof d3==='object')return{data:d3,format:'lz-uri'};}}catch(e){}
-  try{var s4=LZString.decompressFromUTF16(text);if(s4){var d4=JSON.parse(s4);if(d4&&typeof d4==='object')return{data:d4,format:'lz-utf16'};}}catch(e){}
   return null;
 }
 function tryDecodeBuffer(buf){
   var bytes=new Uint8Array(buf);
-  // LSD (RPG Maker 2000/2003) - liblcf 포맷
-  if(bytes.length>13){
-    try{var head=new TextDecoder('latin1').decode(bytes.subarray(0,24));
-      if(head.indexOf('LcfSaveData')>-1||head.indexOf('LcfMapTree')>-1)return{error:'RPG Maker 2000/2003 세이브(.lsd)는 liblcf 포맷이라 아직 준비 중입니다'};}catch(e){}
-  }
-  // Marshal 시그니처 04 08
+  if(bytes.length>13){try{var head=new TextDecoder('latin1').decode(bytes.subarray(0,24));if(head.indexOf('LcfSaveData')>-1||head.indexOf('LcfMapTree')>-1)return{error:'RPG Maker 2000/2003(.lsd)은 liblcf 포맷이라 준비 중입니다'};}catch(e){}}
   if(bytes.length>=2&&bytes[0]===4&&bytes[1]===8){
-    try{var arr=marshal.loadAll(buf,{hash:'wrap'});if(arr&&arr.length){return{data:arr,format:'marshal'};}}catch(e){console.error('Marshal load 실패',e);return{error:'Marshal 파싱 실패: '+e.message};}
+    try{var streams=parseMarshal(bytes);return{nodes:streams,format:'marshal',originalBytes:bytes};}
+    catch(e){console.error(e);return{error:'Marshal 파싱 실패: '+e.message};}
   }
   var text;try{text=new TextDecoder('utf-8',{fatal:false}).decode(buf);}catch(e){text='';}
-  var r=tryDecodeText(text);
-  return r||{error:'인식할 수 없는 형식'};
+  var r=tryDecodeText(text);return r||{error:'인식할 수 없는 형식'};
 }
-
-function encode(data,format){
-  if(format==='marshal')return marshal.dumpAll(data);
-  var json=JSON.stringify(data,function(k,v){return typeof v==='bigint'?Number(v):v});
+function encodeJSON(data,format){
+  var json=JSON.stringify(data);
   if(format==='lz-b64')return LZString.compressToBase64(json);
   if(format==='lz-uri')return LZString.compressToEncodedURIComponent(json);
-  if(format==='lz-utf16')return LZString.compressToUTF16(json);
   return json;
 }
 
-// ---------- 파일 로드 ----------
+/* ========== 파일 로드 ========== */
 function loadFile(file){
   var reader=new FileReader();
   reader.onload=function(e){
     var res=tryDecodeBuffer(e.target.result);
-    if(res.error){toast(res.error+'. JSON · RPG Maker(MV/MZ/XP/VX) 세이브인지 확인하세요.','err');return;}
-    state.data=res.data;state.format=res.format;state.fileName=file.name;state.changed=new Set();
+    if(res.error){toast(res.error,'err');return;}
+    state.fileName=file.name;state.changed=new Set();state.editCount=0;
     var badge=$('#fmtBadge');
-    var fmtName={'json':'JSON (평문)','lz-b64':'LZString (MV/MZ)','lz-uri':'LZString URI','lz-utf16':'LZString UTF16','marshal':'Ruby Marshal (XP/VX/VXAce)'}[res.format]||res.format;
-    badge.textContent=fmtName;
-    badge.className='badge '+(res.format==='json'?'fmt-json':(res.format==='marshal'?'fmt-marshal':'fmt-lz'));
+    if(res.format==='marshal'){
+      state.mode='marshal';state.nodes=res.nodes;state.originalBytes=res.originalBytes;state.format='marshal';
+      badge.textContent='Ruby Marshal (바이트패치)';badge.className='badge fmt-marshal';
+    }else{
+      state.mode='json';state.data=res.data;state.format=res.format;
+      badge.textContent=res.format==='json'?'JSON (평문)':'LZString (MV/MZ)';badge.className='badge '+(res.format==='json'?'fmt-json':'fmt-lz');
+    }
     $('#fname').textContent=file.name;
-    try{render();applyFilter();}catch(err){console.error(err);toast('표시 중 오류: '+err.message,'err');return;}
-    $('#editor').classList.add('on');$('#drop').style.display='none';
-    $('#editor').scrollIntoView({behavior:'smooth',block:'start'});
-    toast('불러옴 · '+fieldCount.toLocaleString()+' fields · '+fmtName,'ok');
+    try{render();applyFilter();updateEditBadge();}catch(err){console.error(err);toast('표시 오류: '+err.message,'err');return;}
+    $('#editor').classList.add('on');$('#drop').style.display='none';$('#editor').scrollIntoView({behavior:'smooth',block:'start'});
+    toast('불러옴 · '+fieldCount.toLocaleString()+' fields · '+badge.textContent,'ok');
   };
-  reader.onerror=function(){toast('파일을 읽지 못했습니다.','err')};
+  reader.onerror=function(){toast('파일 읽기 실패','err')};
   reader.readAsArrayBuffer(file);
 }
+function download(content,name){var blob=new Blob([content],{type:'application/octet-stream'});var url=URL.createObjectURL(blob);var a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(url);a.remove()},120);}
 
-// ---------- 다운로드 ----------
-function download(content,name){
-  var blob=new Blob([content],{type:'application/octet-stream'});
-  var url=URL.createObjectURL(blob);var a=document.createElement('a');
-  a.href=url;a.download=name;document.body.appendChild(a);a.click();
-  setTimeout(function(){URL.revokeObjectURL(url);a.remove()},120);
-}
-
-// ---------- 이벤트 ----------
+/* ========== 이벤트 ========== */
 var drop=$('#drop'),fileInput=$('#file');
 $('#btnUp').addEventListener('click',function(e){e.stopPropagation();fileInput.click()});
 drop.addEventListener('click',function(){fileInput.click()});
@@ -608,30 +639,30 @@ fileInput.addEventListener('change',function(){if(fileInput.files[0])loadFile(fi
 drop.addEventListener('drop',function(e){var f=e.dataTransfer.files[0];if(f)loadFile(f)});
 window.addEventListener('dragover',function(e){e.preventDefault()});
 window.addEventListener('drop',function(e){e.preventDefault();if($('#editor').classList.contains('on'))return;var f=e.dataTransfer&&e.dataTransfer.files[0];if(f)loadFile(f)});
-
 $('#q').addEventListener('input',applyFilter);
 $('#changedOnly').addEventListener('change',applyFilter);
-$('#modeSeg').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;$('#modeSeg').querySelectorAll('button').forEach(function(x){x.classList.remove('on')});b.classList.add('on');mode=b.dataset.mode;applyFilter()});
+$('#modeSeg').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;$('#modeSeg').querySelectorAll('button').forEach(function(x){x.classList.remove('on')});b.classList.add('on');fmode=b.dataset.mode;applyFilter()});
 $('#typeSeg').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;$('#typeSeg').querySelectorAll('button').forEach(function(x){x.classList.remove('on')});b.classList.add('on');typeF=b.dataset.type;applyFilter()});
 
 $('#btnSave').addEventListener('click',function(){
-  if(!state.data)return;
-  try{var out=encode(state.data,state.format);download(out,state.fileName);
-    toast('저장 완료 · '+state.changed.size+'개 필드 변경','ok');}
-  catch(err){console.error(err);toast('저장 실패: '+err.message,'err')}
+  try{
+    var out,cnt;
+    if(state.mode==='marshal'){var edits=collectMEdits();out=rebuildBytes(state.originalBytes,edits);cnt=edits.length;}
+    else{out=encodeJSON(state.data,state.format);cnt=state.changed.size;}
+    download(out,state.fileName);
+    toast('저장 완료 · '+cnt+'개 필드 변경 (원본 구조 보존)','ok');
+  }catch(err){console.error(err);toast('저장 실패: '+err.message,'err')}
 });
 $('#btnJson').addEventListener('click',function(){
-  if(!state.data)return;
-  try{var name=state.fileName.replace(/\.[^.]+$/,'')+'.json';
-    download(JSON.stringify(state.data,function(k,v){return typeof v==='bigint'?v.toString():(typeof v==='symbol'?v.toString():v)},2),name);
-    toast('JSON 내보내기 완료','ok');}
-  catch(err){toast('Marshal 데이터는 JSON 변환이 제한됩니다','err')}
+  try{
+    if(state.mode==='marshal'){toast('Marshal은 바이트패치 전용 (JSON 변환 미지원)','err');return;}
+    var name=state.fileName.replace(/\.[^.]+$/,'')+'.json';
+    download(JSON.stringify(state.data,null,2),name);toast('JSON 내보내기 완료','ok');
+  }catch(err){toast('변환 실패','err')}
 });
 $('#btnReset').addEventListener('click',function(){
-  state={data:null,format:'json',fileName:'save.json',changed:new Set(),isArrayRoot:false};
-  $('#editor').classList.remove('on');$('#drop').style.display='';
-  $('#q').value='';$('#changedOnly').checked=false;
-  window.scrollTo({top:0,behavior:'smooth'});
+  state={mode:'json',data:null,nodes:null,originalBytes:null,format:'json',fileName:'save.json',changed:new Set(),editCount:0};
+  $('#editor').classList.remove('on');$('#drop').style.display='';$('#q').value='';$('#changedOnly').checked=false;window.scrollTo({top:0,behavior:'smooth'});
 });
 })();
 
