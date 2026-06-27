@@ -261,13 +261,34 @@ footer a:hover{color:var(--cyan)}
 
   <div class="note">
     💾 <b>안전 안내</b> — 편집 전 원본 세이브를 반드시 백업하세요. 이 도구는 원본을 직접 건드리지 않고 사본만 수정해 새 파일로 내려받습니다.<br>
-    🧩 <b>지원</b> — MV/MZ(.rpgsave·.rmmzsave) · XP/VX/VX Ace(.rxdata·.rvdata·.rvdata2) · JSON. XP~VX Ace는 Ruby Marshal 구조라 <span style="color:var(--gold)">@gold</span> 같은 인스턴스 변수가 트리에 그대로 나옵니다.
+    🧩 <b>지원</b> — MV/MZ(.rpgsave·.rmmzsave) · XP/VX/VX Ace(.rxdata·.rvdata·.rvdata2) · Pokémon Essentials(.rxdata) · JSON. 한글(CP949)·일본어(Shift-JIS) 인코딩 자동 처리.<br>
+    🚧 <b>준비 중</b> — RPG Maker 2000/2003(.lsd)은 liblcf 포맷이라 별도 작업이 필요합니다.
   </div>
 
   <footer>特撮 ARCHIVE · TOOLS &nbsp;·&nbsp; <a href="https://github.com/paeaenteom" target="_blank">github.com/paeaenteom</a></footer>
 </div>
 
 <div class="toast" id="toast"></div>
+
+<!-- TextDecoder 인코딩 정규화 (CP949/Shift-JIS 등) - marshal 로드 전 필수 -->
+<script>
+(function(){
+  if(typeof TextDecoder==='undefined')return;
+  var _TD=TextDecoder;
+  var alias={cp949:'euc-kr',ms949:'euc-kr',windows949:'euc-kr',uhc:'euc-kr',ksc5601:'euc-kr',
+    shiftjis:'shift-jis',sjis:'shift-jis',windows31j:'shift-jis',cp932:'shift-jis',mskanji:'shift-jis',
+    cp936:'gbk',ms936:'gbk',gb2312:'gbk',
+    eucjp:'euc-jp',cp51932:'euc-jp',
+    big5hkscs:'big5',cp950:'big5',
+    asciibit:'latin1',ascii8bit:'latin1',usascii:'latin1'};
+  function Patched(label,opts){
+    if(label){var l=String(label).toLowerCase().replace(/[^a-z0-9]/g,'');if(alias[l])label=alias[l];}
+    try{return new _TD(label,opts);}catch(e){try{return new _TD('utf-8',opts);}catch(e2){return new _TD();}}
+  }
+  Patched.prototype=_TD.prototype;
+  try{TextDecoder=Patched;}catch(e){try{window.TextDecoder=Patched;}catch(e2){}}
+})();
+</script>
 
 <!-- lz-string (inline) -->
 <script>
@@ -301,6 +322,7 @@ function typeOf(v){
   if(v===null||v===undefined) return 'null';
   var t=typeof v;
   if(t==='boolean'||t==='number'||t==='bigint'||t==='string'||t==='symbol') return t;
+  if(v instanceof Uint8Array) return 'bytes';
   if(Array.isArray(v)) return 'array';
   if(RH&&v instanceof RH) return 'hash';
   if(RO&&v instanceof RO) return 'object';
@@ -309,6 +331,13 @@ function typeOf(v){
   if(t==='object') return 'plain';
   return 'other';
 }
+function bytesToText(u8){
+  try{var t=new TextDecoder('utf-8',{fatal:false}).decode(u8);var bad=0;
+    for(var i=0;i<t.length;i++){var c=t.charCodeAt(i);if(t[i]==='\uFFFD'||(c<32&&c!==9&&c!==10&&c!==13))bad++;}
+    if(t.length&&bad/t.length<0.1)return t;}catch(e){}
+  return null;
+}
+function bytesToHex(u8){var h=[],n=Math.min(u8.length,48);for(var i=0;i<n;i++)h.push(('0'+u8[i].toString(16)).slice(-2));return h.join(' ')+(u8.length>n?' … ('+u8.length+'B)':'');}
 function isContainer(t){return t==='array'||t==='hash'||t==='object'||t==='plain'||t==='struct'}
 
 function className(v){
@@ -410,6 +439,15 @@ function makeLeaf(value,set,label,pathStr,info){
     row.appendChild(ins);
   }else if(t==='symbol'){
     var ss=document.createElement('span');ss.className='t-null';ss.textContent=':'+ivarName(value).replace(/^@/,'');row.appendChild(ss);
+  }else if(t==='bytes'){
+    var txt=bytesToText(value);
+    if(txt!==null){
+      var inby=document.createElement('input');inby.className='val t-string';inby.type='text';inby.value=txt;row.dataset.val=txt;
+      inby.addEventListener('change',function(){set(new TextEncoder().encode(inby.value));mark(row,pathStr,inby.value)});
+      row.appendChild(inby);
+    }else{
+      var hx=document.createElement('span');hx.className='t-null';hx.style.color='var(--txt-mute)';hx.textContent=bytesToHex(value);row.dataset.val=bytesToHex(value);row.appendChild(hx);
+    }
   }else if(t==='float'){
     var sf=document.createElement('span');sf.className='t-null';sf.textContent='Float '+(value.toString?value.toString():'');row.appendChild(sf);
   }else{
@@ -508,6 +546,11 @@ function tryDecodeText(text){
 }
 function tryDecodeBuffer(buf){
   var bytes=new Uint8Array(buf);
+  // LSD (RPG Maker 2000/2003) - liblcf 포맷
+  if(bytes.length>13){
+    try{var head=new TextDecoder('latin1').decode(bytes.subarray(0,24));
+      if(head.indexOf('LcfSaveData')>-1||head.indexOf('LcfMapTree')>-1)return{error:'RPG Maker 2000/2003 세이브(.lsd)는 liblcf 포맷이라 아직 준비 중입니다'};}catch(e){}
+  }
   // Marshal 시그니처 04 08
   if(bytes.length>=2&&bytes[0]===4&&bytes[1]===8){
     try{var arr=marshal.loadAll(buf,{hash:'wrap'});if(arr&&arr.length){return{data:arr,format:'marshal'};}}catch(e){console.error('Marshal load 실패',e);return{error:'Marshal 파싱 실패: '+e.message};}
