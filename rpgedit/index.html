@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RPG SAVE EDITOR · 特撮 ARCHIVE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Teko:wght@400;500;600;700&family=Share+Tech+Mono&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg-deep:#04050c; --bg:#080a14; --bg-card:#0c0e1a; --bg-card2:#0e1120;
+  --line:#1c2740; --line2:#28365a;
+  --cyan:#00eaff; --mag:#ff2a6d; --green:#00ff9c; --gold:#ffc233; --orange:#ff9d3c;
+  --txt:#e8edf7; --txt-dim:#8a96b4; --txt-mute:#566184;
+  --radius:6px;
+  --mono:'Share Tech Mono',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{
+  background:var(--bg-deep);
+  color:var(--txt);
+  font-family:'Noto Sans KR',sans-serif;
+  min-height:100vh;
+  position:relative;
+  overflow-x:hidden;
+}
+/* 배경 */
+.bg-layer{position:fixed;inset:0;pointer-events:none;z-index:0}
+.bg-grad{background:
+  radial-gradient(1200px 700px at 15% -10%, rgba(0,234,255,.10), transparent 60%),
+  radial-gradient(1000px 600px at 95% 0%, rgba(255,42,109,.08), transparent 55%),
+  radial-gradient(900px 800px at 50% 120%, rgba(0,255,156,.06), transparent 60%),
+  linear-gradient(180deg,#04050c,#080a14 60%,#06070f);}
+.bg-grid{background-image:
+  linear-gradient(rgba(40,54,90,.18) 1px,transparent 1px),
+  linear-gradient(90deg,rgba(40,54,90,.18) 1px,transparent 1px);
+  background-size:42px 42px;opacity:.4;
+  mask-image:radial-gradient(ellipse 90% 70% at 50% 20%,#000 40%,transparent 100%);}
+.orb{position:absolute;border-radius:50%;filter:blur(60px);opacity:.5;animation:float 22s ease-in-out infinite}
+.orb.a{width:340px;height:340px;background:rgba(0,234,255,.20);top:-60px;left:-40px}
+.orb.b{width:300px;height:300px;background:rgba(255,42,109,.16);top:30%;right:-60px;animation-delay:-7s}
+.orb.c{width:260px;height:260px;background:rgba(0,255,156,.14);bottom:-40px;left:30%;animation-delay:-13s}
+@keyframes float{0%,100%{transform:translate(0,0)}33%{transform:translate(30px,-26px)}66%{transform:translate(-22px,20px)}}
+
+.wrap{position:relative;z-index:1;max-width:1080px;margin:0 auto;padding:0 20px 80px}
+
+/* 상단바 */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:22px 4px 0}
+.brand{font-family:var(--mono);font-size:13px;letter-spacing:3px;color:var(--txt-dim);text-decoration:none;transition:.2s}
+.brand:hover{color:var(--cyan)}
+.brand b{color:var(--txt)}
+.topbar nav{display:flex;gap:18px}
+.topbar nav a{font-family:var(--mono);font-size:12px;letter-spacing:2px;color:var(--txt-mute);text-decoration:none;transition:.2s}
+.topbar nav a:hover{color:var(--cyan)}
+
+/* 히어로 */
+.hero{padding:54px 4px 30px;text-align:center}
+.hero .eyebrow{font-family:var(--mono);font-size:13px;letter-spacing:6px;color:var(--cyan);opacity:.85;margin-bottom:10px}
+.hero h1{font-family:'Teko',sans-serif;font-weight:600;line-height:.92;
+  font-size:clamp(50px,9vw,104px);letter-spacing:1px;
+  background:linear-gradient(120deg,#fff 10%,var(--green) 55%,var(--cyan) 100%);
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+.hero p{margin-top:8px;color:var(--txt-dim);font-size:15px;max-width:560px;margin-inline:auto;line-height:1.6}
+
+/* 드롭존 */
+.drop{
+  margin:18px auto 0;max-width:680px;
+  border:1.5px dashed var(--line2);border-radius:14px;
+  background:linear-gradient(180deg,rgba(12,14,26,.7),rgba(10,12,22,.5));
+  padding:46px 30px;text-align:center;cursor:pointer;
+  transition:.22s;backdrop-filter:blur(6px);
+}
+.drop:hover{border-color:var(--cyan);box-shadow:0 0 0 1px rgba(0,234,255,.25),0 18px 50px -20px rgba(0,234,255,.35)}
+.drop.drag{border-color:var(--green);background:rgba(0,255,156,.06);box-shadow:0 0 0 1px rgba(0,255,156,.4),0 0 60px -10px rgba(0,255,156,.35)}
+.drop .ico{font-size:42px;margin-bottom:14px;filter:grayscale(.2)}
+.drop .big{font-family:'Teko',sans-serif;font-size:30px;letter-spacing:1px;color:var(--txt)}
+.drop .sub{color:var(--txt-mute);font-size:13px;margin-top:6px}
+.btn-up{display:inline-block;margin-top:18px;padding:10px 26px;border-radius:8px;
+  background:linear-gradient(120deg,var(--cyan),#0bbfd6);color:#021016;font-weight:700;
+  font-family:'Teko',sans-serif;font-size:20px;letter-spacing:1px;border:none;cursor:pointer;transition:.2s}
+.btn-up:hover{transform:translateY(-1px);box-shadow:0 10px 30px -10px rgba(0,234,255,.6)}
+.formats{margin-top:22px;display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.fmt{font-family:var(--mono);font-size:11px;letter-spacing:1px;color:var(--txt-dim);
+  border:1px solid var(--line);border-radius:20px;padding:5px 13px;background:rgba(14,17,32,.6)}
+.fmt b{color:var(--cyan)}
+
+/* 에디터 */
+.editor{display:none;margin-top:24px}
+.editor.on{display:block;animation:rise .4s ease both}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+
+.filebar{display:flex;flex-wrap:wrap;align-items:center;gap:14px;
+  background:var(--bg-card);border:1px solid var(--line);border-radius:var(--radius);
+  padding:14px 18px;margin-bottom:14px}
+.filebar .fname{font-family:var(--mono);font-size:14px;color:var(--txt);word-break:break-all;flex:1;min-width:160px}
+.filebar .badge{font-family:var(--mono);font-size:11px;letter-spacing:1px;padding:4px 11px;border-radius:6px;
+  border:1px solid var(--line2)}
+.badge.fmt-json{color:var(--green);border-color:rgba(0,255,156,.4);background:rgba(0,255,156,.08)}
+.badge.fmt-lz{color:var(--cyan);border-color:rgba(0,234,255,.4);background:rgba(0,234,255,.08)}
+.filebar .cnt{font-family:var(--mono);font-size:12px;color:var(--txt-mute)}
+
+/* 검색바 */
+.toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;
+  background:var(--bg-card);border:1px solid var(--line);border-radius:var(--radius);
+  padding:12px 14px;margin-bottom:14px;position:sticky;top:10px;z-index:5;backdrop-filter:blur(8px)}
+.search{flex:1;min-width:200px;position:relative}
+.search input{width:100%;background:var(--bg-deep);border:1px solid var(--line2);border-radius:8px;
+  padding:10px 12px 10px 34px;color:var(--txt);font-family:var(--mono);font-size:13px;outline:none;transition:.2s}
+.search input:focus{border-color:var(--cyan);box-shadow:0 0 0 2px rgba(0,234,255,.15)}
+.search .si{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--txt-mute);font-size:14px}
+.seg{display:flex;border:1px solid var(--line2);border-radius:8px;overflow:hidden}
+.seg button{background:var(--bg-deep);color:var(--txt-dim);border:none;padding:9px 13px;
+  font-family:var(--mono);font-size:11px;letter-spacing:1px;cursor:pointer;transition:.18s}
+.seg button+button{border-left:1px solid var(--line2)}
+.seg button.on{background:rgba(0,234,255,.14);color:var(--cyan)}
+.seg button:hover:not(.on){color:var(--txt)}
+.chk{display:flex;align-items:center;gap:7px;font-family:var(--mono);font-size:11px;letter-spacing:1px;
+  color:var(--txt-dim);cursor:pointer;user-select:none;padding:0 4px}
+.chk input{accent-color:var(--mag);width:15px;height:15px;cursor:pointer}
+
+/* 트리 */
+.tree{background:var(--bg-card);border:1px solid var(--line);border-radius:var(--radius);
+  padding:10px 6px;font-family:var(--mono);font-size:13px;line-height:1.7;overflow-x:auto}
+.tree details{margin-left:0}
+.tree details details{margin-left:16px;border-left:1px solid var(--line);padding-left:6px}
+.tree summary{list-style:none;cursor:pointer;padding:1px 6px;border-radius:4px;transition:.12s;
+  display:flex;align-items:center;gap:7px;white-space:nowrap}
+.tree summary::-webkit-details-marker{display:none}
+.tree summary:hover{background:rgba(40,54,90,.3)}
+.tree summary .tw{color:var(--txt-mute);font-size:10px;width:10px;display:inline-block;transition:.15s}
+.tree details[open]>summary .tw{transform:rotate(90deg)}
+.tree .k{color:var(--cyan)}
+.tree .meta{color:var(--txt-mute);font-size:11px}
+.tree .leaf{display:flex;align-items:center;gap:7px;padding:1px 6px 1px 22px;border-radius:4px;white-space:nowrap;position:relative}
+.tree .leaf:hover{background:rgba(40,54,90,.22)}
+.tree .leaf.changed{background:rgba(255,42,109,.07)}
+.tree .leaf.changed::before{content:"";position:absolute;left:6px;top:3px;bottom:3px;width:2px;background:var(--mag);border-radius:2px}
+.tree .leaf .k{flex-shrink:0}
+.tree .leaf .col{color:var(--txt-mute)}
+.tree input.val,.tree select.val{
+  background:var(--bg-deep);border:1px solid var(--line2);border-radius:5px;
+  padding:3px 8px;color:var(--txt);font-family:var(--mono);font-size:12px;outline:none;transition:.15s;min-width:60px}
+.tree input.val:focus,.tree select.val:focus{border-color:var(--cyan);box-shadow:0 0 0 2px rgba(0,234,255,.15)}
+.tree input.t-number{color:var(--orange);max-width:170px}
+.tree input.t-string{color:var(--green);min-width:120px}
+.tree select.t-boolean{color:var(--mag)}
+.tree .t-null{color:var(--txt-mute);font-style:italic}
+.tree .leaf.changed input.val{border-color:var(--mag)}
+
+.empty{padding:40px;text-align:center;color:var(--txt-mute);font-family:var(--mono);font-size:13px}
+
+/* 하단 액션 */
+.actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:18px}
+.act{flex:1;min-width:140px;padding:13px 18px;border-radius:9px;border:1px solid var(--line2);
+  background:var(--bg-card);color:var(--txt);font-family:'Teko',sans-serif;font-size:21px;letter-spacing:1px;
+  cursor:pointer;transition:.2s;text-align:center}
+.act:hover{transform:translateY(-1px)}
+.act.primary{background:linear-gradient(120deg,var(--green),#0bd687);color:#02160d;border:none}
+.act.primary:hover{box-shadow:0 12px 32px -12px rgba(0,255,156,.6)}
+.act.warn:hover{border-color:var(--mag);color:var(--mag)}
+.act .s{display:block;font-family:var(--mono);font-size:10px;letter-spacing:1px;color:var(--txt-mute);margin-top:2px}
+.act.primary .s{color:rgba(2,22,13,.6)}
+
+/* 토스트 */
+.toast{position:fixed;left:50%;bottom:30px;transform:translateX(-50%) translateY(20px);
+  background:var(--bg-card2);border:1px solid var(--line2);border-radius:10px;padding:13px 22px;
+  font-family:var(--mono);font-size:13px;color:var(--txt);z-index:50;opacity:0;pointer-events:none;
+  transition:.3s;box-shadow:0 20px 50px -20px rgba(0,0,0,.8)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.ok{border-color:rgba(0,255,156,.5);color:var(--green)}
+.toast.err{border-color:rgba(255,42,109,.5);color:var(--mag)}
+
+.note{margin-top:30px;text-align:center;color:var(--txt-mute);font-size:12px;line-height:1.7;font-family:var(--mono)}
+.note b{color:var(--txt-dim)}
+
+footer{text-align:center;padding:40px 0 0;color:var(--txt-mute);font-family:var(--mono);font-size:11px;letter-spacing:1px}
+footer a{color:var(--txt-dim);text-decoration:none}
+footer a:hover{color:var(--cyan)}
+
+@media(max-width:620px){
+  .toolbar{position:static}
+  .act{min-width:100%}
+}
+</style>
+</head>
+<body>
+<div class="bg-layer bg-grad"></div>
+<div class="bg-layer bg-grid"></div>
+<div class="bg-layer"><span class="orb a"></span><span class="orb b"></span><span class="orb c"></span></div>
+
+<div class="wrap">
+  <div class="topbar">
+    <a href="/" class="brand"><b>PAEAENTEOM</b> · TOOLS</a>
+    <nav>
+      <a href="/">HOME</a>
+      <a href="/DB/">ARCHIVE</a>
+    </nav>
+  </div>
+
+  <div class="hero">
+    <div class="eyebrow">SAVE FILE EDITOR</div>
+    <h1>RPG SAVE EDITOR</h1>
+    <p>세이브 파일을 올려서 골드·레벨·진행도 등 모든 값을 직접 편집하세요. 전부 브라우저 안에서만 처리되며, 파일은 서버로 전송되지 않습니다.</p>
+  </div>
+
+  <!-- 드롭존 -->
+  <div class="drop" id="drop">
+    <div class="ico">🗂️</div>
+    <div class="big">세이브 파일을 드래그하거나 클릭</div>
+    <div class="sub">파일을 이 영역에 놓으면 자동으로 열립니다</div>
+    <button class="btn-up" id="btnUp" type="button">파일 선택</button>
+    <input type="file" id="file" hidden accept=".rpgsave,.rmmzsave,.rvdata,.rvdata2,.rxdata,.save,.json,.dat,.data,.sav,.txt">
+    <div class="formats">
+      <span class="fmt">RPG Maker MV <b>.rpgsave</b></span>
+      <span class="fmt">RPG Maker MZ <b>.rmmzsave</b></span>
+      <span class="fmt">JSON <b>.json</b></span>
+      <span class="fmt">LZString <b>.save</b></span>
+    </div>
+  </div>
+
+  <!-- 에디터 -->
+  <div class="editor" id="editor">
+    <div class="filebar">
+      <span class="fname" id="fname">save.rpgsave</span>
+      <span class="badge" id="fmtBadge">JSON</span>
+      <span class="cnt" id="fieldCnt">0 fields</span>
+    </div>
+
+    <div class="toolbar">
+      <div class="search">
+        <span class="si">⌕</span>
+        <input type="text" id="q" placeholder="키 또는 값 검색…  (예: gold, level, 500)">
+      </div>
+      <div class="seg" id="modeSeg">
+        <button data-mode="partial" class="on">부분일치</button>
+        <button data-mode="full">완전일치</button>
+      </div>
+      <div class="seg" id="typeSeg">
+        <button data-type="all" class="on">전체</button>
+        <button data-type="number">숫자</button>
+        <button data-type="string">문자</button>
+        <button data-type="boolean">불린</button>
+      </div>
+      <label class="chk"><input type="checkbox" id="changedOnly">변경된 것만</label>
+    </div>
+
+    <div class="tree" id="tree"></div>
+
+    <div class="actions">
+      <button class="act primary" id="btnSave">다운로드<span class="s">원본 포맷으로 재인코드</span></button>
+      <button class="act" id="btnJson">JSON 내보내기<span class="s">사람이 읽는 .json</span></button>
+      <button class="act warn" id="btnReset">초기화<span class="s">변경 취소 · 새 파일</span></button>
+    </div>
+  </div>
+
+  <div class="note">
+    💾 <b>안전 안내</b> — 편집 전 원본 세이브를 반드시 백업하세요. 이 도구는 원본을 직접 건드리지 않고 사본만 수정해 새 파일로 내려받습니다.
+  </div>
+
+  <footer>特撮 ARCHIVE · TOOLS &nbsp;·&nbsp; <a href="https://github.com/paeaenteom" target="_blank">github.com/paeaenteom</a></footer>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- lz-string (inline) -->
+<script>
+var LZString=function(){var r=String.fromCharCode,o="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=",n="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+-$",e={};function t(r,o){if(!e[r]){e[r]={};for(var n=0;n<r.length;n++)e[r][r.charAt(n)]=n}return e[r][o]}var i={compressToBase64:function(r){if(null==r)return"";var n=i._compress(r,6,function(r){return o.charAt(r)});switch(n.length%4){default:case 0:return n;case 1:return n+"===";case 2:return n+"==";case 3:return n+"="}},decompressFromBase64:function(r){return null==r?"":""==r?null:i._decompress(r.length,32,function(n){return t(o,r.charAt(n))})},compressToUTF16:function(o){return null==o?"":i._compress(o,15,function(o){return r(o+32)})+" "},decompressFromUTF16:function(r){return null==r?"":""==r?null:i._decompress(r.length,16384,function(o){return r.charCodeAt(o)-32})},compressToUint8Array:function(r){for(var o=i.compress(r),n=new Uint8Array(2*o.length),e=0,t=o.length;e<t;e++){var s=o.charCodeAt(e);n[2*e]=s>>>8,n[2*e+1]=s%256}return n},decompressFromUint8Array:function(o){if(null==o)return i.decompress(o);for(var n=new Array(o.length/2),e=0,t=n.length;e<t;e++)n[e]=256*o[2*e]+o[2*e+1];var s=[];return n.forEach(function(o){s.push(r(o))}),i.decompress(s.join(""))},compressToEncodedURIComponent:function(r){return null==r?"":i._compress(r,6,function(r){return n.charAt(r)})},decompressFromEncodedURIComponent:function(r){return null==r?"":""==r?null:(r=r.replace(/ /g,"+"),i._decompress(r.length,32,function(o){return t(n,r.charAt(o))}))},compress:function(o){return i._compress(o,16,function(o){return r(o)})},_compress:function(r,o,n){if(null==r)return"";var e,t,i,s={},u={},a="",p="",c="",l=2,f=3,h=2,d=[],m=0,v=0;for(i=0;i<r.length;i+=1)if(a=r.charAt(i),Object.prototype.hasOwnProperty.call(s,a)||(s[a]=f++,u[a]=!0),p=c+a,Object.prototype.hasOwnProperty.call(s,p))c=p;else{if(Object.prototype.hasOwnProperty.call(u,c)){if(c.charCodeAt(0)<256){for(e=0;e<h;e++)m<<=1,v==o-1?(v=0,d.push(n(m)),m=0):v++;for(t=c.charCodeAt(0),e=0;e<8;e++)m=m<<1|1&t,v==o-1?(v=0,d.push(n(m)),m=0):v++,t>>=1}else{for(t=1,e=0;e<h;e++)m=m<<1|t,v==o-1?(v=0,d.push(n(m)),m=0):v++,t=0;for(t=c.charCodeAt(0),e=0;e<16;e++)m=m<<1|1&t,v==o-1?(v=0,d.push(n(m)),m=0):v++,t>>=1}0==--l&&(l=Math.pow(2,h),h++),delete u[c]}else for(t=s[c],e=0;e<h;e++)m=m<<1|1&t,v==o-1?(v=0,d.push(n(m)),m=0):v++,t>>=1;0==--l&&(l=Math.pow(2,h),h++),s[p]=f++,c=String(a)}if(""!==c){if(Object.prototype.hasOwnProperty.call(u,c)){if(c.charCodeAt(0)<256){for(e=0;e<h;e++)m<<=1,v==o-1?(v=0,d.push(n(m)),m=0):v++;for(t=c.charCodeAt(0),e=0;e<8;e++)m=m<<1|1&t,v==o-1?(v=0,d.push(n(m)),m=0):v++,t>>=1}else{for(t=1,e=0;e<h;e++)m=m<<1|t,v==o-1?(v=0,d.push(n(m)),m=0):v++,t=0;for(t=c.charCodeAt(0),e=0;e<16;e++)m=m<<1|1&t,v==o-1?(v=0,d.push(n(m)),m=0):v++,t>>=1}0==--l&&(l=Math.pow(2,h),h++),delete u[c]}else for(t=s[c],e=0;e<h;e++)m=m<<1|1&t,v==o-1?(v=0,d.push(n(m)),m=0):v++,t>>=1;0==--l&&(l=Math.pow(2,h),h++)}for(t=2,e=0;e<h;e++)m=m<<1|1&t,v==o-1?(v=0,d.push(n(m)),m=0):v++,t>>=1;for(;;){if(m<<=1,v==o-1){d.push(n(m));break}v++}return d.join("")},decompress:function(r){return null==r?"":""==r?null:i._decompress(r.length,32768,function(o){return r.charCodeAt(o)})},_decompress:function(o,n,e){var t,i,s,u,a,p,c,l=[],f=4,h=4,d=3,m="",v=[],g={val:e(0),position:n,index:1};for(t=0;t<3;t+=1)l[t]=t;for(s=0,a=Math.pow(2,2),p=1;p!=a;)u=g.val&g.position,g.position>>=1,0==g.position&&(g.position=n,g.val=e(g.index++)),s|=(u>0?1:0)*p,p<<=1;switch(s){case 0:for(s=0,a=Math.pow(2,8),p=1;p!=a;)u=g.val&g.position,g.position>>=1,0==g.position&&(g.position=n,g.val=e(g.index++)),s|=(u>0?1:0)*p,p<<=1;c=r(s);break;case 1:for(s=0,a=Math.pow(2,16),p=1;p!=a;)u=g.val&g.position,g.position>>=1,0==g.position&&(g.position=n,g.val=e(g.index++)),s|=(u>0?1:0)*p,p<<=1;c=r(s);break;case 2:return""}for(l[3]=c,i=c,v.push(c);;){if(g.index>o)return"";for(s=0,a=Math.pow(2,d),p=1;p!=a;)u=g.val&g.position,g.position>>=1,0==g.position&&(g.position=n,g.val=e(g.index++)),s|=(u>0?1:0)*p,p<<=1;switch(c=s){case 0:for(s=0,a=Math.pow(2,8),p=1;p!=a;)u=g.val&g.position,g.position>>=1,0==g.position&&(g.position=n,g.val=e(g.index++)),s|=(u>0?1:0)*p,p<<=1;l[h++]=r(s),c=h-1,f--;break;case 1:for(s=0,a=Math.pow(2,16),p=1;p!=a;)u=g.val&g.position,g.position>>=1,0==g.position&&(g.position=n,g.val=e(g.index++)),s|=(u>0?1:0)*p,p<<=1;l[h++]=r(s),c=h-1,f--;break;case 2:return v.join("")}if(0==f&&(f=Math.pow(2,d),d++),l[c])m=l[c];else{if(c!==h)return null;m=i+i.charAt(0)}v.push(m),l[h++]=i+m.charAt(0),i=m,0==--f&&(f=Math.pow(2,d),d++)}}};return i}();
+</script>
+
+<!-- 에디터 로직 -->
+<script>
+(function(){
+'use strict';
+var $=function(s){return document.querySelector(s)};
+var state={data:null,format:'json',fileName:'save.json',changed:new Set()};
+
+// ---------- 토스트 ----------
+var toastT;
+function toast(msg,kind){
+  var t=$('#toast');t.textContent=msg;t.className='toast show'+(kind?' '+kind:'');
+  clearTimeout(toastT);toastT=setTimeout(function(){t.className='toast'+(kind?' '+kind:'')},2400);
+}
+
+// ---------- 파일 디코드 ----------
+function tryDecode(text){
+  // 1) 평문 JSON
+  try{var d=JSON.parse(text);if(d&&typeof d==='object')return{data:d,format:'json'};}catch(e){}
+  // 2) LZString base64 (RPG Maker MV/MZ)
+  try{var s=LZString.decompressFromBase64(text.trim());if(s){var d2=JSON.parse(s);if(d2&&typeof d2==='object')return{data:d2,format:'lz-b64'};}}catch(e){}
+  // 3) LZString URI-encoded
+  try{var s3=LZString.decompressFromEncodedURIComponent(text.trim());if(s3){var d3=JSON.parse(s3);if(d3&&typeof d3==='object')return{data:d3,format:'lz-uri'};}}catch(e){}
+  // 4) LZString UTF16
+  try{var s4=LZString.decompressFromUTF16(text);if(s4){var d4=JSON.parse(s4);if(d4&&typeof d4==='object')return{data:d4,format:'lz-utf16'};}}catch(e){}
+  return null;
+}
+
+function encode(data,format){
+  var json=JSON.stringify(data);
+  if(format==='lz-b64')return LZString.compressToBase64(json);
+  if(format==='lz-uri')return LZString.compressToEncodedURIComponent(json);
+  if(format==='lz-utf16')return LZString.compressToUTF16(json);
+  return json;
+}
+
+// ---------- 트리 렌더 ----------
+var fieldCount=0;
+function countFields(v){
+  if(v===null||typeof v!=='object'){fieldCount++;return;}
+  if(Array.isArray(v))v.forEach(countFields);
+  else for(var k in v)if(Object.prototype.hasOwnProperty.call(v,k))countFields(v[k]);
+}
+
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+
+// path는 배열. id = path.join('\u0001')
+function pathId(path){return path.join('\u0001')}
+
+function buildNode(value,path,keyLabel,arrIdx){
+  var isArr=Array.isArray(value);
+  var isObj=value!==null&&typeof value==='object';
+  if(isObj){
+    var det=document.createElement('details');
+    det.open=path.length<2; // 상위만 펼침
+    var sum=document.createElement('summary');
+    var cnt=isArr?value.length:Object.keys(value).length;
+    sum.innerHTML='<span class="tw">▶</span><span class="k">'+esc(keyLabel)+'</span>'+
+      '<span class="meta">'+(isArr?'[ '+cnt+' ]':'{ '+cnt+' }')+'</span>';
+    det.appendChild(sum);
+    var keys=isArr?value.map(function(_,i){return i}):Object.keys(value);
+    keys.forEach(function(k){
+      det.appendChild(buildNode(value[k],path.concat(k),isArr?('['+k+']'):k));
+    });
+    return det;
+  }
+  // leaf
+  var row=document.createElement('div');
+  row.className='leaf';
+  var pid=pathId(path);
+  row.dataset.path=pid;
+  row.dataset.key=String(keyLabel);
+  var type=value===null?'null':typeof value;
+  row.dataset.type=type;
+  row.dataset.val=value===null?'null':String(value);
+  if(state.changed.has(pid))row.classList.add('changed');
+
+  var kspan='<span class="k">'+esc(keyLabel)+'</span><span class="col">:</span>';
+  var ctrl;
+  if(type==='boolean'){
+    ctrl='<select class="val t-boolean" data-p="'+esc(pid)+'">'+
+      '<option value="true"'+(value?' selected':'')+'>true</option>'+
+      '<option value="false"'+(!value?' selected':'')+'>false</option></select>';
+  }else if(type==='number'){
+    ctrl='<input class="val t-number" type="number" step="any" data-p="'+esc(pid)+'" value="'+esc(value)+'">';
+  }else if(type==='string'){
+    ctrl='<input class="val t-string" type="text" data-p="'+esc(pid)+'" value="'+esc(value)+'">';
+  }else{ // null
+    ctrl='<span class="t-null">null</span>';
+  }
+  row.innerHTML=kspan+ctrl;
+  return row;
+}
+
+function getByPath(path){
+  var cur=state.data;
+  for(var i=0;i<path.length;i++)cur=cur[path[i]];
+  return cur;
+}
+function setByPath(path,val){
+  var cur=state.data;
+  for(var i=0;i<path.length-1;i++)cur=cur[path[i]];
+  cur[path[path.length-1]]=val;
+}
+function decodePath(pid){
+  return pid.split('\u0001').map(function(seg){
+    // 배열 인덱스 복원: 부모가 배열이면 숫자. 안전하게 숫자면 숫자로.
+    return /^\d+$/.test(seg)?Number(seg):seg;
+  });
+}
+
+function render(){
+  fieldCount=0;countFields(state.data);
+  $('#fieldCnt').textContent=fieldCount.toLocaleString()+' fields';
+  var tree=$('#tree');tree.innerHTML='';
+  var root=state.data;
+  var isArr=Array.isArray(root);
+  var keys=isArr?root.map(function(_,i){return i}):Object.keys(root);
+  if(keys.length===0){tree.innerHTML='<div class="empty">빈 데이터입니다.</div>';return;}
+  keys.forEach(function(k){
+    tree.appendChild(buildNode(root[k],[k],isArr?('['+k+']'):k));
+  });
+  bindInputs();
+}
+
+function bindInputs(){
+  $('#tree').querySelectorAll('.val').forEach(function(el){
+    el.addEventListener('change',function(){
+      var pid=el.dataset.p;var path=decodePath(pid);
+      var orig=getByPath(path);
+      var nv;
+      if(el.tagName==='SELECT'){nv=el.value==='true';}
+      else if(el.classList.contains('t-number')){nv=el.value===''?0:Number(el.value);if(isNaN(nv))nv=orig;}
+      else{nv=el.value;}
+      setByPath(path,nv);
+      var row=el.closest('.leaf');
+      row.dataset.val=String(nv);
+      state.changed.add(pid);
+      row.classList.add('changed');
+      applyFilter();
+    });
+  });
+}
+
+// ---------- 검색/필터 ----------
+var mode='partial',typeF='all';
+function applyFilter(){
+  var q=$('#q').value.trim().toLowerCase();
+  var changedOnly=$('#changedOnly').checked;
+  var noFilter=!q&&typeF==='all'&&!changedOnly;
+  var tree=$('#tree');
+  var leaves=tree.querySelectorAll('.leaf');
+  leaves.forEach(function(row){
+    var ok=true;
+    if(q){
+      var k=row.dataset.key.toLowerCase();
+      var v=(row.dataset.val||'').toLowerCase();
+      ok=mode==='full'?(k===q||v===q):(k.indexOf(q)>-1||v.indexOf(q)>-1);
+    }
+    if(ok&&typeF!=='all')ok=row.dataset.type===typeF;
+    if(ok&&changedOnly)ok=state.changed.has(row.dataset.path);
+    row.dataset.match=ok?'1':'0';
+    row.style.display=(noFilter||ok)?'':'none';
+  });
+  // 그룹: 자손에 매치 있으면 표시+열기
+  var groups=tree.querySelectorAll('details');
+  // bottom-up: querySelectorAll는 document order라, 역순 처리하면 자식 먼저
+  var arr=Array.prototype.slice.call(groups).reverse();
+  arr.forEach(function(d){
+    if(noFilter){d.style.display='';return;}
+    var hasLeaf=d.querySelector('.leaf[data-match="1"]');
+    var hasGroup=false;
+    d.querySelectorAll(':scope > details').forEach(function(c){if(c.style.display!=='none')hasGroup=true;});
+    var show=hasLeaf||hasGroup;
+    d.style.display=show?'':'none';
+    if(show)d.open=true;
+  });
+  // 변경 하이라이트 갱신
+  leaves.forEach(function(row){
+    if(state.changed.has(row.dataset.path))row.classList.add('changed');
+    else row.classList.remove('changed');
+  });
+}
+
+// ---------- 파일 로드 ----------
+function loadFile(file){
+  state.fileName=file.name;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    var text=e.target.result;
+    var res=tryDecode(text);
+    if(!res){toast('인식할 수 없는 형식입니다. JSON 또는 RPG Maker 세이브인지 확인하세요.','err');return;}
+    state.data=res.data;state.format=res.format;state.changed=new Set();
+    $('#fname').textContent=file.name;
+    var badge=$('#fmtBadge');
+    if(res.format==='json'){badge.textContent='JSON (평문)';badge.className='badge fmt-json';}
+    else{badge.textContent='LZString 압축';badge.className='badge fmt-lz';}
+    render();applyFilter();
+    $('#editor').classList.add('on');
+    $('#drop').style.display='none';
+    $('#editor').scrollIntoView({behavior:'smooth',block:'start'});
+    toast('파일을 불러왔습니다 · '+fieldCount.toLocaleString()+' fields','ok');
+  };
+  reader.onerror=function(){toast('파일을 읽지 못했습니다.','err');};
+  reader.readAsText(file);
+}
+
+// ---------- 다운로드 ----------
+function download(content,name){
+  var blob=new Blob([content],{type:'application/octet-stream'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();
+  setTimeout(function(){URL.revokeObjectURL(url);a.remove();},100);
+}
+
+// ---------- 이벤트 바인딩 ----------
+var drop=$('#drop'),fileInput=$('#file');
+$('#btnUp').addEventListener('click',function(e){e.stopPropagation();fileInput.click();});
+drop.addEventListener('click',function(){fileInput.click();});
+fileInput.addEventListener('change',function(){if(fileInput.files[0])loadFile(fileInput.files[0]);fileInput.value='';});
+;['dragenter','dragover'].forEach(function(ev){drop.addEventListener(ev,function(e){e.preventDefault();drop.classList.add('drag');});});
+;['dragleave','drop'].forEach(function(ev){drop.addEventListener(ev,function(e){e.preventDefault();drop.classList.remove('drag');});});
+drop.addEventListener('drop',function(e){var f=e.dataTransfer.files[0];if(f)loadFile(f);});
+// 전체 영역 드롭도 허용
+window.addEventListener('dragover',function(e){e.preventDefault();});
+window.addEventListener('drop',function(e){e.preventDefault();if($('#editor').classList.contains('on'))return;var f=e.dataTransfer&&e.dataTransfer.files[0];if(f)loadFile(f);});
+
+$('#q').addEventListener('input',applyFilter);
+$('#changedOnly').addEventListener('change',applyFilter);
+$('#modeSeg').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;
+  $('#modeSeg').querySelectorAll('button').forEach(function(x){x.classList.remove('on')});b.classList.add('on');mode=b.dataset.mode;applyFilter();});
+$('#typeSeg').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;
+  $('#typeSeg').querySelectorAll('button').forEach(function(x){x.classList.remove('on')});b.classList.add('on');typeF=b.dataset.type;applyFilter();});
+
+$('#btnSave').addEventListener('click',function(){
+  if(!state.data)return;
+  var out=encode(state.data,state.format);
+  download(out,state.fileName);
+  toast('저장 완료 · '+state.changed.size+'개 필드 변경됨','ok');
+});
+$('#btnJson').addEventListener('click',function(){
+  if(!state.data)return;
+  var name=state.fileName.replace(/\.[^.]+$/,'')+'.json';
+  download(JSON.stringify(state.data,null,2),name);
+  toast('JSON 내보내기 완료','ok');
+});
+$('#btnReset').addEventListener('click',function(){
+  state={data:null,format:'json',fileName:'save.json',changed:new Set()};
+  $('#editor').classList.remove('on');
+  $('#drop').style.display='';
+  $('#q').value='';$('#changedOnly').checked=false;
+  window.scrollTo({top:0,behavior:'smooth'});
+});
+})();
+</script>
+</body>
+</html>
