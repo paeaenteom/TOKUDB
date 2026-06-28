@@ -270,7 +270,7 @@ body{background:var(--bg);color:var(--txt);font-family:'Noto Sans KR',sans-serif
 
 <script>
 /* ════ Gemini API 설정 ════ */
-const GEMINI_MODEL = 'gemini-3.1-flash-live-preview';
+const GEMINI_MODEL = 'gemini-2.5-flash';
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
 
 function getApiKey(){ return localStorage.getItem('gemini_api_key')||''; }
