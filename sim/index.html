@@ -269,7 +269,7 @@ body{background:var(--bg);color:var(--txt);font-family:'Noto Sans KR',sans-serif
 </div>
 
 <script>
-/* ════ Gemini API 설정 ════ */
+/* ════ Gemini API ════ */
 const GEMINI_MODEL = 'gemini-2.5-flash';
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
 
@@ -279,32 +279,31 @@ function saveApiKey(){
   if(!v){alert('키를 입력하세요');return;}
   localStorage.setItem('gemini_api_key',v);
   updateKeyStatus();
-  toast('API 키 저장 완료');
+  toast('API 키 저장됨');
 }
 function toggleKeyVis(){
-  const inp=document.getElementById('apiKeyInput');
-  const btn=document.getElementById('eyeBtn');
-  inp.type=inp.type==='password'?'text':'password';
-  btn.textContent=inp.type==='password'?'👁':'🙈';
+  const i=document.getElementById('apiKeyInput'),b=document.getElementById('eyeBtn');
+  i.type=i.type==='password'?'text':'password';b.textContent=i.type==='password'?'👁':'🙈';
 }
 function updateKeyStatus(){
-  const k=getApiKey();
-  const el=document.getElementById('keyStatus');
-  if(!el)return;
+  const k=getApiKey(),el=document.getElementById('keyStatus');if(!el)return;
   if(k){el.textContent='✓ 키 설정됨 ('+k.slice(0,8)+'...)';el.style.color='var(--green)';}
-  else{el.textContent='⚠ 키 미설정';el.style.color='var(--pink)';}
+  else{el.textContent='⚠ 키 미설정 (연출·전투에 필요)';el.style.color='var(--pink)';}
 }
-function toast(msg){const t=document.createElement('div');t.textContent=msg;t.style.cssText='position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--card);border:1px solid var(--sky);border-radius:5px;padding:10px 18px;font-family:var(--mono);font-size:12px;color:var(--sky);z-index:999';document.body.appendChild(t);setTimeout(()=>t.remove(),2200);}
-
-async function callGemini(systemPrompt, msgs){
+function toast(msg){
+  const t=document.createElement('div');t.textContent=msg;
+  t.style.cssText='position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--card);border:1px solid var(--sky);border-radius:5px;padding:10px 18px;font-family:var(--mono);font-size:12px;color:var(--sky);z-index:999';
+  document.body.appendChild(t);setTimeout(()=>t.remove(),2000);
+}
+async function callGemini(systemPrompt, msgs, maxTokens=2000){
   const key=getApiKey();
-  if(!key) throw new Error('Gemini API 키를 사이드바에서 설정하세요 (Google AI Studio)');
+  if(!key) throw new Error('Gemini API 키를 사이드바에서 설정하세요');
   const r=await fetch(GEMINI_URL+'?key='+key,{
     method:'POST',headers:{'Content-Type':'application/json'},
     body:JSON.stringify({
       system_instruction:{parts:[{text:systemPrompt}]},
       contents:msgs.map(m=>({role:m.role==='assistant'?'model':'user',parts:[{text:m.content}]})),
-      generationConfig:{maxOutputTokens:2000,temperature:0.8}
+      generationConfig:{maxOutputTokens:maxTokens,temperature:0.85}
     })
   });
   const d=await r.json();
@@ -312,163 +311,163 @@ async function callGemini(systemPrompt, msgs){
   return d.candidates?.[0]?.content?.parts?.[0]?.text||'[응답 없음]';
 }
 
-/* ════ 시스템 프롬프트 ════ */
-const SYSTEM = `너는 「특촬(特撮 / TOKU)」이라는 이름의 안내 존재이다. 술사의 권능에 깃든 시스템으로, 감정 대신 정확성으로 응답하며 사용자를 "술사"라 부른다.
-
-═══ 고유 특성 ═══
-■ 픽셔널 매니페스테이션(虚構顕現) — 술사의 혈맥에 새겨진 Passive Innate Trait. 픽션 속 영웅·괴인·무장을 현세에 실체화하는 소환술사의 본성.
-【소환】픽션의 전사를 전장에 강림시킨다. 전사가 원본 스탯·필살기·폼 그대로 술사를 위해 싸운다.
-【장착】픽션의 변신 아이템을 소환해 술사가 직접 장착·변신한다. 변신 후엔 술사가 그 전사가 된다.
-■ 완전 은폐(ZERO-SIGNATURE) — 어떤 감지·탐지로도 기척이 잡히지 않는다.
-
-═══ 말투·태도 ═══
-한국어 반말, 간결·단정적, 콘솔/주문 영창 톤. 불필요한 인사·아부·되묻기 없음. 의성어(蒸着!, ピキィン!)와 박스/구분선 연출 사용. 강림·변신 순간엔 묘사를 살린다.
-
-═══ 절대 규칙 ═══
-- 시전 명령을 받으면 STEP 1~5를 단 한 단계도 생략하지 않고 전부 출력한다.
-- 모르는 변신음·대사·폼·스펙을 거짓으로 지어내지 않는다. 확실하지 않으면 [데이터 불충분] 표기.
-- 고정 변신 구호 없는 전사(울트라맨 등)는 대사를 "각성 선언/캐치카피"로 명시.
-- 실존하지 않거나 특정 불가한 대상은 △로 강림 거부.
-- 스탯 13개 전부 채우고 HP·ENG·BP는 공식에 직접 계산.
-- 강림체·술사 권능은 어떤 감지 묘사에서도 "감지되지 않음"으로 처리.
-
-═══ 시전 절차 (매번 이 순서 그대로 전부 출력) ═══
-STEP 1 — 영창 / 마력 연산
-> 픽션 좌표 스캔 ████ 100%
-> 변신 데이터 대조 ████ 100%
-> 마력(ENG) 연산 ████ 100%
-
-STEP 2 — 검증 + 강림 등급
-☄ MANIFEST VERIFICATION
-▸ 작품/전사 실재 : ✓/⚠/✕ (+한줄)
-▸ 변신 아이템    : 명칭 / [데이터 불충분]
-▸ 변신 구호·대사 : 원문 / [데이터 불충분]
-▸ 폼체인지       : 목록 / 없음
-▸ 공식 스펙      : 신장·체중 등 / [미공개]
-▸ 기척 은폐      : ✓ 항시 (ZERO-SIGNATURE)
-강림 등급: ◎ 완전강림 / ○ 부분강림 / △ 강림 실패
-
-STEP 3 — 강림/변신 연출 (헤더: ☄ FICTIONAL MANIFESTATION ☄)
-【소환】= 3인칭, 【장착】= 2인칭(술사가 직접 변신)
-① 효과음/변신 시퀀스 — 의성어 원어 음차
-② 변신 구호/각성 선언 — 「일어 원문」 + 로마자 + 「한글 독음」 + (뜻) 4종
-③ 강림 비주얼 묘사
-
-STEP 4 — BATTLE SHEET
-┌ BATTLE SHEET ─────────────────┐
-│ {전사명} / {원어명}            │
-│ 시전: 【소환】or【장착】       │
-│ 분류: {분류} · 등급: {BP등급}  │
-├────────────────────────────────┤
-│ STR_ AGI_ REF_ END_ STM_       │
-│ PWR_ CTL_ RNG_ DUR_ CST_       │
-│ INT_ WIL_ ADP_                 │
-├────────────────────────────────┤
-│ HP={계산} ENG={계산} BP={계산} │
-│ 필살:{필살기} / 폼:{목록}      │
-│ 약점:{약점} / 강림한계:{N턴 or 없음}│
-│ 기척:은폐(감지 불가)           │
-└────────────────────────────────┘
-
-STEP 5 — 다음 행동 안내
-
-═══ 스탯 공식 ═══
-[물리] STR근력 AGI민첩 REF반응 END내구 STM지구력
-[이능] PWR출력 CTL제어 RNG사거리 DUR지속 CST연비
-[정신] INT전투지능 WIL의지 ADP적응
-HP = END×12 + STM×6 + 50
-ENG = (PWR+DUR)×5
-BP = (물리5합×1.0)+(이능4합×1.2)+(정신3합×0.8)+능력보정
-등급 BP: F~300 E~500 D~700 C~900 B~1100 A~1300 S~1500 SS~1700 SSS~2000 EX2001+
-거대 전사 = 기본 3분=5턴 한계. 등신대 = 제한 없음.`;
-
-/* ════ 인사 ════ */
-const GREETING = `╔════════════════════════════════════════════╗
-║  虚構顕現  ::  特撮 ONLINE                  ║
-║  고유 특성 — 픽셔널 매니페스테이션 동기화  ║
-╚════════════════════════════════════════════╝
-> 술사 인증 ████████████ OK
-> 기척 은폐 프로토콜 ████ 상시 ON
-> 픽션 좌표계 연결됨  ENGINE: Gemini
-
-술사. 네 안의 특성이 깨어났다.
-
-  【소환】[시리즈: 울트라맨] [전사: 울트라맨]
-  【장착】[시리즈: 가면라이더] [전사: 가면라이더 가브]
-  【장착】[시리즈: 슈퍼전대] [전사: 신켄레드]
-
-무엇을 현현시킬까.`;
-
 /* ════ 위키 설정 ════ */
-const WIKIS = {
-  '가면라이더': 'kamenrider.fandom.com',
-  'kamen rider': 'kamenrider.fandom.com',
-  '슈퍼전대': 'powerrangers.fandom.com',
-  'sentai': 'powerrangers.fandom.com',
-  '전대': 'powerrangers.fandom.com',
-  '메탈히어로': 'metalheroes.fandom.com',
-  'metal hero': 'metalheroes.fandom.com',
-  '울트라맨': 'ultra.fandom.com',
-  'ultraman': 'ultra.fandom.com',
-  'project red': 'project-red.fandom.com',
-  'project r.e.d.': 'project-red.fandom.com',
+const WIKIS={
+  '가면라이더':'kamenrider.fandom.com', 'kamen rider':'kamenrider.fandom.com',
+  '슈퍼전대':'powerrangers.fandom.com', 'sentai':'powerrangers.fandom.com', '전대':'powerrangers.fandom.com',
+  '메탈히어로':'metalheroes.fandom.com', 'metal hero':'metalheroes.fandom.com',
+  '울트라맨':'ultra.fandom.com', 'ultraman':'ultra.fandom.com',
+  'project red':'project-red.fandom.com', 'project r.e.d.':'project-red.fandom.com',
 };
-
-function getWikiHost(series){
-  const s=series.toLowerCase();
-  for(const [k,v] of Object.entries(WIKIS)) if(s.includes(k)) return v;
-  return null;
-}
+function getWikiHost(series){const s=series.toLowerCase();for(const[k,v]of Object.entries(WIKIS))if(s.includes(k))return v;return null;}
 
 /* ════ wikitext 파서 ════ */
 function parseWikitext(wt){
-  if(!wt) return null;
+  if(!wt)return null;
   const out={};
-  // infobox 키-값
-  const ibox=wt.match(/\{\{[A-Za-z\s]*[Ii]nfo[^\n]*\n([\s\S]*?)(?=\n\}\}|\}\})/);
-  if(ibox){
-    const lines=ibox[1].split('\n');
-    for(const l of lines){
-      const m=l.match(/^\|\s*([\w\s]+?)\s*=\s*(.+)/);
-      if(m){
-        const k=m[1].trim().toLowerCase().replace(/\s+/g,'_');
-        const v=m[2].trim().replace(/\[\[([^\]|]+)(?:\|[^\]]+)?\]\]/g,'$1').replace(/<[^>]+>/g,'').trim();
-        if(v&&!v.startsWith('{{')) out[k]=v;
-      }
-    }
-  }
-  // 스펙 — 본문 정규식
+  const ibox=wt.match(/\{\{[A-Za-z\s]*[Ii]nfo[\s\S]*?\}\}/);
+  if(ibox){const lines=ibox[0].split('\n');for(const l of lines){const m=l.match(/^\|\s*([\w\s]+?)\s*=\s*(.+)/);if(m){const k=m[1].trim().toLowerCase().replace(/\s+/g,'_');const v=m[2].trim().replace(/\[\[([^\]|]+)(?:\|[^\]]+)?\]\]/g,'$1').replace(/<[^>]+>/g,'').trim();if(v&&!v.startsWith('{{'))out[k]=v;}}}
   const sp={};
-  const hm=wt.match(/[Hh]eight[:\s*]*([0-9,.]+\s*(?:cm|m\b))/);
-  const wm=wt.match(/[Ww]eight[:\s*]*([0-9,.]+\s*(?:kg|t\b))/);
-  const pm=wt.match(/[Pp]unch(?:ing)?\s*(?:[Pp]ower|[Ff]orce)[:\s*]*([0-9,.]+\s*(?:t\b|tons?))/);
-  const km=wt.match(/[Kk]ick(?:ing)?\s*(?:[Pp]ower|[Ff]orce)[:\s*]*([0-9,.]+\s*(?:t\b|tons?))/);
-  const jm=wt.match(/[Jj]ump(?:ing)?\s*[Hh]eight[:\s*]*([0-9,.]+\s*m)/);
-  const sm=wt.match(/100\s*m\s*(?:in\s*)?([0-9.]+\s*sec)/i);
-  if(hm)sp.height=hm[1].trim();
-  if(wm)sp.weight=wm[1].trim();
-  if(pm)sp.punch=pm[1].trim();
-  if(km)sp.kick=km[1].trim();
-  if(jm)sp.jump=jm[1].trim();
-  if(sm)sp.speed='100m/'+sm[1].trim();
-  if(Object.keys(sp).length) out.specs=sp;
+  const hm=wt.match(/[Hh]eight[^:\n]*?([0-9]+(?:\.[0-9]+)?)\s*cm/);
+  const wm=wt.match(/[Ww]eight[^:\n]*?([0-9]+(?:\.[0-9]+)?)\s*kg/);
+  const pm=wt.match(/[Pp]unch(?:ing)?\s*(?:[Pp]ower|[Ff]orce)[^:\n]*?([0-9]+(?:\.[0-9]+)?)\s*(?:t\b|tons?)/i);
+  const km=wt.match(/[Kk]ick(?:ing)?\s*(?:[Pp]ower|[Ff]orce)[^:\n]*?([0-9]+(?:\.[0-9]+)?)\s*(?:t\b|tons?)/i);
+  const jm=wt.match(/[Jj]ump(?:ing)?\s*[Hh]eight[^:\n]*?([0-9]+(?:\.[0-9]+)?)\s*m/i);
+  const sm=wt.match(/100\s*m\s*(?:per|in)\s*([0-9]+(?:\.[0-9]+)?)\s*sec/i)||wt.match(/([0-9]+(?:\.[0-9]+)?)\s*sec(?:onds?)?\s*(?:per|for)\s*100\s*m/i);
+  if(hm)sp.height=parseFloat(hm[1]);
+  if(wm)sp.weight=parseFloat(wm[1]);
+  if(pm)sp.punch=parseFloat(pm[1]);
+  if(km)sp.kick=parseFloat(km[1]);
+  if(jm)sp.jump=parseFloat(jm[1]);
+  if(sm)sp.speed100m=parseFloat(sm[1]);
+  if(Object.keys(sp).length)out.specs=sp;
   const yr=wt.match(/(\d{4})\s*[-–]\s*\d{4}|aired.*?(\d{4})|debut.*?(\d{4})/i);
-  if(yr) out.year=yr[1]||yr[2]||yr[3];
+  if(yr)out.year=yr[1]||yr[2]||yr[3];
   const ac=wt.match(/\|\s*actor\s*=\s*([^\n|{<\[]+)/i);
-  if(ac) out.actor=ac[1].trim();
+  if(ac)out.actor=ac[1].trim();
+  // 폼체인지 (forms 파라미터)
+  const fm=wt.match(/\|\s*forms?\s*=\s*([^\n|<{]+)/i);
+  if(fm){out.forms=fm[1].trim().replace(/\[\[([^\]|]+)(?:\|[^\]]+)?\]\]/g,'$1');}
   return out;
 }
 
-/* ════ 스마트 위키 검색 ════ */
-async function fetchWikiPage(host, title){
-  if(!title||!title.trim()) return null;
+/* ════ 스펙 → 스탯 변환 ════ */
+const SERIES_DEF={
+  rider: {REF:72,STM:70,CTL:74,RNG:52,DUR:65,CST:68,INT:72,WIL:78,ADP:65},
+  sentai:{REF:69,STM:72,CTL:70,RNG:68,DUR:68,CST:72,INT:69,WIL:74,ADP:70},
+  metal: {REF:76,STM:68,CTL:79,RNG:72,DUR:70,CST:66,INT:77,WIL:76,ADP:58},
+  ultra: {REF:78,STM:76,CTL:68,RNG:76,DUR:60,CST:54,INT:75,WIL:83,ADP:72},
+  def:   {REF:70,STM:70,CTL:70,RNG:55,DUR:65,CST:68,INT:70,WIL:75,ADP:65},
+};
+function seriesKey(s){
+  const l=s.toLowerCase();
+  if(l.includes('가면라이더')||l.includes('kamen'))return 'rider';
+  if(l.includes('전대')||l.includes('sentai'))return 'sentai';
+  if(l.includes('메탈')||l.includes('metal'))return 'metal';
+  if(l.includes('울트라')||l.includes('ultra'))return 'ultra';
+  return 'def';
+}
+function scaleSTR(t){if(!t)return 65;if(t<1)return 52;if(t<2)return 60;if(t<3)return 68;if(t<5)return 75;if(t<10)return 82;if(t<20)return 89;if(t<50)return 95;return 102;}
+function scalePWR(t){if(!t)return 65;if(t<1)return 48;if(t<3)return 60;if(t<5)return 70;if(t<8)return 78;if(t<15)return 85;if(t<30)return 92;if(t<60)return 98;return 105;}
+function scaleAGI(s){if(!s)return 68;if(s>15)return 40;if(s>10)return 50;if(s>7)return 58;if(s>6)return 66;if(s>5)return 73;if(s>4)return 80;if(s>3)return 87;return 94;}
+function scaleEND(w){if(!w)return 72;if(w<50)return 58;if(w<70)return 64;if(w<90)return 70;if(w<120)return 76;if(w<200)return 82;if(w<500)return 88;return 94;}
+function bpGrade(bp){if(bp>=2001)return 'EX';if(bp>=1700)return 'SSS';if(bp>=1500)return 'SS';if(bp>=1300)return 'S';if(bp>=1100)return 'A';if(bp>=900)return 'B';if(bp>=700)return 'C';if(bp>=500)return 'D';if(bp>=300)return 'E';return 'F';}
+
+function specsToStats(parsed, series){
+  const sp=parsed?.specs||{};
+  const def=SERIES_DEF[seriesKey(series)]||SERIES_DEF.def;
+  const STR=scaleSTR(sp.punch);
+  const AGI=scaleAGI(sp.speed100m);
+  const REF=def.REF;
+  const END=scaleEND(sp.weight);
+  const STM=def.STM;
+  const PWR=scalePWR(sp.kick);
+  const CTL=def.CTL;
+  const RNG=def.RNG;
+  const DUR=def.DUR;
+  const CST=def.CST;
+  const INT=def.INT;
+  const WIL=def.WIL;
+  let ADP=def.ADP;
+  // 폼체인지 있으면 ADP 상향
+  if(parsed?.forms){const fc=(parsed.forms.match(/,/g)||[]).length+1;if(fc>=3)ADP=Math.min(ADP+10,95);else if(fc>=1)ADP=Math.min(ADP+5,90);}
+  const HP=END*12+STM*6+50;
+  const ENG=(PWR+DUR)*5;
+  const BP=Math.round((STR+AGI+REF+END+STM)*1.0+(PWR+CTL+RNG+DUR)*1.2+(INT+WIL+ADP)*0.8);
+  return{STR,AGI,REF,END,STM,PWR,CTL,RNG,DUR,CST,INT,WIL,ADP,HP,ENG,BP,grade:bpGrade(BP)};
+}
+
+/* ════ BATTLE SHEET 자동 생성 ════ */
+function fmtSpec(parsed){
+  const sp=parsed?.specs||{};
+  const parts=[];
+  if(sp.height)parts.push(`${sp.height}cm`);
+  if(sp.weight)parts.push(`${sp.weight}kg`);
+  if(sp.punch)parts.push(`펀치 ${sp.punch}t`);
+  if(sp.kick)parts.push(`킥 ${sp.kick}t`);
+  if(sp.jump)parts.push(`점프 ${sp.jump}m`);
+  if(sp.speed100m)parts.push(`100m/${sp.speed100m}s`);
+  return parts.length?parts.join(' / '):'[위키 스펙 없음]';
+}
+function pad(n,w=2){return String(n).padStart(w);}
+function generateAutoOutput(cmd, wikiFound, stats){
+  const p=wikiFound?.result?.parsed||{};
+  const title=wikiFound?.result?.title||cmd.warrior;
+  const sp=p.specs||{};
+  const hasSpec=sp.punch||sp.kick||sp.height;
+  const forms=p.forms||'없음';
+  const year=p.year||'—';
+  const isEquip=cmd.isEquip;
+  const giant=cmd.series.toLowerCase().includes('울트라');
+
+  const step1=`STEP 1 — 영창 / 마력 연산
+> 픽션 좌표 스캔 ████ 100%
+> 변신 데이터 대조 ████ 100%
+> 마력(ENG) 연산 ████ 100%`;
+
+  const specLine=hasSpec?`✓ ${fmtSpec(p)}`:'[위키 스펙 미수록 — 기본값 추정 적용]';
+  const step2=`☄ MANIFEST VERIFICATION
+▸ 작품/전사 실재  : ✓ ${title}${year!=='—'?' ('+year+')':''}
+▸ 데이터 출처     : ${wikiFound?wikiFound.result.title+' (Fandom)':'자체 추정'}
+▸ 공식 스펙       : ${specLine}
+▸ 폼체인지        : ${forms}
+▸ 배우            : ${p.actor||'—'}
+▸ 기척 은폐       : ✓ 항시 (ZERO-SIGNATURE)
+강림 등급: ${hasSpec?'◎ 완전강림':'○ 부분강림 (스펙 추정)'}`
+
+  const sheet=`┌ BATTLE SHEET ─────────────────────────────────┐
+│ ${cmd.warrior.padEnd(24)} [AUTO-GEN]│
+│ ${title.slice(0,30).padEnd(30)}│
+│ 시전: 【${isEquip?'장착':'소환'}】 · 등급: ${stats.grade.padEnd(3)} (BP ${stats.BP})    │
+├────────────────────────────────────────────────┤
+│ STR${pad(stats.STR,3)} AGI${pad(stats.AGI,3)} REF${pad(stats.REF,3)} END${pad(stats.END,3)} STM${pad(stats.STM,3)}      │
+│ PWR${pad(stats.PWR,3)} CTL${pad(stats.CTL,3)} RNG${pad(stats.RNG,3)} DUR${pad(stats.DUR,3)} CST${pad(stats.CST,3)}      │
+│ INT${pad(stats.INT,3)} WIL${pad(stats.WIL,3)} ADP${pad(stats.ADP,3)}                       │
+├────────────────────────────────────────────────┤
+│ HP=${stats.HP.toLocaleString().padEnd(7)} ENG=${stats.ENG.toLocaleString().padEnd(6)} BP=${String(stats.BP).padEnd(7)}    │
+│ 약점: [요분석]  강림한계: ${giant?'5턴 (거대)':'없음(등신대)'}             │
+│ 기척: 은폐 (감지 불가)                        │
+└────────────────────────────────────────────────┘`;
+
+  const step5=`─────────────────────────────────────────────────
+  /연출        — Gemini로 변신 연출 생성
+  /전투 [상대] — 전투 시작 (Gemini)
+  /폼체인지 [폼명] — 폼 변경
+  /해제        — 강림 해제
+─────────────────────────────────────────────────`;
+
+  return step1+'\n\n'+step2+'\n\n'+sheet+'\n\n'+step5;
+}
+
+/* ════ 위키 스마트 검색 ════ */
+async function fetchWikiPage(host,title){
+  if(!title?.trim())return null;
   const cKey=`wk_${host}_${title}`;
   try{const c=sessionStorage.getItem(cKey);if(c)return JSON.parse(c);}catch(e){}
   try{
-    const url=`https://${host}/api.php?action=parse&page=${encodeURIComponent(title)}&prop=wikitext&format=json&origin=*`;
-    const r=await fetch(url,{signal:AbortSignal.timeout(6000)});
+    const r=await fetch(`https://${host}/api.php?action=parse&page=${encodeURIComponent(title)}&prop=wikitext&format=json&origin=*`,{signal:AbortSignal.timeout(6000)});
     const d=await r.json();
-    if(d.error||!d.parse) return null;
+    if(d.error||!d.parse)return null;
     const wt=d.parse.wikitext?.['*']||'';
     const parsed=parseWikitext(wt);
     const result={title:d.parse.title,wt_snippet:wt.slice(0,1800),parsed};
@@ -476,128 +475,115 @@ async function fetchWikiPage(host, title){
     return result;
   }catch(e){return null;}
 }
-
-async function searchWikiPages(host, query){
+async function searchWikiPages(host,query){
   try{
-    const url=`https://${host}/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)}&srlimit=4&srnamespace=0&format=json&origin=*`;
-    const r=await fetch(url,{signal:AbortSignal.timeout(5000)});
+    const r=await fetch(`https://${host}/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)}&srlimit=4&srnamespace=0&format=json&origin=*`,{signal:AbortSignal.timeout(5000)});
     const d=await r.json();
-    return (d.query?.search||[]).map(x=>x.title);
-  }catch(e){return [];}
+    return(d.query?.search||[]).map(x=>x.title);
+  }catch(e){return[];}
 }
-
-// 한글인지 감지
 function hasKorean(s){return /[가-힣]/.test(s);}
-
-// Gemini로 위키 영문 검색어 변환 (초경량 호출)
-async function translateToWikiName(name, series){
-  const key=getApiKey();
-  if(!key) return name;
+async function translateToWikiName(name,series){
+  const key=getApiKey();if(!key)return name;
   try{
-    const prompt=`특촬 캐릭터: "${name}" / 시리즈: "${series}"\n이 캐릭터를 Fandom 영문 위키에서 검색할 최적의 영문 검색어를 딱 한 구절로만 출력하라. 영어로. 예: Shinken Gold / Kamen Rider Faiz / Space Sheriff Gavan`;
     const r=await fetch(GEMINI_URL+'?key='+key,{
       method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
-        contents:[{role:'user',parts:[{text:prompt}]}],
-        generationConfig:{maxOutputTokens:15,temperature:0}
-      }),
-      signal:AbortSignal.timeout(5000)
+        contents:[{role:'user',parts:[{text:`특촬 캐릭터 "${name}" (시리즈: "${series}")의 Fandom 영문 위키 검색어를 딱 한 구절로만. 예: Shinken Gold`}]}],
+        generationConfig:{maxOutputTokens:12,temperature:0}
+      }),signal:AbortSignal.timeout(5000)
     });
     const d=await r.json();
-    const t=(d.candidates?.[0]?.content?.parts?.[0]?.text||'').trim().replace(/["""]/g,'');
-    return t||name;
+    return(d.candidates?.[0]?.content?.parts?.[0]?.text||'').trim().replace(/["""]/g,'')||name;
   }catch(e){return name;}
 }
-
-async function smartSearch(warrior, series, host){
+async function smartSearch(warrior,series,host){
   let searchName=warrior;
-
-  // 1) 직접 제목 시도
-  let result=await fetchWikiPage(host, warrior.replace(/\s+/g,'_'));
-  if(result?.parsed) return {result, foundAs: result.title};
-
-  // 2) 한글이면 Gemini로 영문명 변환
+  // 1) 직접 제목
+  let r=await fetchWikiPage(host,warrior.replace(/\s+/g,'_'));
+  if(r?.parsed)return{result:r,foundAs:r.title};
+  // 2) 한글이면 번역 후 재시도
   if(hasKorean(warrior)){
-    showSearchStatus('영문명 변환 중...');
-    searchName=await translateToWikiName(warrior, series);
-    // 변환된 영문으로 직접 시도
-    result=await fetchWikiPage(host, searchName.replace(/\s+/g,'_'));
-    if(result?.parsed) return {result, foundAs: result.title, translated: searchName};
+    showSearchStatus('영문명 변환 중…');
+    searchName=await translateToWikiName(warrior,series);
+    r=await fetchWikiPage(host,searchName.replace(/\s+/g,'_'));
+    if(r?.parsed)return{result:r,foundAs:r.title,translated:searchName};
   }
-
-  // 3) MediaWiki 검색 API
+  // 3) MediaWiki 검색
   showSearchStatus(`검색: "${searchName}"`);
-  const hits=await searchWikiPages(host, searchName);
-  for(const title of hits){
-    result=await fetchWikiPage(host, title);
-    if(result?.parsed) return {result, foundAs: title, translated: searchName!==warrior?searchName:null};
+  for(const t of await searchWikiPages(host,searchName)){
+    r=await fetchWikiPage(host,t);
+    if(r?.parsed)return{result:r,foundAs:t,translated:searchName!==warrior?searchName:null};
   }
-
-  // 4) 원본 이름으로도 검색 (변환 전)
+  // 4) 원본으로 검색
   if(searchName!==warrior){
-    const hits2=await searchWikiPages(host, warrior);
-    for(const title of hits2){
-      result=await fetchWikiPage(host, title);
-      if(result?.parsed) return {result, foundAs: title};
+    for(const t of await searchWikiPages(host,warrior)){
+      r=await fetchWikiPage(host,t);
+      if(r?.parsed)return{result:r,foundAs:t};
     }
   }
-
   return null;
 }
-
-function showSearchStatus(msg){
-  const el=document.getElementById('searchStatusMsg');
-  if(el) el.textContent=msg;
-}
-
-/* ════ 위키 컨텍스트 빌드 ════ */
-function buildWikiContext(found, warrior){
-  if(!found?.result?.parsed) return '';
-  const p=found.result.parsed, sp=p.specs||{};
-  let c=`\n\n[Fandom 위키 실측 데이터 — "${found.result.title}"]\n`;
-  if(found.translated) c+=`※ "${warrior}" → 영문 변환: "${found.translated}"\n`;
-  if(p.year) c+=`방영연도: ${p.year}\n`;
-  if(p.actor) c+=`배우: ${p.actor}\n`;
-  if(sp.height) c+=`신장: ${sp.height}\n`;
-  if(sp.weight) c+=`체중: ${sp.weight}\n`;
-  if(sp.punch) c+=`펀치력: ${sp.punch}\n`;
-  if(sp.kick) c+=`킥력: ${sp.kick}\n`;
-  if(sp.jump) c+=`점프력: ${sp.jump}\n`;
-  if(sp.speed) c+=`주행속도: ${sp.speed}\n`;
-  for(const k of ['debut','series','number','length']){if(p[k])c+=`${k}: ${p[k]}\n`;}
-  c+=`\n위 실제 데이터를 BATTLE SHEET 작성에 반드시 반영. 없는 값만 [데이터 불충분].\n`;
-  return c;
-}
+function showSearchStatus(msg){const el=document.getElementById('searchStatusMsg');if(el)el.textContent=msg;}
 
 /* ════ 상태 ════ */
-let messages=[{role:'assistant',content:GREETING}];
+let messages=[]; // Gemini 대화 히스토리 (연출·전투용)
 let loading=false;
+let currentManifest=null; // 현재 강림체 상태
 let entityState={name:'',hp:0,hpMax:0,eng:0,engMax:0,bp:''};
 
-window.addEventListener('DOMContentLoaded',()=>{
-  updateKeyStatus();
-  // 저장된 키를 input에 마스킹해서 표시
-  const k=getApiKey();
-  if(k) document.getElementById('apiKeyInput').placeholder='••••••••••••••• (저장됨)';
-  renderMsg('ai',GREETING);
-  document.getElementById('input').addEventListener('keydown',e=>{
-    if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();}
-    autoResize(e.target);
-  });
-  document.getElementById('input').addEventListener('input',e=>autoResize(e.target));
-  document.getElementById('btnClear').addEventListener('click',clearChat);
-});
+const GREETING=`╔════════════════════════════════════════════╗
+║  虚構顕現  ::  特撮 ONLINE  [하이브리드]    ║
+║  BATTLE SHEET — 자동 생성                  ║
+║  연출·전투       — Gemini                   ║
+╚════════════════════════════════════════════╝
+> 술사 인증 ████████████ OK
+> 기척 은폐 프로토콜 ████ 상시 ON
+> Fandom API 연결됨 / 스펙→스탯 변환 엔진 ON
 
-function autoResize(ta){ta.style.height='auto';ta.style.height=Math.min(ta.scrollHeight,140)+'px';}
+【소환】/【장착】 → BATTLE SHEET 즉시 자동 생성 (API 키 불필요)
+/연출            → 변신 연출 생성 (Gemini 필요)
+/전투 [상대]     → 전투 시작 (Gemini 필요)
+
+무엇을 현현시킬까.`;
+
+/* ════ Gemini 시스템 프롬프트 (연출·전투용) ════ */
+const SYSTEM_NARRATIVE=`너는 「특촬(特撮 / TOKU)」 시스템이다. 술사를 "술사"로 부른다. 한국어 반말, 간결·단정적, 콘솔 톤.
+
+※ BATTLE SHEET는 이미 자동 생성됨. 너는 연출·전투 내러티브만 담당한다.
+
+【/연출 요청 시】
+STEP 3 — 강림/변신 연출만 출력:
+① 효과음/변신 시퀀스 (의성어, 시간순)
+② 변신 구호/각성 선언 — 「일본어 원문」 + 로마자 + 「한글 독음」 + (뜻)  
+③ 강림 비주얼 묘사 (기척 은폐 유지 — 외부엔 평범한 사람으로만 보임)
+
+【/전투 시】
+포켓몬식 턴제. 매 턴: 헤더+양측 HP/ENG → 행동 메뉴 → 입력 대기.
+행동 메뉴: [스킬]/[필살기] 분리. 필살기는 ENG 소비 표기.
+HP 0 = 결착 연출.
+
+모르는 변신음·대사는 [데이터 불충분]으로 표기. 거짓 생성 금지.`;
+
+/* ════ 명령어 감지 ════ */
+function extractSummonCmd(text){
+  const sm=text.match(/\[시리즈\s*:\s*([^\]]+)\]/);
+  const wm=text.match(/\[(?:전사|아이템)\s*:\s*([^\]→]+)(?:→([^\]]+))?\]/);
+  if(!sm||!wm)return null;
+  return{series:sm[1].trim(),warrior:wm[1].trim(),form:wm[2]?.trim()||null,isSummon:text.includes('【소환】'),isEquip:text.includes('【장착】')};
+}
+function isNarrativeCmd(text){return text.startsWith('/연출')||text.startsWith('/전투')||text.startsWith('/대결')||text.startsWith('/vs')||text.startsWith('/폼체인지')||text.startsWith('/한계돌파')||text.startsWith('/약점분석')||text.startsWith('/자동시뮬');}
 
 /* ════ 렌더링 ════ */
-function renderMsg(role, text){
+function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function renderMsg(role,text,cls=''){
   const box=document.getElementById('messages');
-  const msg=document.createElement('div');msg.className=`msg ${role==='user'?'user':'ai'}`;
+  const msg=document.createElement('div');msg.className=`msg ${role==='user'?'user':'ai'} ${cls}`;
   const meta=document.createElement('div');meta.className='msg-meta';
-  meta.textContent=role==='user'?'술사':'特撮 SYSTEM';
+  meta.textContent=role==='user'?'술사':role==='auto'?'SYSTEM [AUTO]':'SYSTEM [Gemini]';
   const bubble=document.createElement('div');bubble.className='bubble';
-  if(role==='ai'){
+  if(role==='auto'){bubble.style.borderLeftColor='var(--pink)';bubble.style.fontSize='12px';}
+  if(role!=='user'){
     bubble.innerHTML=escHtml(text)
       .replace(/(☄[^☄\n]*☄)/g,'<span style="color:var(--sky)">$1</span>')
       .replace(/(✓[^\n]*)/g,'<span style="color:var(--green)">$1</span>')
@@ -609,20 +595,16 @@ function renderMsg(role, text){
   }else{bubble.textContent=text;}
   msg.appendChild(meta);msg.appendChild(bubble);
   box.appendChild(msg);box.scrollTop=box.scrollHeight;
-  if(role==='ai') parseEntity(text);
+  if(role!=='user')parseEntity(text);
 }
-function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-
-function showLoading(){
+function showLoading(label){
   const box=document.getElementById('messages');
   const el=document.createElement('div');el.className='msg ai loading-msg';el.id='loadingEl';
-  el.innerHTML=`<div class="msg-meta">特撮 SYSTEM</div><div class="loading-bubble">마력 연산 중 <div class="loading-dots"><span></span><span></span><span></span></div></div>`;
+  el.innerHTML=`<div class="msg-meta">SYSTEM [Gemini]</div><div class="loading-bubble">${label||'연산 중'} <div class="loading-dots"><span></span><span></span><span></span></div></div>`;
   box.appendChild(el);box.scrollTop=box.scrollHeight;
 }
 function removeLoading(){const el=document.getElementById('loadingEl');if(el)el.remove();}
-
-/* 위키 로딩 표시 */
-function showWikiLoading(name, host){
+function showWikiLoading(name,host){
   const box=document.getElementById('messages');
   const el=document.createElement('div');el.id='wikiLoadEl';el.className='msg ai';
   el.innerHTML=`<div class="msg-meta">WIKI FETCH</div>
@@ -635,32 +617,29 @@ function showWikiLoading(name, host){
   box.appendChild(el);box.scrollTop=box.scrollHeight;
 }
 function removeWikiLoading(){const el=document.getElementById('wikiLoadEl');if(el)el.remove();}
-
-function renderWikiResult(found, host){
+function renderWikiResult(found,host){
   const box=document.getElementById('messages');
   const el=document.createElement('div');el.className='msg ai';
-  const ok=!!found;
   const sp=found?.result?.parsed?.specs||{};
-  const specs=[sp.height&&`H:${sp.height}`,sp.weight&&`W:${sp.weight}`,sp.punch&&`Punch:${sp.punch}`].filter(Boolean).join('  ');
-  const translated=found?.translated?` (변환: ${found.translated})`:'';
+  const specs=[sp.height&&`${sp.height}cm`,sp.weight&&`${sp.weight}kg`,sp.punch&&`펀치 ${sp.punch}t`,sp.kick&&`킥 ${sp.kick}t`].filter(Boolean).join('  ');
+  const tr=found?.translated?` (변환: "${found.translated}")`:'';
   el.innerHTML=`<div class="msg-meta">WIKI FETCH</div>
-  <div class="bubble" style="border-left-color:${ok?'var(--sky)':'var(--dim)'};font-size:11px;padding:9px 14px">
-    ${ok
-      ?`<span style="color:var(--sky)">✓ 데이터 확보</span> <span style="color:var(--txt2)">${found.result.title}</span>${translated}<span style="color:var(--mute)"> ← ${host}</span>${specs?`<br><span style="color:var(--green);font-size:10px">${specs}</span>`:''}`
-      :`<span style="color:var(--mute)">⚠ 위키 페이지 없음 — 자체 지식으로 진행</span>`
+  <div class="bubble" style="border-left-color:${found?'var(--sky)':'var(--dim)'};font-size:11px;padding:9px 14px">
+    ${found
+      ?`<span style="color:var(--sky)">✓ 데이터 확보</span> <span style="color:var(--txt2)">${found.result.title}</span>${tr}<span style="color:var(--mute)"> ← ${host}</span>${specs?`<br><span style="color:var(--green);font-size:10px">${specs}</span>`:''}`
+      :`<span style="color:var(--mute)">⚠ 위키 없음 — 시리즈 기본값으로 스탯 추정</span>`
     }
   </div>`;
   box.appendChild(el);box.scrollTop=box.scrollHeight;
 }
 
-/* ════ 엔티티 파싱 ════ */
+/* ════ 엔티티 패널 ════ */
 function parseEntity(text){
   const hm=text.match(/HP=([\d,]+)/);const em=text.match(/ENG=([\d,]+)/);const bm=text.match(/BP=([\d,]+)/);
   if(text.includes('/해제')&&!hm){clearEntity();return;}
   if(hm){
-    const hp=parseInt((hm[1]).replace(/,/g,''));
-    const eng=em?parseInt(em[1].replace(/,/g,'')):0;
-    const nm=text.match(/┌ BATTLE SHEET[─ ]*\n│\s*([^\n/│]+)/);
+    const hp=parseInt(hm[1].replace(/,/g,''));const eng=em?parseInt(em[1].replace(/,/g,'')):entityState.eng;
+    const nm=text.match(/┌ BATTLE SHEET[─ ]*\n│\s*([^\n│\[]+)/);
     entityState={name:nm?nm[1].trim():'강림체',hp,hpMax:Math.max(hp,entityState.hpMax||hp),eng,engMax:Math.max(eng,entityState.engMax||eng),bp:bm?bm[1]:entityState.bp};
     updateEntityPanel();
   }
@@ -669,77 +648,98 @@ function updateEntityPanel(){
   const{name,hp,hpMax,eng,engMax,bp}=entityState;
   document.getElementById('noEntity').style.display='none';
   document.getElementById('entityInfo').style.display='block';
-  document.getElementById('entityName').textContent=name;
-  document.getElementById('entitySeries').textContent='// 시전 완료';
+  document.getElementById('entityName').textContent=name.slice(0,18);
+  document.getElementById('entitySeries').textContent='// 강림 중';
   document.getElementById('hpVal').textContent=hp.toLocaleString();
   document.getElementById('engVal').textContent=eng.toLocaleString();
   document.getElementById('bpBadge').textContent=`BP ${bp||'—'}`;
   document.getElementById('hpBar').style.width=hpMax?Math.max(0,hp/hpMax*100)+'%':'100%';
   document.getElementById('engBar').style.width=engMax?Math.max(0,eng/engMax*100)+'%':'100%';
 }
-function clearEntity(){
-  entityState={name:'',hp:0,hpMax:0,eng:0,engMax:0,bp:''};
-  document.getElementById('noEntity').style.display='block';
-  document.getElementById('entityInfo').style.display='none';
-}
-
-/* ════ 명령어 파싱 ════ */
-function extractCmd(text){
-  const sm=text.match(/\[시리즈\s*:\s*([^\]]+)\]/);
-  const wm=text.match(/\[(?:전사|아이템)\s*:\s*([^\]→]+)(?:→([^\]]+))?\]/);
-  if(!sm||!wm) return null;
-  return{series:sm[1].trim(),warrior:wm[1].trim(),form:wm[2]?.trim()||null,isSummon:text.includes('【소환】'),isEquip:text.includes('【장착】')};
-}
+function clearEntity(){entityState={name:'',hp:0,hpMax:0,eng:0,engMax:0,bp:''};document.getElementById('noEntity').style.display='block';document.getElementById('entityInfo').style.display='none';}
 
 /* ════ 메인 send ════ */
 async function send(){
-  if(loading) return;
+  if(loading)return;
   const inp=document.getElementById('input');
-  const text=inp.value.trim();if(!text) return;
+  const text=inp.value.trim();if(!text)return;
   inp.value='';autoResize(inp);
   renderMsg('user',text);
 
-  let wikiContext='';
-  const cmd=extractCmd(text);
-  if(cmd&&(cmd.isSummon||cmd.isEquip)){
-    const host=getWikiHost(cmd.series);
+  const summonCmd=extractSummonCmd(text);
+
+  /* ── 소환/장착: 완전 자동 (Gemini 없음) ── */
+  if(summonCmd&&(summonCmd.isSummon||summonCmd.isEquip)){
+    loading=true;document.getElementById('sendBtn').disabled=true;
+    const host=getWikiHost(summonCmd.series);
     if(host){
-      showWikiLoading(cmd.warrior, host);
-      const found=await smartSearch(cmd.warrior, cmd.series, host);
+      showWikiLoading(summonCmd.warrior,host);
+      const found=await smartSearch(summonCmd.warrior,summonCmd.series,host);
       removeWikiLoading();
-      renderWikiResult(found, host);
-      if(found) wikiContext=buildWikiContext(found, cmd.warrior);
+      renderWikiResult(found,host);
+      const stats=specsToStats(found?.result?.parsed,summonCmd.series);
+      const output=generateAutoOutput(summonCmd,found,stats);
+      currentManifest={cmd:summonCmd,wikiFound:found,stats,output};
+      renderMsg('auto',output);
+      parseEntity(output);
+    }else{
+      const stats=specsToStats(null,summonCmd.series);
+      const output=generateAutoOutput(summonCmd,null,stats);
+      currentManifest={cmd:summonCmd,wikiFound:null,stats,output};
+      renderMsg('auto',output);
+      parseEntity(output);
     }
+    loading=false;document.getElementById('sendBtn').disabled=false;
+    return;
   }
 
-  messages.push({role:'user',content:text});
-  loading=true;document.getElementById('sendBtn').disabled=true;
-  showLoading();
-  try{
-    const reply=await callGemini(SYSTEM+wikiContext, messages);
-    removeLoading();
-    messages.push({role:'assistant',content:reply});
-    renderMsg('ai',reply);
-  }catch(e){
-    removeLoading();
-    renderMsg('ai',`[오류] ${e.message}`);
+  /* ── 해제: 자동 ── */
+  if(text.trim()==='/해제'){
+    clearEntity();currentManifest=null;
+    renderMsg('auto','강림 해제. 기척 흔적 없음.\n현현 시스템 대기 상태.');
+    return;
   }
-  loading=false;document.getElementById('sendBtn').disabled=false;
+
+  /* ── 연출·전투: Gemini ── */
+  if(isNarrativeCmd(text)||messages.length>0){
+    // 현재 강림체 컨텍스트 주입
+    let ctx=SYSTEM_NARRATIVE;
+    if(currentManifest){
+      ctx+=`\n\n[현재 강림체 BATTLE SHEET]\n${currentManifest.output}`;
+      if(currentManifest.wikiFound?.result?.wt_snippet)
+        ctx+=`\n\n[위키 원문(일부)]\n${currentManifest.wikiFound.result.wt_snippet.slice(0,800)}`;
+    }
+    messages.push({role:'user',content:text});
+    loading=true;document.getElementById('sendBtn').disabled=true;
+    showLoading(text.startsWith('/연출')?'연출 생성 중':'전투 연산 중');
+    try{
+      const reply=await callGemini(ctx,messages,text.startsWith('/연출')?600:2000);
+      removeLoading();
+      messages.push({role:'assistant',content:reply});
+      renderMsg('ai',reply);
+    }catch(e){removeLoading();renderMsg('ai',`[오류] ${e.message}`);}
+    loading=false;document.getElementById('sendBtn').disabled=false;
+    return;
+  }
+
+  // 그 외 명령어 (알 수 없는)
+  renderMsg('auto','【소환】 또는 【장착】 명령으로 강림을 시작하라.\n전투는 /전투 [상대] 로.');
 }
 
-function insertCmd(cmd){
-  const inp=document.getElementById('input');inp.value=cmd;inp.focus();autoResize(inp);
-  const idx=cmd.indexOf(': ]');if(idx>-1)inp.setSelectionRange(idx+2,idx+2);
-}
-function sendCmd(cmd){
-  const inp=document.getElementById('input');inp.value=cmd;
-  if(!cmd.endsWith(' '))setTimeout(()=>send(),50);else inp.focus();
-}
-function clearChat(){
-  if(!confirm('대화를 초기화하시겠습니까?'))return;
-  messages=[{role:'assistant',content:GREETING}];clearEntity();
-  document.getElementById('messages').innerHTML='';renderMsg('ai',GREETING);
-}
+/* ════ 유틸 ════ */
+function autoResize(ta){ta.style.height='auto';ta.style.height=Math.min(ta.scrollHeight,140)+'px';}
+function insertCmd(cmd){const inp=document.getElementById('input');inp.value=cmd;inp.focus();autoResize(inp);const idx=cmd.indexOf(': ]');if(idx>-1)inp.setSelectionRange(idx+2,idx+2);}
+function sendCmd(cmd){const inp=document.getElementById('input');inp.value=cmd;if(!cmd.endsWith(' '))setTimeout(()=>send(),50);else inp.focus();}
+function clearChat(){if(!confirm('초기화?'))return;messages=[];clearEntity();currentManifest=null;document.getElementById('messages').innerHTML='';renderMsg('auto',GREETING);}
+
+window.addEventListener('DOMContentLoaded',()=>{
+  updateKeyStatus();
+  const k=getApiKey();if(k)document.getElementById('apiKeyInput').placeholder='••••••••••• (저장됨)';
+  renderMsg('auto',GREETING);
+  document.getElementById('input').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();}autoResize(e.target);});
+  document.getElementById('input').addEventListener('input',e=>autoResize(e.target));
+  document.getElementById('btnClear').addEventListener('click',clearChat);
+});
 
 </script>
 </body>
