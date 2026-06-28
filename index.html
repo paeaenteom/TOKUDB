@@ -3,207 +3,220 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PAEAENTEOM — 特撮 PORTAL</title>
-<meta name="description" content="토에이 · 츠부라야 특촬 아카이브. 슈퍼전대 · 가면라이더 · 메탈히어로 · 울트라 시리즈 도감.">
+<title>PAEAENTEOM — 特撮 ARCHIVE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Teko:wght@300;400;500;600;700&family=Orbitron:wght@600;700;800;900&family=Share+Tech+Mono&family=Noto+Sans+KR:wght@400;500;700;900&family=Noto+Sans+JP:wght@400;500;700&display=swap');
 :root{
-  --bg-deep:#04050c; --bg:#080a14; --bg-card:#0c0e1a; --bg-card-2:#11141f;
-  --line:#1c2740; --ink:#eef2ff; --ink-dim:#8a93b5; --ink-faint:#4e5878;
-  --cyan:#00eaff; --cyan-d:#00b4d8; --mag:#ff2a6d; --gold:#ffc233;
-  --sentai:#00ff9c; --rider:#b14bff; --metal:#36a3ff; --ultra:#ffc233;
+  --bg:#040609; --bg2:#070a0f; --bg3:#0a0e13;
+  --card:#0d1014; --card2:#0f1318; --line:#191f27; --line2:#252d38;
+  --orange:#87CEFF; --orange-d:#5BAEE0; --amber:#FFB3C8;
+  --blue:#87CEFF; --green:#3ad17a; --magenta:#FFB3C8; --yellow:#f0c020; --cyan:#90E8FF;
+  --txt:#e8ecf2; --txt2:#a4adba; --dim:#6b7682; --mute:#454e5a;
+  --mono:'Share Tech Mono',monospace; --disp:'Rajdhani',sans-serif;
 }
 *{margin:0;padding:0;box-sizing:border-box}
 html{scroll-behavior:smooth}
-body{background:var(--bg-deep);color:var(--ink);font-family:'Noto Sans KR',sans-serif;
-  overflow-x:hidden;line-height:1.6;-webkit-font-smoothing:antialiased}
-.bg{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
-.bg-grad{position:absolute;inset:0;
-  background:
-    radial-gradient(ellipse 80% 60% at 50% -10%, color-mix(in srgb,var(--cyan) 14%,transparent), transparent 60%),
-    radial-gradient(ellipse 60% 50% at 85% 20%, color-mix(in srgb,var(--mag) 9%,transparent), transparent 55%),
-    radial-gradient(ellipse 70% 60% at 10% 80%, color-mix(in srgb,var(--rider) 10%,transparent), transparent 60%),
-    var(--bg-deep)}
-.bg-grid{position:absolute;inset:0;
-  background:linear-gradient(rgba(0,234,255,.05) 1px,transparent 1px),
-             linear-gradient(90deg,rgba(0,234,255,.05) 1px,transparent 1px);
-  background-size:54px 54px;
-  -webkit-mask-image:radial-gradient(ellipse 100% 80% at 50% 0%,#000 20%,transparent 75%);
-  mask-image:radial-gradient(ellipse 100% 80% at 50% 0%,#000 20%,transparent 75%)}
-.orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:.5;animation:float 18s ease-in-out infinite}
-.orb.a{width:420px;height:420px;background:var(--cyan);top:-120px;left:-80px}
-.orb.b{width:360px;height:360px;background:var(--mag);bottom:-100px;right:-60px;animation-delay:-6s}
-.orb.c{width:300px;height:300px;background:var(--rider);top:40%;right:20%;animation-delay:-12s;opacity:.35}
-@keyframes float{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(40px,-30px) scale(1.08)}66%{transform:translate(-30px,20px) scale(.95)}}
+body{background:var(--bg);color:var(--txt);font-family:'Noto Sans KR',sans-serif;min-height:100vh;overflow-x:hidden;position:relative}
+.bg{position:fixed;inset:0;z-index:0;pointer-events:none}
+.bg-grad{background:radial-gradient(1100px 600px at 12% -8%, rgba(135,206,255,.10), transparent 58%),radial-gradient(900px 520px at 92% 4%, rgba(255,179,200,.09), transparent 55%),linear-gradient(180deg,#040609,#05080c 55%,#040609)}
+.bg-grid{background-image:linear-gradient(rgba(37,45,56,.14) 1px,transparent 1px),linear-gradient(90deg,rgba(37,45,56,.14) 1px,transparent 1px);background-size:48px 48px;opacity:.5;mask-image:radial-gradient(ellipse 100% 60% at 50% 0%,#000 35%,transparent 90%)}
+.bg-scan{background:repeating-linear-gradient(0deg,rgba(255,255,255,.015) 0 1px,transparent 1px 3px);opacity:.4}
 .wrap{position:relative;z-index:1;max-width:1180px;margin:0 auto;padding:0 24px}
-.topbar{display:flex;align-items:center;justify-content:space-between;padding:22px 0;position:relative;z-index:5}
-.brand{font-family:'Orbitron',sans-serif;font-weight:800;font-size:20px;letter-spacing:.06em;color:var(--ink);text-decoration:none}
-.brand b{color:var(--cyan)}
-.nav{display:flex;gap:26px;font-size:13px;font-family:'Share Tech Mono',monospace;letter-spacing:.08em}
-.nav a{color:var(--ink-dim);text-decoration:none;transition:.25s}
-.nav a:hover{color:var(--cyan)}
-@media(max-width:620px){.nav{display:none}}
-.hero{min-height:84vh;display:flex;flex-direction:column;justify-content:center;padding:40px 0 70px;position:relative}
-.hero .tag{font-family:'Share Tech Mono',monospace;color:var(--cyan);letter-spacing:.42em;
-  font-size:13px;opacity:.8;margin-bottom:24px;display:flex;align-items:center;gap:14px}
-.hero .tag::before{content:'';width:42px;height:1px;background:var(--cyan);opacity:.6}
-.hero h1{font-family:'Teko',sans-serif;font-weight:600;font-size:clamp(64px,13vw,150px);
-  line-height:.92;letter-spacing:.005em;margin-bottom:8px}
-.hero h1 .jp{display:block;font-family:'Noto Sans JP',sans-serif;font-weight:700;
-  font-size:clamp(26px,5vw,58px);letter-spacing:.04em;
-  background:linear-gradient(110deg,var(--cyan),#7cc4ff 60%,var(--mag));
-  -webkit-background-clip:text;background-clip:text;color:transparent}
-.hero h1 .en{display:block;color:var(--ink)}
-.hero p.sub{max-width:540px;color:var(--ink-dim);font-size:16px;margin:24px 0 40px;line-height:1.7}
-.hero .cta{display:flex;gap:14px;flex-wrap:wrap;align-items:center}
-.btn{display:inline-flex;align-items:center;gap:10px;padding:15px 28px;border-radius:12px;
-  font-weight:700;font-size:15px;text-decoration:none;transition:.3s;border:1px solid transparent}
-.btn.primary{background:linear-gradient(120deg,var(--cyan),var(--cyan-d));color:#04131a;
-  box-shadow:0 12px 36px -12px color-mix(in srgb,var(--cyan) 55%,transparent)}
-.btn.primary:hover{transform:translateY(-3px);box-shadow:0 20px 48px -14px color-mix(in srgb,var(--cyan) 60%,transparent)}
-.btn.ghost{border-color:var(--line);color:var(--ink-dim)}
-.btn.ghost:hover{border-color:color-mix(in srgb,var(--cyan) 40%,var(--line));color:var(--ink)}
-.btn .arr{transition:.3s}.btn:hover .arr{transform:translateX(4px)}
-.stats{display:flex;gap:42px;flex-wrap:wrap;margin-top:54px;padding-top:34px;border-top:1px solid var(--line)}
-.stat .n{font-family:'Orbitron',sans-serif;font-weight:800;font-size:34px;color:var(--ink);line-height:1}
-.stat .n span{color:var(--cyan)}
-.stat .l{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--ink-faint);
-  letter-spacing:.1em;margin-top:6px;text-transform:uppercase}
-.section{padding:80px 0}
-.sec-head{margin-bottom:38px}
-.sec-head .k{font-family:'Share Tech Mono',monospace;color:var(--cyan);letter-spacing:.3em;font-size:12px;opacity:.75}
-.sec-head h2{font-family:'Teko',sans-serif;font-weight:600;font-size:clamp(36px,6vw,56px);line-height:1.05;margin-top:8px}
-.sec-head p{color:var(--ink-dim);margin-top:10px;max-width:560px}
-.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px}
-a.entry{position:relative;display:block;padding:30px 28px 26px;border-radius:20px;
-  border:1px solid var(--line);background:linear-gradient(160deg,var(--bg-card),var(--bg-deep));
-  text-decoration:none;color:var(--ink);overflow:hidden;
-  box-shadow:0 4px 24px -14px rgba(0,0,0,.5);transition:.34s cubic-bezier(.16,1,.3,1)}
-a.entry::after{content:'';position:absolute;left:0;right:0;bottom:0;height:3px;
-  background:linear-gradient(90deg,transparent,var(--ac),transparent);opacity:.6;transition:.34s}
-a.entry:hover{transform:translateY(-6px);border-color:color-mix(in srgb,var(--ac) 35%,var(--line));
-  box-shadow:0 26px 56px -22px rgba(0,0,0,.6)}
-a.entry:hover::after{height:5px;opacity:1}
-a.entry .ic{width:48px;height:48px;border-radius:12px;display:grid;place-items:center;
-  font-size:24px;margin-bottom:20px;background:color-mix(in srgb,var(--ac) 14%,var(--bg-card-2));
-  border:1px solid color-mix(in srgb,var(--ac) 24%,transparent)}
-a.entry .t{font-family:'Teko',sans-serif;font-weight:600;font-size:30px;line-height:1.05}
-a.entry .jp{font-family:'Noto Sans JP',sans-serif;font-size:12px;color:var(--ac);margin-top:2px;font-weight:500}
-a.entry .d{font-size:13px;color:var(--ink-dim);margin-top:12px;line-height:1.55}
-a.entry .go{font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--ink-faint);
-  letter-spacing:.06em;margin-top:18px;display:flex;align-items:center;gap:8px}
-a.entry:hover .go{color:var(--ac)}
-a.entry .go .arr{transition:.3s}a.entry:hover .go .arr{transform:translateX(4px)}
-a.entry.soon{cursor:default;opacity:.6}
-a.entry.soon:hover{transform:none;border-color:var(--line);box-shadow:0 4px 24px -14px rgba(0,0,0,.5)}
-a.entry.soon .badge{position:absolute;top:22px;right:22px;font-family:'Share Tech Mono',monospace;
-  font-size:9px;letter-spacing:.1em;color:var(--ink-faint);border:1px solid var(--line);
-  padding:3px 8px;border-radius:6px}
-.chips{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px}
-.chip{font-family:'Share Tech Mono',monospace;font-size:12px;letter-spacing:.04em;
-  padding:8px 15px;border-radius:9px;border:1px solid var(--line);color:var(--ink-dim);
-  background:var(--bg-card);transition:.25s;text-decoration:none}
-.chip:hover{border-color:color-mix(in srgb,var(--cc) 40%,var(--line));color:var(--ink);
-  box-shadow:0 0 0 1px color-mix(in srgb,var(--cc) 16%,transparent)}
-.chip b{color:var(--cc)}
-footer{border-top:1px solid var(--line);padding:36px 0 50px;margin-top:40px;position:relative;z-index:1}
-.foot{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px}
-.foot .c{font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--ink-faint);letter-spacing:.05em}
-.foot .links{display:flex;gap:20px;font-size:13px}
-.foot .links a{color:var(--ink-dim);text-decoration:none;transition:.25s}
-.foot .links a:hover{color:var(--cyan)}
-.reveal{opacity:0;transform:translateY(24px);animation:rise .9s cubic-bezier(.16,1,.3,1) forwards}
-@keyframes rise{to{opacity:1;transform:none}}
-.d1{animation-delay:.05s}.d2{animation-delay:.15s}.d3{animation-delay:.28s}.d4{animation-delay:.42s}.d5{animation-delay:.56s}
+.nav{position:sticky;top:0;z-index:30;background:linear-gradient(180deg,rgba(4,6,9,.96),rgba(4,6,9,.82));backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.nav-in{max-width:1180px;margin:0 auto;padding:0 24px;height:58px;display:flex;align-items:center;gap:30px}
+.logo{font-family:var(--disp);font-weight:700;font-size:24px;letter-spacing:3px;color:var(--txt);text-decoration:none;white-space:nowrap}
+.logo b{color:var(--orange)}
+.logo .jp{font-family:'Noto Sans KR';font-weight:900;font-size:14px;color:var(--dim);letter-spacing:1px;margin-left:8px}
+.nav-menu{display:flex;gap:26px;flex:1}
+.nav-menu a{font-family:var(--mono);font-size:12px;letter-spacing:1.5px;color:var(--txt2);text-decoration:none;padding:6px 0;position:relative;transition:.2s;text-transform:uppercase}
+.nav-menu a::after{content:"";position:absolute;left:0;right:100%;bottom:-2px;height:2px;background:var(--orange);transition:.25s}
+.nav-menu a:hover{color:var(--txt)}
+.nav-menu a:hover::after,.nav-menu a.on::after{right:0}
+.nav-menu a.on{color:var(--orange)}
+.nav-stat{display:flex;gap:14px;align-items:center}
+.stat-chip{font-family:var(--mono);font-size:11px;letter-spacing:1px;padding:5px 11px;border:1px solid var(--line2);border-radius:3px;color:var(--txt2);background:rgba(15,19,24,.7)}
+.stat-chip b{color:var(--amber)}
+.rec{display:flex;align-items:center;gap:7px;font-family:var(--mono);font-size:11px;letter-spacing:1px;color:var(--green)}
+.rec .dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:blink 1.4s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+@media(max-width:820px){.nav-menu{display:none}.nav-stat .stat-chip:nth-child(n+2){display:none}}
+.sec-h{display:flex;align-items:center;gap:14px;margin:38px 0 18px}
+.sec-h .t{font-family:var(--disp);font-weight:600;font-size:15px;letter-spacing:3px;color:var(--txt);text-transform:uppercase;white-space:nowrap}
+.sec-h .t .ac{color:var(--orange)}
+.sec-h .line{flex:1;height:1px;background:linear-gradient(90deg,var(--orange-d),transparent)}
+.sec-h .jp{font-family:var(--mono);font-size:11px;color:var(--mute);letter-spacing:2px}
+.hero{margin-top:30px}
+.carousel{position:relative;border:1px solid var(--line);border-radius:6px;overflow:hidden;background:linear-gradient(135deg,#0d1116,#0a0d12 60%,#0c0f14);min-height:230px}
+.carousel::before{content:"";position:absolute;inset:0;background:radial-gradient(600px 300px at 88% 120%, rgba(135,206,255,.12), transparent 60%);pointer-events:none}
+.slide{position:absolute;inset:0;padding:26px 30px;display:flex;flex-direction:column;opacity:0;transform:translateY(8px);transition:.5s;pointer-events:none}
+.slide.on{opacity:1;transform:none;pointer-events:auto;position:relative}
+.slide-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.badge{font-family:var(--mono);font-size:11px;letter-spacing:1.5px;color:var(--orange);border:1px solid var(--orange-d);border-radius:3px;padding:4px 10px;background:rgba(135,206,255,.08);white-space:nowrap}
+.slide .meta-r{font-family:var(--mono);font-size:11px;color:var(--dim);letter-spacing:1px;text-align:right}
+.slide h2{font-family:'Noto Sans KR';font-weight:900;font-size:30px;line-height:1.15;margin:14px 0 4px;color:var(--txt)}
+.slide .jp-title{font-family:var(--mono);font-size:13px;color:var(--txt2);letter-spacing:.5px}
+.slide .desc{color:var(--txt2);font-size:14px;line-height:1.65;margin-top:12px;max-width:640px}
+.slide-bot{margin-top:auto;display:flex;justify-content:space-between;align-items:flex-end;padding-top:18px}
+.slide .stat{font-family:var(--mono);font-size:15px;letter-spacing:1px;color:var(--amber);font-weight:bold}
+.slide .stat .lb{color:var(--dim);font-size:11px}
+.slide .prog{width:160px;height:3px;background:var(--line2);border-radius:2px;overflow:hidden}
+.slide .prog i{display:block;height:100%;background:linear-gradient(90deg,var(--orange),var(--amber));width:0;transition:width .3s}
+.dots{display:flex;gap:7px;justify-content:center;margin-top:14px}
+.dots b{width:7px;height:7px;border-radius:50%;background:var(--line2);cursor:pointer;transition:.2s}
+.dots b.on{background:var(--orange);width:20px;border-radius:4px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px}
+.entry{position:relative;display:flex;flex-direction:column;align-items:center;gap:10px;padding:22px 14px;background:var(--card);border:1px solid var(--line);border-radius:5px;text-decoration:none;color:var(--txt);transition:.2s;overflow:hidden}
+.entry::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent,rgba(0,0,0,.2));opacity:0;transition:.2s}
+.entry:hover{transform:translateY(-3px);border-color:var(--ac,var(--orange));box-shadow:0 12px 30px -16px var(--ac,var(--orange))}
+.entry:hover::before{opacity:1}
+.entry .ic{width:34px;height:34px;display:flex;align-items:center;justify-content:center;color:var(--ac,var(--orange))}
+.entry .ic svg{width:30px;height:30px;stroke:currentColor;fill:none;stroke-width:1.6}
+.entry .nm{font-family:'Noto Sans KR';font-weight:700;font-size:14px;letter-spacing:.5px;text-align:center}
+.entry .en{font-family:var(--mono);font-size:9px;letter-spacing:1px;color:var(--mute);text-transform:uppercase}
+.entry .soon{position:absolute;top:8px;right:8px;font-family:var(--mono);font-size:8px;letter-spacing:1px;color:var(--dim);border:1px solid var(--line2);border-radius:2px;padding:2px 5px}
+.entry.dis{opacity:.55;cursor:default}
+.entry.dis:hover{transform:none;border-color:var(--line);box-shadow:none}
+.broadcast{border:1px solid var(--line);border-left:2px solid var(--orange);border-radius:5px;background:linear-gradient(180deg,rgba(13,16,20,.9),rgba(10,13,17,.7));padding:18px 22px}
+.broadcast .bh{font-family:var(--mono);font-size:11px;letter-spacing:1.5px;color:var(--dim);margin-bottom:12px}
+.broadcast .bh b{color:var(--orange)}
+.broadcast ul{list-style:none;display:flex;flex-direction:column;gap:8px}
+.broadcast li{font-family:'Noto Sans KR';font-size:13.5px;color:var(--txt2);line-height:1.5;padding-left:18px;position:relative}
+.broadcast li::before{content:"›";position:absolute;left:2px;color:var(--orange);font-family:var(--mono)}
+.broadcast li b{color:var(--amber)}
+.broadcast li.warn::before{content:"⚠";font-size:11px;left:0}
+.broadcast li.warn{color:var(--txt)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.stat-box{border:1px solid var(--line);border-radius:5px;background:var(--card);padding:20px 16px;text-align:center;position:relative;overflow:hidden}
+.stat-box::after{content:"";position:absolute;left:0;bottom:0;width:100%;height:2px;background:linear-gradient(90deg,transparent,var(--cl,var(--orange)),transparent);opacity:.6}
+.stat-box .num{font-family:var(--disp);font-weight:700;font-size:38px;line-height:1;color:var(--cl,var(--orange))}
+.stat-box .lb{font-family:var(--mono);font-size:10px;letter-spacing:2px;color:var(--dim);margin-top:8px;text-transform:uppercase}
+@media(max-width:620px){.stats{grid-template-columns:repeat(2,1fr)}}
+.ext{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
+.ext-card{border:1px solid var(--line);border-radius:5px;overflow:hidden;background:var(--card);text-decoration:none;color:var(--txt);transition:.2s}
+.ext-card:hover{border-color:var(--cyan);transform:translateY(-2px)}
+.ext-card .top{height:96px;display:flex;align-items:center;justify-content:center;position:relative;background:linear-gradient(135deg,#0e1218,#0a0d12)}
+.ext-card .top .tag{position:absolute;top:8px;right:8px;font-family:var(--mono);font-size:9px;letter-spacing:1px;color:var(--cyan);border:1px solid rgba(38,198,218,.4);border-radius:2px;padding:2px 6px;background:rgba(38,198,218,.06)}
+.ext-card .top svg{width:38px;height:38px;stroke:var(--txt2);fill:none;stroke-width:1.4}
+.ext-card .bd{padding:13px 15px}
+.ext-card .bd .t{font-family:'Noto Sans KR';font-weight:700;font-size:14px}
+.ext-card .bd .d{font-family:var(--mono);font-size:10px;color:var(--mute);letter-spacing:1px;margin-top:3px}
+footer{margin:50px 0 0;padding:24px 0 40px;border-top:1px solid var(--line);text-align:center}
+footer .f1{font-family:var(--mono);font-size:11px;letter-spacing:2px;color:var(--mute)}
+footer .f1 b{color:var(--dim)}
+@media(max-width:560px){.slide h2{font-size:24px}.slide{padding:20px}}
 </style>
 </head>
 <body>
-<div class="bg">
-  <div class="bg-grad"></div>
-  <div class="bg-grid"></div>
-  <div class="orb a"></div><div class="orb b"></div><div class="orb c"></div>
-</div>
+<div class="bg bg-grad"></div>
+<div class="bg bg-grid"></div>
+<div class="bg bg-scan"></div>
+
+<nav class="nav"><div class="nav-in">
+  <a href="/" class="logo">PAEAEN<b>TEOM</b><span class="jp">特撮</span></a>
+  <div class="nav-menu">
+    <a href="#hero" class="on">SPOTLIGHT</a>
+    <a href="/DB/">ARCHIVE</a>
+    <a href="#entries">CORNERS</a>
+    <a href="/sim">SIM</a>
+    <a href="#broadcast">UPDATE</a>
+    <a href="#stats">STATS</a>
+  </div>
+  <div class="nav-stat">
+    <span class="stat-chip">作品 <b>160</b></span>
+    <span class="stat-chip">STUDIO <b>02</b></span>
+    <span class="rec"><span class="dot"></span>ONLINE</span>
+  </div>
+</div></nav>
+
 <div class="wrap">
-  <div class="topbar reveal d1">
-    <a href="/" class="brand">PAEAEN<b>TEOM</b></a>
-    <nav class="nav">
-      <a href="/DB/">ARCHIVE</a>
-      <a href="#series">SERIES</a>
-      <a href="#about">ABOUT</a>
-    </nav>
-  </div>
-  <section class="hero">
-    <div class="tag reveal d1">特撮 DATABASE PORTAL</div>
-    <h1>
-      <span class="jp reveal d2">特撮アーカイブ</span>
-      <span class="en reveal d3">TOKUSATSU<br>ARCHIVE</span>
-    </h1>
-    <p class="sub reveal d4">토에이 · 츠부라야의 특촬 세계를 한곳에. 슈퍼전대 · 가면라이더 · 메탈히어로 · 울트라 시리즈의 영웅 · 괴수 · 메카 · 무장을 도감으로 탐색하세요.</p>
-    <div class="cta reveal d4">
-      <a href="/DB/" class="btn primary">도감 들어가기 <span class="arr">&rarr;</span></a>
-      <a href="#series" class="btn ghost">시리즈 둘러보기</a>
-    </div>
-    <div class="stats reveal d5">
-      <div class="stat"><div class="n"><span>160</span>+</div><div class="l">Works</div></div>
-      <div class="stat"><div class="n">9</div><div class="l">Series</div></div>
-      <div class="stat"><div class="n"><span>2</span></div><div class="l">Studios</div></div>
-      <div class="stat"><div class="n">1957&ndash;</div><div class="l">Years</div></div>
-    </div>
+  <section class="hero" id="hero">
+    <div class="sec-h"><span class="t">아카이브 <span class="ac">스포트라이트</span></span><span class="line"></span><span class="jp">// ARCHIVE SPOTLIGHT</span></div>
+    <div class="carousel" id="carousel"></div>
+    <div class="dots" id="dots"></div>
   </section>
-  <section class="section" id="series">
-    <div class="sec-head">
-      <div class="k">// EXPLORE</div>
-      <h2>아카이브 둘러보기</h2>
-      <p>지금은 도감이 메인 콘텐츠입니다. 더 많은 코너가 순차적으로 열립니다.</p>
-    </div>
-    <div class="cards">
-      <a href="/DB/" class="entry" style="--ac:var(--cyan)">
-        <div class="ic">&#128214;</div>
-        <div class="t">特撮 ARCHIVE</div>
-        <div class="jp">特撮アーカイブ</div>
-        <div class="d">토에이 · 츠부라야 전 작품 도감. 영웅 · 괴수 · 메카 · 무장 · 조직을 작품별로 탐색.</div>
-        <div class="go">ENTER <span class="arr">&rarr;</span></div>
+
+  <section id="entries">
+    <div class="sec-h"><span class="t">코너 <span class="ac">진입</span></span><span class="line"></span><span class="jp">// SELECT CORNER</span></div>
+    <div class="grid">
+      <a class="entry" style="--ac:var(--orange)" href="/DB/">
+        <span class="ic"><svg viewBox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v14l-8-4-8 4z"/></svg></span>
+        <span class="nm">DEX</span><span class="en">Database</span>
       </a>
-      <a class="entry soon" style="--ac:var(--rider)">
-        <div class="badge">SOON</div>
-        <div class="ic">&#127916;</div>
-        <div class="t">TIMELINE</div>
-        <div class="jp">放送年表</div>
-        <div class="d">연도별 방영 타임라인. 시대순으로 특촬의 흐름을 한눈에.</div>
-        <div class="go">준비 중</div>
+      <a class="entry" style="--ac:var(--magenta)" href="/rpgedit">
+        <span class="ic"><svg viewBox="0 0 24 24"><path d="M14 2l6 6-9 9-6 1 1-6z"/><path d="M12 8l4 4"/></svg></span>
+        <span class="nm">RPG 세이브 에디터</span><span class="en">RPG Editor</span>
       </a>
-      <a href="/rpgedit" class="entry" style="--ac:var(--ultra)">
-        <div class="ic">&#128736;</div>
-        <div class="t">RPG SAVE EDITOR</div>
-        <div class="jp">セーブエディター</div>
-        <div class="d">RPG Maker · JSON 세이브 파일 편집기. 골드 · 레벨 · 진행도 등 모든 값을 직접 수정.</div>
-        <div class="go">ENTER <span class="arr">&rarr;</span></div>
+      <a class="entry" style="--ac:var(--amber)" href="/sim">
+        <span class="ic"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg></span>
+        <span class="nm">현현 시뮬레이터</span><span class="en">Manifest SIM</span>
+      </a>
+      <a class="entry dis" style="--ac:var(--yellow)">
+        <span class="soon">SOON</span>
+        <span class="ic"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/><circle cx="20" cy="18" r="1.5"/></svg></span>
+        <span class="nm">방영 타임라인</span><span class="en">Timeline</span>
       </a>
     </div>
   </section>
-  <section class="section" id="about" style="padding-top:20px">
-    <div class="sec-head">
-      <div class="k">// SERIES</div>
-      <h2>수록 시리즈</h2>
-    </div>
-    <div class="chips">
-      <a class="chip" href="/DB/" style="--cc:var(--sentai)"><b>&#9679;</b> 슈퍼전대</a>
-      <a class="chip" href="/DB/" style="--cc:var(--rider)"><b>&#9679;</b> 가면라이더</a>
-      <a class="chip" href="/DB/" style="--cc:var(--metal)"><b>&#9679;</b> 메탈히어로</a>
-      <a class="chip" href="/DB/" style="--cc:var(--ultra)"><b>&#9679;</b> 울트라 시리즈</a>
-      <a class="chip" href="/DB/" style="--cc:var(--cyan)"><b>&#9679;</b> 그리드맨</a>
-      <a class="chip" href="/DB/" style="--cc:var(--mag)"><b>&#9679;</b> 이시노모리</a>
+
+  <section id="broadcast">
+    <div class="sec-h"><span class="t">시스템 <span class="ac">공지</span></span><span class="line"></span><span class="jp">// BROADCAST</span></div>
+    <div class="broadcast">
+      <div class="bh">// <b>ARCHIVE NETWORK BROADCAST</b> // 2026.06 // 우선순위: 일반</div>
+      <ul>
+        <li>도감에 <b>URL 라우팅</b> 적용 — 작품별 주소(<b>/DB/시리즈/작품/</b>)로 바로 진입·공유 가능.</li>
+        <li><b>RPG 세이브 에디터</b> 가동 — RPG Maker MV/MZ/XP/VX/VXAce · 한글 인코딩 지원.</li>
+        <li class="warn">현재 메인 콘텐츠는 <b>도감 아카이브</b>입니다. 타임라인·용어 코너는 순차 개방.</li>
+      </ul>
     </div>
   </section>
+
+  <section id="stats">
+    <div class="sec-h"><span class="t">데이터 <span class="ac">현황</span></span><span class="line"></span><span class="jp">// DATABASE STATUS</span></div>
+    <div class="stats">
+      <div class="stat-box" style="--cl:var(--orange)"><div class="num" data-to="160">0</div><div class="lb">Works</div></div>
+      <div class="stat-box" style="--cl:var(--blue)"><div class="num" data-to="16">0</div><div class="lb">Series</div></div>
+      <div class="stat-box" style="--cl:var(--green)"><div class="num" data-to="2">0</div><div class="lb">Studios</div></div>
+      <div class="stat-box" style="--cl:var(--amber)"><div class="num" data-to="60">0</div><div class="lb">Years</div></div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="f1">© 2026 <b>PAEAENTEOM</b> 特撮 ARCHIVE · TOKUSATSU DATABASE · ALL ENTRIES LOGGED</div>
+  </footer>
 </div>
-<footer>
-  <div class="wrap foot">
-    <div class="c">&copy; 2026 PAEAENTEOM.COM &mdash; 비영리 팬 아카이브</div>
-    <div class="links">
-      <a href="/DB/">Archive</a>
-      <a href="https://github.com/paeaenteom" target="_blank" rel="noopener">GitHub</a>
-    </div>
-  </div>
-</footer>
+
+<script>
+var SLIDES=[
+  {tag:"★ ULTRA", studio:"円谷プロ / 츠부라야", ko:"울트라맨", jp:"ウルトラマン", year:"1966", desc:"빛의 거인이 지구에 강림한다. 특촬 거대 히어로의 원점이자, 모든 울트라 시리즈의 시작점.", stat:"ENTRIES", val:"58", cl:"var(--orange)"},
+  {tag:"★ RIDER", studio:"東映 / 토에이", ko:"가면라이더", jp:"仮面ライダー", year:"1971", desc:"개조인간이 악의 조직 쇼커에 맞선다. 변신 히어로의 전설이 여기서 출발했다.", stat:"YEAR", val:"1971", cl:"var(--green)"},
+  {tag:"★ SENTAI", studio:"東映 / 토에이", ko:"비밀전대 고레인저", jp:"秘密戦隊ゴレンジャー", year:"1975", desc:"다섯 색의 전사들이 모였다. 슈퍼전대 시리즈 50년 역사의 첫 페이지.", stat:"SERIES", val:"#01", cl:"var(--magenta)"},
+  {tag:"★ ULTRA Q", studio:"円谷プロ / 츠부라야", ko:"울트라Q", jp:"ウルトラQ", year:"1966", desc:"괴수와 미스터리의 흑백 SF 앤솔로지. 울트라 세계관의 토대를 놓은 전설적 시리즈.", stat:"ENTRIES", val:"34", cl:"var(--cyan)"}
+];
+var idx=0, timer=null, DUR=5000;
+var carousel=document.getElementById('carousel'), dotsBox=document.getElementById('dots');
+SLIDES.forEach(function(s,i){
+  var el=document.createElement('div');
+  el.className='slide'+(i===0?' on':'');
+  el.innerHTML='<div class="slide-top"><span class="badge">'+s.tag+'</span><span class="meta-r">의뢰 스튜디오<br>'+s.studio+'</span></div><h2>'+s.ko+'</h2><div class="jp-title">'+s.jp+' · '+s.year+'</div><div class="desc">'+s.desc+'</div><div class="slide-bot"><div class="stat"><span class="lb">'+s.stat+': </span>'+s.val+'</div><div class="prog"><i style="background:linear-gradient(90deg,'+s.cl+',var(--amber))"></i></div></div>';
+  carousel.appendChild(el);
+  var d=document.createElement('b');d.className=(i===0?'on':'');d.onclick=function(){go(i)};
+  dotsBox.appendChild(d);
+});
+var slides=carousel.querySelectorAll('.slide'), dots=dotsBox.querySelectorAll('b');
+function setProg(){var p=slides[idx].querySelector('.prog i');p.style.transition='none';p.style.width='0';void p.offsetWidth;p.style.transition='width '+DUR+'ms linear';p.style.width='100%';}
+function go(n){slides[idx].classList.remove('on');dots[idx].classList.remove('on');idx=(n+SLIDES.length)%SLIDES.length;slides[idx].classList.add('on');dots[idx].classList.add('on');setProg();restart();}
+function next(){go(idx+1)}
+function restart(){clearInterval(timer);timer=setInterval(next,DUR)}
+setProg();restart();
+function animateStats(){document.querySelectorAll('.num').forEach(function(el){var to=+el.dataset.to,cur=0,step=Math.max(1,Math.ceil(to/40));var t=setInterval(function(){cur+=step;if(cur>=to){cur=to;clearInterval(t)}el.textContent=cur;},28);});}
+var done=false;
+var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting&&!done){done=true;animateStats()}})},{threshold:.4});
+io.observe(document.getElementById('stats'));
+var navLinks=document.querySelectorAll('.nav-menu a[href^="#"]');
+var secs=[].map.call(navLinks,function(a){return document.querySelector(a.getAttribute('href'))});
+window.addEventListener('scroll',function(){var y=window.scrollY+120,act=-1;secs.forEach(function(s,i){if(s&&s.offsetTop<=y)act=i});navLinks.forEach(function(a,i){a.classList.toggle('on',i===act)});});
+</script>
 </body>
 </html>

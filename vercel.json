@@ -1,6 +1,13 @@
 {
   "cleanUrls": true,
   "rewrites": [
-    { "source": "/DB/:path*", "destination": "/DB/index.html" }
+    {
+      "source": "/DB/:path*",
+      "destination": "/DB/index.html"
+    },
+    {
+      "source": "/sim/:path*",
+      "destination": "/sim/index.html"
+    }
   ]
 }
