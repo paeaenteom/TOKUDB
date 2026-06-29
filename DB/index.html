@@ -67,12 +67,33 @@ button{font-family:inherit}
 .hd{text-align:center;padding:54px 0 8px}
 .hd .eye{font-family:var(--mono);font-size:12px;letter-spacing:.5em;color:var(--faint);text-transform:uppercase}
 .hd h1{font-family:var(--disp);font-weight:700;font-size:clamp(46px,8vw,86px);line-height:1;margin-top:14px;background:linear-gradient(115deg,#fff,#d4dafc 42%,#8b93b5);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
-.hd h1 .jp{display:block;font-family:var(--jp);font-weight:700;font-size:.22em;line-height:1;letter-spacing:.34em;-webkit-text-fill-color:var(--dim);color:var(--dim);margin-bottom:.5em}
+.hd h1 .jp{display:block;font-family:var(--jp);font-weight:700;font-size:.2em;line-height:1;letter-spacing:.34em;-webkit-text-fill-color:var(--dim);color:var(--dim);margin-bottom:1.1em}
 .hd .lead{margin-top:14px;color:var(--dim);font-size:14px;line-height:1.6;max-width:560px;margin-left:auto;margin-right:auto}
 .hd .stats{margin-top:20px;display:inline-flex;border:1px solid var(--line2);border-radius:999px;overflow:hidden;background:var(--panel)}
 .hd .stats div{padding:8px 20px;font-size:12.5px;color:var(--dim);border-right:1px solid var(--line)}
 .hd .stats div:last-child{border-right:none}
 .hd .stats b{font-family:var(--mono);font-size:15px;color:var(--ink);margin-right:5px}
+
+/* ===== 업데이트 스포트라이트 ===== */
+.wrap-spot{margin:34px 0 4px}
+.wrap-spot:empty{display:none}
+.spot{--c:var(--acc);position:relative;border:1px solid var(--line2);border-radius:16px;overflow:hidden;
+  background:linear-gradient(150deg,color-mix(in srgb,var(--c) 11%,var(--panel)),var(--bg) 125%);padding:22px 26px 24px}
+.spot-h{display:flex;align-items:center;gap:14px;font-family:var(--mono);font-size:11.5px;letter-spacing:.28em;color:var(--dim);margin-bottom:18px}
+.spot-h .ln{flex:1;height:1px;background:linear-gradient(90deg,var(--line2),transparent)}
+.spot-h .tag{color:var(--faint);letter-spacing:.3em}
+.spot-badge{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--c);border:1px solid color-mix(in srgb,var(--c) 45%,transparent);border-radius:7px;padding:5px 11px;background:color-mix(in srgb,var(--c) 10%,transparent)}
+.spot-name{font-family:var(--jp);font-weight:700;font-size:32px;color:var(--ink);margin:12px 0 4px;line-height:1.1}
+.spot-sub{font-family:var(--jp);font-size:13px;color:var(--faint);letter-spacing:.06em}
+.spot-desc{margin-top:12px;color:var(--dim);font-size:14px;line-height:1.6;max-width:640px}
+.spot-meta{position:absolute;top:24px;right:26px;text-align:right;font-family:var(--jp);font-size:12px;color:var(--faint);line-height:1.7}
+.spot-foot{display:flex;align-items:center;gap:14px;margin-top:18px}
+.spot-foot .ent{font-family:var(--mono);font-size:11.5px;letter-spacing:.18em;color:var(--dim)}
+.spot-foot .ent b{color:var(--c);font-size:14px;margin-left:6px}
+.spot-foot .bar{flex:1;max-width:240px;height:4px;border-radius:3px;background:var(--line);overflow:hidden;margin-left:auto}
+.spot-foot .bar i{display:block;height:100%;width:60%;background:linear-gradient(90deg,var(--cyan),var(--pink))}
+.spot{cursor:pointer;transition:.18s}
+.spot:hover{border-color:color-mix(in srgb,var(--c) 50%,transparent)}
 
 /* ===== 그룹/시리즈 (홈) ===== */
 .group{padding:30px 0 8px}
@@ -279,6 +300,7 @@ button{font-family:inherit}
       <p class="lead">토에이 · 츠부라야 특촬 영웅을 시리즈별로 소환·열람하는 아카이브. 그룹을 골라 시대 → 작품 → 영웅·괴수·무장·장비·폼 순으로 파고드세요.</p>
       <div class="stats" id="home-stats"></div>
     </header>
+    <div class="wrap-spot" id="spotlight"></div>
     <div id="groups"></div>
   </div>
   <div class="foot">特撮DEX · 데이터 구조: GROUP → SERIES → 시대 → 작품 → <b>영웅 / 괴수 / 무장 / 장비 / 폼 / 정보</b></div>
@@ -556,6 +578,7 @@ function renderHome(){
   const st=totalStats();
   document.getElementById('home-stats').innerHTML=
     `<div><b>${st.series}</b>시리즈</div><div><b>${st.works}</b>작품</div><div><b>${st.heroes}</b>영웅</div><div><b>${st.kaiju}</b>괴수</div>`;
+  renderSpotlight();
   const root=document.getElementById('groups');
   root.innerHTML=Object.values(DATA).map(g=>{
     const keys=Object.keys(g.series);
@@ -584,7 +607,38 @@ function renderHome(){
   requestAnimationFrame(()=>document.querySelectorAll('.series-grid').forEach(el=>el.classList.add('in')));
 }
 
-/* ===== 시리즈 뷰 ===== */
+/* ===== 업데이트 스포트라이트: 데이터(작품) 있을 때만 표시 ===== */
+function renderSpotlight(){
+  const box=document.getElementById('spotlight');
+  if(!box)return;
+  // 작품이 들어있는 시리즈만 후보로
+  const cands=[];
+  for(const g of Object.values(DATA))for(const k in g.series){
+    const s=g.series[k];
+    const works=[];s.eras.forEach(e=>e.works.forEach(w=>{if(!w._todo)works.push(w);}));
+    if(works.length)cands.push({k,s,g,works});
+  }
+  if(!cands.length){box.innerHTML='';return;}   // 데이터 없으면 아무것도 안 나옴
+  // 가장 최근 작품(year 큰 값) 보유 시리즈를 스포트라이트로
+  cands.forEach(c=>{c.latest=Math.max(...c.works.map(w=>parseInt(w.year)||0));});
+  cands.sort((a,b)=>b.latest-a.latest);
+  const {k,s,g,works}=cands[0];
+  const lead=works.slice().sort((a,b)=>(parseInt(b.year)||0)-(parseInt(a.year)||0))[0];
+  const entries=s.eras.reduce((a,e)=>a+e.works.filter(w=>!w._todo).reduce((x,w)=>x+1+(w.members||[]).length+(w.kaiju||[]).length,0),0);
+  box.innerHTML=`
+    <div class="spot" style="--c:var(--${s.c})" onclick="showSeries('${k}')">
+      <div class="spot-h"><span class="tag">// UPDATE</span><span class="ln"></span></div>
+      <div class="spot-meta">${esc(g.jp)} ${esc(g.ko)}<br>${esc(s.jp)}</div>
+      <div class="spot-badge">★ ${esc(s.en)}</div>
+      <div class="spot-name">${esc(lead?lead.ko:s.ko)}</div>
+      <div class="spot-sub">${esc(lead?(lead.jp+(lead.year?' · '+lead.year:'')):s.jp)}</div>
+      <div class="spot-desc">${esc(lead&&lead.summary?lead.summary:(s.desc||''))}</div>
+      <div class="spot-foot">
+        <span class="ent">ENTRIES:<b>${entries}</b></span>
+        <span class="bar"><i></i></span>
+      </div>
+    </div>`;
+}
 let curSeriesKey=null, curEra='all';
 function showSeries(key,fromRoute){
   const s=getSeries(key);if(!s)return showHome();
