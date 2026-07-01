@@ -1610,7 +1610,13 @@ function getSeries(key){for(const g of Object.values(DATA))if(g.series&&g.series
 function getSeriesGroup(key){for(const g of Object.values(DATA))if(g.series&&g.series[key])return g;return null;}
 function seriesTotal(s){return s.eras.reduce((a,e)=>a+e.works.filter(w=>!w._todo).length,0);}
 function esc(s){return String(s==null?'':s);}
-function iu(p){return String(p==null?'':p).split('/').map(encodeURIComponent).join('/');}
+function iu(p){
+  const s=String(p==null?'':p);
+  if(!s)return s;
+  if(/^https?:\/\//i.test(s)||s.startsWith('data:')||s.startsWith('//'))return s;
+  const enc=s.split('/').map(seg=>seg?encodeURIComponent(seg):seg).join('/');
+  return s.startsWith('/')?enc:dbBase()+enc;
+}
 
 /* 별 배경 */
 (function(){let h='';for(let i=0;i<64;i++)h+=`<i style="left:${Math.random()*100}%;top:${Math.random()*100}%;animation-delay:${Math.random()*4}s"></i>`;document.getElementById('stars').innerHTML=h;})();
