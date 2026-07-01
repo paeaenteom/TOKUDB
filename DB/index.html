@@ -156,6 +156,9 @@ button{font-family:inherit}
 .rcard .thumb{position:relative;aspect-ratio:3/4;overflow:hidden;background:linear-gradient(155deg,color-mix(in srgb,var(--c) 22%,var(--panel2)),var(--bg) 120%);display:grid;place-items:center}
 .rcard .thumb img{width:100%;height:100%;object-fit:cover;transition:transform .4s}
 .rcard:hover .thumb img{transform:scale(1.05)}
+/* 슈트(전신) 사진 전용 썸네일: 잘리지 않고 전신이 다 보이도록 세로 비율+contain */
+.rcard .thumb.hero-thumb{aspect-ratio:2/5}
+.rcard .thumb.hero-thumb img{object-fit:contain}
 .rcard .thumb .ph{font-family:var(--disp);font-weight:700;font-size:48px;color:color-mix(in srgb,var(--c) 60%,var(--faint))}
 .rcard .thumb::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(0,0,0,.07) 0 1px,transparent 1px 3px);opacity:.5;pointer-events:none}
 .rcard .crail{position:absolute;left:0;top:0;bottom:0;width:5px;background:linear-gradient(180deg,var(--c),transparent 85%);z-index:2}
@@ -234,7 +237,7 @@ button{font-family:inherit}
 .modal .x{position:absolute;top:13px;right:13px;z-index:6;width:34px;height:34px;border-radius:50%;border:none;cursor:pointer;background:rgba(6,8,15,.6);color:#fff;font-size:19px;display:grid;place-items:center;transition:.18s}
 .modal .x:hover{background:var(--pink-d)}
 .m-hero{position:relative;overflow:hidden;background:linear-gradient(150deg,color-mix(in srgb,var(--c) 30%,var(--panel2)),var(--bg) 125%);display:grid;place-items:center;min-height:230px;border-radius:16px 16px 0 0}
-.m-hero img{width:100%;display:block;max-height:420px;object-fit:cover}
+.m-hero img{width:100%;display:block;max-height:520px;object-fit:contain}
 .m-hero .ph{font-family:var(--disp);font-weight:700;font-size:84px;color:color-mix(in srgb,var(--c) 55%,var(--faint))}
 .m-hero .crail{position:absolute;left:0;top:0;bottom:0;width:6px;z-index:3}
 .m-hero.entity{min-height:210px}
@@ -473,6 +476,7 @@ const DATA = {
                     "jp": "2代目キレンジャー",
                     "sub": "쿠마노 다이고로 (熊野大五郎)",
                     "color": "#F4C518",
+                    "formHidden": true,
                     "desc": "제55~67화 등장한 2대 키레인저. 초대 오오이와 다이타가 규슈지부 교관으로 일시 이탈하며 이글 고레인저 예비대원 중 선발되었다. 초대와 달리 단것을 좋아하는 미식가. 제67화에서 칸키리가면의 칸키리 카터에 복부를 찔려 전사 — 슈퍼전대 시리즈 최초로 순직한 전사로 기록된다. (실제 교체 경위: 초대役 배우 하타케야마 바쿠가 타 드라마 출연과 겹쳐 일시 강판되어 다루마 지로가 2대를 연기했다.)",
                     "item": "키 스티커 (キーステッカー) / YTC 옐로 트랜시버 (イエロートランシーバー)",
                     "mecha": "고레인저 머신(사이드카) · 바리키키-ㄴ",
@@ -1834,8 +1838,9 @@ function entCard(it,click,num,catId){
   const ep=it.ep?`<span class="ep">${esc(it.ep)}</span>`:'';
   const sub=it.sub||it.cat||'';
   const cvar=it.color?` style="--c:${it.color}"`:'';
+  const thumbCls=catId==='heroes'?'thumb hero-thumb':'thumb';
   return `<div class="rcard clk"${cvar} onclick="${click}">
-    <div class="thumb">${rail}${dot}${no}${ep}${thumb}</div>
+    <div class="${thumbCls}">${rail}${dot}${no}${ep}${thumb}</div>
     <div class="meta"><div class="nm">${esc(it.name)}</div>${it.jp?`<div class="jp">${esc(it.jp)}</div>`:''}${sub?`<div class="sub">${esc(sub)}</div>`:''}</div>
   </div>`;
 }
@@ -1845,13 +1850,14 @@ function emptyPane(ic,label){
     <div class="d">이 작품에는 아직 ${label} 데이터가 채워지지 않았습니다.<br>리서치로 채우면 카드가 자동 표시됩니다.</div></div>`;
 }
 
-/* 폼: 영웅별 기본폼 + 변신폼(imgAlt) 집계 */
+/* 폼: 영웅별 기본(슈트) 폼만 집계. imgAlt(변신 전/본명 모습)는 영웅 탭 상세팝업의 은폐 토글로만 노출하고
+   여기서는 더 이상 별도 카드로 만들지 않는다. formHidden 멤버(동일 슈트 재사용하는 2대 키레인저 등)는 제외. */
 function collectForms(w){
   const forms=[];
   (w.members||[]).forEach((h,hi)=>{
     if(h.person)return;
+    if(h.formHidden)return;
     forms.push({hi,name:h.name,jp:h.jp,img:h.img,color:h.color,sub:'기본 폼',kind:'base'});
-    if(h.imgAlt)forms.push({hi,name:`${h.name} · ${h.imgAltLabel||'다른 모습'}`,jp:h.jp,img:h.imgAlt,color:h.color,sub:h.imgAltLabel||'변신/은폐 폼',kind:'alt'});
   });
   return forms;
 }
@@ -1862,7 +1868,7 @@ function paneForms(forms,key,eIdx,wi){
     const rail=f.color?`<span class="crail" style="background:linear-gradient(180deg,${f.color},transparent 85%)"></span>`:`<span class="crail"></span>`;
     const cvar=f.color?` style="--c:${f.color}"`:'';
     return `<div class="rcard clk"${cvar} onclick="openHero('${key}',${eIdx},${wi},${f.hi})">
-      <div class="thumb">${rail}<span class="no">${esc(f.sub)}</span>${thumb}</div>
+      <div class="thumb hero-thumb">${rail}<span class="no">${esc(f.sub)}</span>${thumb}</div>
       <div class="meta"><div class="nm">${esc(f.name)}</div>${f.jp?`<div class="jp">${esc(f.jp)}</div>`:''}</div>
     </div>`;
   }).join('');
