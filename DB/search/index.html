@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>이미지 검색 — 特撮DEX</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Teko:wght@500;600;700&family=Noto+Sans+KR:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#06080f; --bg2:#0a0e1a; --panel:#0e1424; --panel2:#121a2e;
+  --line:#1c2540; --line2:#2a3557; --ink:#eef2ff; --dim:#9aa6c8; --faint:#5b6788;
+  --cyan:#87CEFF; --pink:#FFB3C8; --acc:#87CEFF;
+  --disp:'Teko',sans-serif; --jp:'Noto Sans JP','Noto Sans KR',sans-serif;
+  --mono:'Share Tech Mono',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--jp);min-height:100vh;
+  background-image:radial-gradient(circle at 20% 0%,rgba(135,206,255,.06),transparent 45%),radial-gradient(circle at 90% 100%,rgba(255,179,200,.05),transparent 45%)}
+a{color:inherit;text-decoration:none}
+
+/* nav */
+.nav{position:sticky;top:0;z-index:50;background:rgba(6,8,15,.86);backdrop-filter:blur(14px);border-bottom:1px solid var(--line2)}
+.nav-in{max-width:1180px;margin:0 auto;padding:12px 22px;display:flex;align-items:center;gap:16px}
+.brand{display:flex;flex-direction:column;line-height:1;cursor:pointer}
+.brand .mk{font-family:var(--disp);font-size:26px;font-weight:700;letter-spacing:.5px}
+.brand .jp{font-family:var(--jp);font-size:10px;color:var(--dim);letter-spacing:.28em;margin-top:2px}
+.home-btn{display:inline-flex;align-items:center;gap:7px;height:34px;padding:0 15px 0 12px;border:1px solid var(--line2);border-radius:8px;background:var(--panel);color:var(--dim);font-family:var(--mono);font-size:12px;letter-spacing:1px;cursor:pointer;transition:.18s;text-decoration:none}
+.home-btn:hover{border-color:color-mix(in srgb,var(--cyan) 50%,transparent);color:var(--ink)}
+.home-btn svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.nav-rec{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--faint);display:flex;align-items:center;gap:7px}
+.nav-rec .dot{width:7px;height:7px;border-radius:50%;background:var(--cyan);box-shadow:0 0 8px var(--cyan)}
+
+.wrap{max-width:1180px;margin:0 auto;padding:40px 22px 80px}
+.eye{font-family:var(--mono);font-size:12px;letter-spacing:.4em;color:var(--faint);text-align:center}
+h1{font-family:var(--disp);font-weight:700;font-size:clamp(40px,7vw,72px);line-height:1;text-align:center;margin-top:10px;
+  background:linear-gradient(115deg,#fff,#d4dafc 42%,#8b93b5);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+h1 .jp{display:block;font-family:var(--jp);font-weight:700;font-size:.24em;letter-spacing:.3em;-webkit-text-fill-color:var(--dim);color:var(--dim);margin-bottom:.6em}
+.lead{text-align:center;color:var(--dim);font-size:14px;line-height:1.7;max-width:620px;margin:16px auto 0}
+
+/* search box */
+.searchbox{max-width:680px;margin:34px auto 0;position:relative}
+.searchbox .field{display:flex;align-items:center;gap:12px;background:var(--panel);border:1px solid var(--line2);border-radius:14px;padding:0 16px;height:60px;transition:.2s}
+.searchbox .field:focus-within{border-color:color-mix(in srgb,var(--cyan) 55%,transparent);box-shadow:0 0 0 4px rgba(135,206,255,.08)}
+.searchbox svg.mag{width:22px;height:22px;fill:none;stroke:var(--faint);stroke-width:2;stroke-linecap:round;flex-shrink:0}
+.searchbox input{flex:1;background:none;border:none;outline:none;color:var(--ink);font-family:var(--jp);font-size:16px}
+.searchbox input::placeholder{color:var(--faint)}
+.searchbox .go{height:42px;padding:0 20px;border:none;border-radius:9px;background:linear-gradient(120deg,var(--cyan),var(--pink));color:#06080f;font-family:var(--disp);font-size:19px;font-weight:600;letter-spacing:1px;cursor:pointer;transition:.18s;flex-shrink:0}
+.searchbox .go:hover{filter:brightness(1.08)}
+
+/* engine chips */
+.engines{display:flex;flex-wrap:wrap;gap:9px;justify-content:center;margin-top:18px}
+.chip{display:inline-flex;align-items:center;gap:7px;padding:8px 15px;border:1px solid var(--line2);border-radius:999px;background:var(--panel);color:var(--dim);font-family:var(--mono);font-size:12px;letter-spacing:.5px;cursor:pointer;transition:.18s}
+.chip:hover{border-color:var(--line2);color:var(--ink);transform:translateY(-1px)}
+.chip.on{border-color:var(--cyan);color:var(--cyan);background:color-mix(in srgb,var(--cyan) 10%,transparent)}
+.chip .d{width:8px;height:8px;border-radius:50%;background:currentColor;opacity:.8}
+
+/* presets */
+.sec{max-width:900px;margin:44px auto 0}
+.sec-h{font-family:var(--mono);font-size:12px;letter-spacing:.28em;color:var(--faint);display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.sec-h .ln{flex:1;height:1px;background:linear-gradient(90deg,var(--line2),transparent)}
+.presets{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:11px}
+.preset{border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:15px;cursor:pointer;transition:.2s;position:relative;overflow:hidden}
+.preset:hover{border-color:color-mix(in srgb,var(--cyan) 40%,transparent);transform:translateY(-2px)}
+.preset .k{font-family:var(--jp);font-weight:700;font-size:14.5px;color:var(--ink)}
+.preset .s{font-family:var(--mono);font-size:11px;color:var(--faint);margin-top:5px;letter-spacing:.5px}
+
+.tip{text-align:center;color:var(--faint);font-size:12.5px;margin-top:40px;line-height:1.7}
+.foot{text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.2em;margin-top:50px;padding-top:24px;border-top:1px solid var(--line)}
+</style>
+</head>
+<body>
+<nav class="nav">
+  <div class="nav-in">
+    <a class="brand" href="../">
+      <span class="mk">特撮DEX</span><span class="jp">現現アーカイブ</span>
+    </a>
+    <a class="home-btn" href="/">
+      <svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8M5 10v10h5v-6h4v6h5V10"/></svg>HOME
+    </a>
+    <a class="home-btn" href="../">
+      <svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>DEX
+    </a>
+    <div class="nav-rec"><span class="dot"></span>IMAGE SEARCH</div>
+  </div>
+</nav>
+
+<div class="wrap">
+  <div class="eye">TOKUSATSU IMAGE FINDER</div>
+  <h1><span class="jp">画像検索</span>이미지 검색</h1>
+  <p class="lead">특촬 영웅·괴수·무장 이미지를 여러 검색엔진에서 한 번에 찾으세요. 키워드를 입력하고 엔진을 골라 검색하거나, 아래 빠른 프리셋을 사용하세요.</p>
+
+  <div class="searchbox">
+    <div class="field">
+      <svg class="mag" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      <input id="q" type="text" placeholder="예: アカレンジャー / 黒十字軍 / 秘密戦隊ゴレンジャー" autofocus>
+      <button class="go" onclick="doSearch()">검색</button>
+    </div>
+    <div class="engines" id="engines"></div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h">빠른 프리셋 · QUICK PRESETS<span class="ln"></span></div>
+    <div class="presets" id="presets"></div>
+  </div>
+
+  <p class="tip">엔진을 여러 개 선택하면 각각 새 탭으로 동시에 열립니다. Enter 키로도 검색할 수 있습니다.</p>
+  <div class="foot">特撮DEX · IMAGE SEARCH MODULE</div>
+</div>
+
+<script>
+const ENGINES=[
+  {id:'google', name:'Google 이미지', url:q=>`https://www.google.com/search?tbm=isch&q=${q}`, on:true},
+  {id:'bing', name:'Bing 이미지', url:q=>`https://www.bing.com/images/search?q=${q}`, on:false},
+  {id:'naver', name:'네이버 이미지', url:q=>`https://search.naver.com/search.naver?where=image&query=${q}`, on:false},
+  {id:'yandex', name:'Yandex', url:q=>`https://yandex.com/images/search?text=${q}`, on:false},
+  {id:'pinterest', name:'Pinterest', url:q=>`https://www.pinterest.com/search/pins/?q=${q}`, on:false},
+  {id:'pixiv', name:'pixiv', url:q=>`https://www.pixiv.net/tags/${q}/artworks`, on:false},
+  {id:'danbooru', name:'Danbooru', url:q=>`https://danbooru.donmai.us/posts?tags=${q}`, on:false},
+];
+const PRESETS=[
+  {k:'고레인저 5인', s:'ゴレンジャー', q:'秘密戦隊ゴレンジャー 5人'},
+  {k:'가면괴인', s:'仮面怪人', q:'ゴレンジャー 仮面怪人'},
+  {k:'흑십자군', s:'黒十字軍', q:'黒十字軍 ゴレンジャー'},
+  {k:'바리도린', s:'バリドリーン', q:'バリドリーン'},
+  {k:'슈퍼전대', s:'スーパー戦隊', q:'スーパー戦隊シリーズ'},
+  {k:'가면라이더', s:'仮面ライダー', q:'仮面ライダー'},
+  {k:'울트라맨', s:'ウルトラマン', q:'ウルトラマン'},
+  {k:'메탈히어로', s:'メタルヒーロー', q:'メタルヒーロー'},
+];
+
+function renderEngines(){
+  document.getElementById('engines').innerHTML=ENGINES.map(e=>
+    `<button class="chip ${e.on?'on':''}" data-id="${e.id}" onclick="toggle('${e.id}')"><span class="d"></span>${e.name}</button>`
+  ).join('');
+}
+function toggle(id){
+  const e=ENGINES.find(x=>x.id===id); e.on=!e.on; renderEngines();
+}
+function renderPresets(){
+  document.getElementById('presets').innerHTML=PRESETS.map(p=>
+    `<div class="preset" onclick="preset('${encodeURIComponent(p.q)}')">
+       <div class="k">${p.k}</div><div class="s">${p.s}</div>
+     </div>`
+  ).join('');
+}
+function preset(q){ document.getElementById('q').value=decodeURIComponent(q); doSearch(); }
+
+function doSearch(){
+  const raw=document.getElementById('q').value.trim();
+  if(!raw){ document.getElementById('q').focus(); return; }
+  const q=encodeURIComponent(raw);
+  const active=ENGINES.filter(e=>e.on);
+  const list=active.length?active:[ENGINES[0]];
+  list.forEach(e=>window.open(e.url(q),'_blank','noopener'));
+}
+document.getElementById('q').addEventListener('keydown',e=>{if(e.key==='Enter')doSearch();});
+
+renderEngines(); renderPresets();
+</script>
+</body>
+</html>
