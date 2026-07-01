@@ -174,6 +174,17 @@ button{font-family:inherit}
 .rcard.clk::before{content:"";position:absolute;inset:0;border:1px solid transparent;border-radius:13px;transition:.25s;pointer-events:none;z-index:5}
 .rcard.clk:hover::before{border-color:color-mix(in srgb,var(--c) 40%,transparent);box-shadow:inset 0 0 24px -10px color-mix(in srgb,var(--c) 60%,transparent)}
 
+/* 작품 카드 — 가로형 */
+.roster.works{grid-template-columns:repeat(auto-fill,minmax(300px,1fr))}
+@media(max-width:560px){.roster.works{grid-template-columns:1fr}}
+.rcard.wcard{aspect-ratio:16/10;display:block}
+.rcard.wcard .thumb{position:absolute;inset:0;width:100%;height:100%;aspect-ratio:auto}
+.rcard.wcard .thumb::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(6,8,15,0) 38%,rgba(6,8,15,.55) 68%,rgba(6,8,15,.94) 100%);pointer-events:none}
+.rcard.wcard .meta{position:absolute;left:0;right:0;bottom:0;z-index:3;padding:16px 18px 14px}
+.rcard.wcard .nm{font-size:16px;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.5)}
+.rcard.wcard .jp{color:#c7cee6}
+.rcard.wcard .sub{color:#a7b0cc}
+
 /* ===== 작품 뷰 ===== */
 .w-banner{position:relative;margin-top:30px;border:1px solid var(--line);border-radius:16px;overflow:hidden;background:linear-gradient(150deg,color-mix(in srgb,var(--acc) 14%,var(--panel)),var(--bg) 130%);min-height:200px;display:flex;align-items:flex-end}
 .w-banner::before{content:"";position:absolute;inset:0;background:radial-gradient(560px 280px at 90% 120%,color-mix(in srgb,var(--acc) 16%,transparent),transparent 60%)}
@@ -218,33 +229,33 @@ button{font-family:inherit}
 /* ===== 모달 (도시에 카드) ===== */
 .modal-bd{position:fixed;inset:0;z-index:100;background:rgba(4,5,11,.78);backdrop-filter:blur(7px);display:none;align-items:center;justify-content:center;padding:24px}
 .modal-bd.open{display:flex;animation:vin .25s}
-.modal{position:relative;width:100%;max-width:430px;max-height:90vh;overflow-y:auto;background:var(--panel);border:1px solid var(--line2);border-radius:16px;box-shadow:0 30px 80px -30px #000}
+.modal{--c:var(--acc);position:relative;width:100%;max-width:430px;max-height:90vh;overflow-y:auto;background:var(--panel);border:1px solid var(--line2);border-radius:16px;box-shadow:0 30px 80px -30px #000}
 .modal::-webkit-scrollbar{width:8px}.modal::-webkit-scrollbar-thumb{background:var(--line2);border-radius:8px}
 .modal .x{position:absolute;top:13px;right:13px;z-index:6;width:34px;height:34px;border-radius:50%;border:none;cursor:pointer;background:rgba(6,8,15,.6);color:#fff;font-size:19px;display:grid;place-items:center;transition:.18s}
 .modal .x:hover{background:var(--pink-d)}
-.m-hero{position:relative;overflow:hidden;background:linear-gradient(150deg,color-mix(in srgb,var(--acc) 30%,var(--panel2)),var(--bg) 125%);display:grid;place-items:center;min-height:230px;border-radius:16px 16px 0 0}
+.m-hero{position:relative;overflow:hidden;background:linear-gradient(150deg,color-mix(in srgb,var(--c) 30%,var(--panel2)),var(--bg) 125%);display:grid;place-items:center;min-height:230px;border-radius:16px 16px 0 0}
 .m-hero img{width:100%;display:block;max-height:420px;object-fit:cover}
-.m-hero .ph{font-family:var(--disp);font-weight:700;font-size:84px;color:color-mix(in srgb,var(--acc) 55%,var(--faint))}
+.m-hero .ph{font-family:var(--disp);font-weight:700;font-size:84px;color:color-mix(in srgb,var(--c) 55%,var(--faint))}
 .m-hero .crail{position:absolute;left:0;top:0;bottom:0;width:6px;z-index:3}
 .m-hero.entity{min-height:210px}
 .m-hero::after{content:"";position:absolute;left:0;right:0;bottom:0;height:54px;background:linear-gradient(180deg,transparent,var(--panel));pointer-events:none}
-.cloak-btn{position:absolute;top:12px;left:14px;z-index:5;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:rgba(6,8,15,.55);border:1px solid color-mix(in srgb,var(--acc) 50%,#fff);cursor:pointer;backdrop-filter:blur(5px);transition:.18s;opacity:.82}
+.cloak-btn{position:absolute;top:12px;left:14px;z-index:5;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:rgba(6,8,15,.55);border:1px solid color-mix(in srgb,var(--c) 50%,#fff);cursor:pointer;backdrop-filter:blur(5px);transition:.18s;opacity:.82}
 .cloak-btn:hover{opacity:1}
 .cloak-btn img{width:17px;height:17px}
 .hImg-base,.hImg-alt{grid-area:1/1}
 
 .m-body{padding:20px 24px 26px}
-.m-kicker{font-family:var(--mono);font-size:11px;letter-spacing:1px;color:var(--acc);text-transform:uppercase}
+.m-kicker{font-family:var(--mono);font-size:11px;letter-spacing:1px;color:var(--c);text-transform:uppercase}
 .m-nm{font-family:var(--kr);font-weight:900;font-size:25px;line-height:1.1;margin-top:5px}
 .m-jp{font-family:var(--jp);font-weight:500;font-size:14px;color:var(--dim);margin-top:3px}
 .m-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:13px}
 .m-chip{font-family:var(--mono);font-size:11px;letter-spacing:.4px;color:var(--dim);border:1px solid var(--line2);border-radius:6px;padding:4px 9px;background:var(--panel2)}
-.m-chip.acc{color:var(--acc);border-color:color-mix(in srgb,var(--acc) 45%,var(--line2))}
+.m-chip.acc{color:var(--c);border-color:color-mix(in srgb,var(--c) 45%,var(--line2))}
 .m-desc{margin-top:15px;font-size:13.5px;line-height:1.75;color:#cdd5ee}
 .m-sec{margin-top:20px}
 .m-sec-h{font-family:var(--mono);font-size:11px;letter-spacing:1px;color:var(--faint);text-transform:uppercase;display:flex;align-items:center;gap:8px;margin-bottom:10px}
 .m-sec-h::after{content:"";flex:1;height:1px;background:var(--line)}
-.m-sec-h .cnt{font-family:var(--mono);color:var(--acc);font-size:11px}
+.m-sec-h .cnt{font-family:var(--mono);color:var(--c);font-size:11px}
 /* meta rows */
 .m-row{display:flex;justify-content:space-between;gap:14px;padding:9px 0;border-bottom:1px solid var(--line)}
 .m-row .k{font-size:12.5px;color:var(--dim)}
@@ -252,7 +263,7 @@ button{font-family:inherit}
 .m-row .v.dim{color:var(--faint);font-style:italic}
 /* skills (스탯바 느낌) */
 .m-skills{list-style:none;display:flex;flex-direction:column;gap:11px}
-.m-skills li{border:1px solid var(--line);border-left:3px solid var(--acc);border-radius:0 9px 9px 0;background:var(--panel2);padding:11px 13px}
+.m-skills li{border:1px solid var(--line);border-left:3px solid var(--c);border-radius:0 9px 9px 0;background:var(--panel2);padding:11px 13px}
 .m-skills li.empty{border-left-color:var(--faint);color:var(--faint);font-size:13px;text-align:center;border-radius:9px}
 .sk-nm{font-weight:700;font-size:13.5px;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
 .sk-nm span{font-family:var(--jp);font-weight:400;font-size:11.5px;color:var(--dim)}
@@ -422,9 +433,9 @@ const DATA = {
                   {
                     "name": "키레인저",
                     "jp": "キレンジャー",
-                    "sub": "오오이와 다이타 (大岩大太) / 2대 쿠마노 다이고로 (熊野大五郎)",
+                    "sub": "오오이와 다이타 (大岩大太)",
                     "color": "#F4C518",
-                    "desc": "고레인저의 무드메이커. 이글 규슈지부 유일 생존자. 유도 챔피언 출신으로 괴력과 박치기를 활용하며 카레를 좋아하는 규슈 남아. 제55화에서 규슈지부 교관으로 영전해 일시 이탈, 2대 쿠마노 다이고로가 뒤를 잇지만 제67화 칸키리가면에게 전사(전대 시리즈 최초의 순직)하고 다시 오오이와가 복귀한다.",
+                    "desc": "고레인저의 초대 키레인저이자 무드메이커. 이글 규슈지부 유일 생존자. 유도 챔피언 출신으로 괴력과 박치기를 활용하며 카레를 좋아하는 규슈 남아. 정밀기술반원 출신으로 통신·정밀기기에도 능하다. 제55화에서 규슈지부 교관으로 영전해 일시 이탈(제1~54화 등장)하며, 2대 쿠마노 다이고로의 순직 후 제67화부터 복귀한다.",
                     "item": "키 스티커 (キーステッカー) / YTC 옐로 트랜시버 (イエロートランシーバー)",
                     "mecha": "고레인저 머신(사이드카) · 바리키키-ㄴ",
                     "skills": [
@@ -437,6 +448,27 @@ const DATA = {
                         "name": "아소산 대분화",
                         "jp": "阿蘇山大噴火",
                         "desc": "괴력으로 적을 들어 내던지는 필살 던지기."
+                      },
+                      {
+                        "name": "메가톤 박치기",
+                        "jp": "メガトンずつき",
+                        "desc": "강철 같은 머리로 들이받는 박치기."
+                      }
+                    ]
+                  },
+                  {
+                    "name": "2대 키레인저",
+                    "jp": "2代目キレンジャー",
+                    "sub": "쿠마노 다이고로 (熊野大五郎)",
+                    "color": "#F4C518",
+                    "desc": "제55~67화 등장한 2대 키레인저. 초대 오오이와 다이타가 규슈지부 교관으로 일시 이탈하며 이글 고레인저 예비대원 중 선발되었다. 초대와 달리 단것을 좋아하는 미식가. 제67화에서 칸키리가면의 칸키리 카터에 복부를 찔려 전사 — 슈퍼전대 시리즈 최초로 순직한 전사로 기록된다. (실제 교체 경위: 초대役 배우 하타케야마 바쿠가 타 드라마 출연과 겹쳐 일시 강판되어 다루마 지로가 2대를 연기했다.)",
+                    "item": "키 스티커 (キーステッカー) / YTC 옐로 트랜시버 (イエロートランシーバー)",
+                    "mecha": "고레인저 머신(사이드카) · 바리키키-ㄴ",
+                    "skills": [
+                      {
+                        "name": "아소산샤",
+                        "jp": "阿蘇山車",
+                        "desc": "유도식 던지기 기술. 초대에게서 이어받았다."
                       },
                       {
                         "name": "메가톤 박치기",
@@ -497,57 +529,111 @@ const DATA = {
                   {
                     "name": "고레인저 스톰",
                     "jp": "ゴレンジャーストーム",
-                    "sub": "공용 필살기 — 회전 패스로 변형하는 공형 폭탄을 아카가 차서 마무리"
+                    "sub": "공용 필살기 — 배구공형 폭탄을 모모→키→미도→아오→아카 순으로 패스, 아카가 슛으로 마무리 (제1화~)"
+                  },
+                  {
+                    "name": "고레인저 스톰 · 뉴파워 작전",
+                    "jp": "ゴレンジャーストーム・ニューパワー作戦",
+                    "sub": "제27화부터 등장한 스톰의 강화형. 공이 적의 약점에 맞춰 형태가 변화"
                   },
                   {
                     "name": "고레인저 하리케인",
                     "jp": "ゴレンジャーハリケーン",
-                    "sub": "공용 필살기 — 제43화 첫 등장. 엔드볼이 적의 약점에 맞춰 변형. 최종회는 하리케인·카시오페아"
+                    "sub": "럭비공형 폭탄. 제43화 뉴 고레인저 슈트 대응 필살기. 최종화는 하리케인·카시오페아, 극장판은 폭탄 하리케인으로 파생"
                   },
                   {
-                    "name": "레드 뱅거",
+                    "name": "바디",
+                    "jp": "バーディー",
+                    "sub": "5인 공통 장비. 허리에 장착한 소형 로켓 부스터를 전개해 시속 100km로 약 30분간 비행"
+                  },
+                  {
+                    "name": "고레인저 슈트 / 뉴 고레인저 슈트",
+                    "jp": "ゴレンジャースーツ / ニューゴレンジャースーツ",
+                    "sub": "이글 개발 5색 강화복. 착용 시 순간 고압전류(구형 10만V→제43화 이후 신형 15만V)가 흘러 훈련받은 대원만 착용 가능. 변신 콜은 '고!'"
+                  },
+                  {
+                    "name": "레드뷰트",
                     "jp": "レッドビュート",
-                    "sub": "아카 전용 다목적 채찍. 야리뱅거·도릴뱅거로 변형, 후반 뉴 레드 뱅거"
+                    "sub": "아카 전용 다목적 채찍(제1~42화). 야리뷰트(창)·도릴뷰트(드릴)·아미뷰트(그물)로 변형. 필살기 레드스파크(2만 볼트 전류)",
+                    "color": "#E5352B"
+                  },
+                  {
+                    "name": "뉴 레드뷰트",
+                    "jp": "ニューレッドビュート",
+                    "sub": "제43화 등장한 레드뷰트의 개조강화판. 레드뷰트펀치·레드헌터·에레키뷰트로 파생. 제67화부터 정식 호칭 사용",
+                    "color": "#E5352B"
+                  },
+                  {
+                    "name": "실버 슛",
+                    "jp": "シルバーショット",
+                    "sub": "아카가 우측 허리에 휴대하는 마취총. 회차에 따라 신호탄·실탄으로도 사용",
+                    "color": "#E5352B"
                   },
                   {
                     "name": "블루체리",
                     "jp": "ブルーチェリー",
-                    "sub": "아오 전용 백발백중 활. 후반 울트라 블루체리"
+                    "sub": "아오 전용 궁시(제1~42화). 연속 블루체리·스핀슛·트리플 블루체리 등으로 응용",
+                    "color": "#1E5FCE"
                   },
                   {
-                    "name": "키 스티커",
-                    "jp": "キーステッカー",
-                    "sub": "키 전용 장창. 헤드에 주먹 등 어태치먼트 장착"
+                    "name": "울트라 블루체리",
+                    "jp": "ウルトラブルーチェリー",
+                    "sub": "제43화 강화판. 다이아몬드헤드·토리모치 블루체리로 변형, 화살 끝에 소형 폭탄을 장착한 체리 미사일도 운용",
+                    "color": "#1E5FCE"
                   },
                   {
                     "name": "YTC (옐로 트랜시버)",
-                    "jp": "イエロートランシーバー",
-                    "sub": "키 전용. 방해 전파·불쾌 음파로 괴인에 데미지"
+                    "jp": "YTC(イエロートランシーバー)",
+                    "sub": "키 전용 고성능 무선기(제34화~). 방해 전파·불쾌 음파로 괴인에 데미지. 제43화부터 키스티커로 세대교체",
+                    "color": "#F4C518"
                   },
                   {
-                    "name": "피어스 폭탄 (모모비즈)",
-                    "jp": "ピアス爆弾",
-                    "sub": "모모 전용 하트형 이어링 폭탄"
+                    "name": "키스티커",
+                    "jp": "キーステッカー",
+                    "sub": "제43화부터 YTC를 대체한 신축식 봉. 무선기 기능도 겸비하며 끝에 주먹형 어태치먼트 장착. 키모쿠교·철권 도레미打ち로 파생",
+                    "color": "#F4C518"
+                  },
+                  {
+                    "name": "이어링 폭탄",
+                    "jp": "イヤリング爆弾",
+                    "sub": "모모 전용. 마스크의 하트형 이어링을 떼어 안전핀을 해제하는 투척 폭탄(모모폭탄/핑크폭탄으로도 통칭)",
+                    "color": "#E84B8A"
                   },
                   {
                     "name": "모모카드",
                     "jp": "モモカード",
-                    "sub": "모모 전용 투척 카드"
+                    "sub": "모모 전용 수리검형 투척 무기",
+                    "color": "#E84B8A"
                   },
                   {
                     "name": "모모미러",
                     "jp": "モモミラー",
-                    "sub": "모모 전용 광선 반사경"
+                    "sub": "모모 전용 반사경. 적의 광선을 반사하거나 교란에 사용",
+                    "color": "#E84B8A"
+                  },
+                  {
+                    "name": "모모세세리",
+                    "jp": "モモセセリ",
+                    "sub": "모모카드 2장을 합체시켜 만드는 나비형 소형 정찰 메카(제46·51화 등장)",
+                    "color": "#E84B8A"
                   },
                   {
                     "name": "미도메란",
                     "jp": "ミドメラン",
-                    "sub": "미도 전용 부메랑"
+                    "sub": "미도 전용 특수합금 부메랑(제1~42화). 미도메란 커터·개량 미도메란·슈퍼 미도메란(분열)·회전 미도메란으로 응용",
+                    "color": "#1FA85A"
+                  },
+                  {
+                    "name": "뉴 미도메란",
+                    "jp": "ニューミドメラン",
+                    "sub": "제43화 강화판 부메랑",
+                    "color": "#1FA85A"
                   },
                   {
                     "name": "미도펀처",
                     "jp": "ミドパンチャー",
-                    "sub": "미도 전용 슬링샷"
+                    "sub": "뉴 미도메란이 변형하는 슬링샷. 철판을 관통하는 탄환 발사",
+                    "color": "#1FA85A"
                   }
                 ],
                 "machines": [
@@ -575,6 +661,21 @@ const DATA = {
                     "name": "고레인저 머신",
                     "jp": "ゴレンジャーマシーン",
                     "sub": "5인의 오토바이(레드머신+사이드카). 후에 스타머신으로 교체"
+                  },
+                  {
+                    "name": "콘도라",
+                    "jp": "コンドラー",
+                    "sub": "흑십자군의 전투폭격기. 조르다가 조종"
+                  },
+                  {
+                    "name": "배트라",
+                    "jp": "バットラー",
+                    "sub": "흑십자군의 전투기"
+                  },
+                  {
+                    "name": "흑십자성",
+                    "jp": "黒十字城",
+                    "sub": "흑십자총통의 정체 그 자체인 이동요새. 최종화에서 고레인저의 바리도린·스타머신 돌입으로 폭파"
                   }
                 ],
                 "kaiju": [
@@ -740,14 +841,14 @@ const DATA = {
                     "desc": "빅 면도날 무기. 분리식 머리-면도날."
                   },
                   {
-                    "name": "팔목가면",
+                    "name": "야츠메가면",
                     "jp": "八ツ目仮面",
                     "ep": "제25화",
                     "cat": "강철군단",
-                    "desc": "폭풍을 일으키고 어뢰로 공격."
+                    "desc": "칠성장어(야츠메 우나기) 모티프. 폭풍을 일으키고 야츠메 쇼크를 방전해 어뢰로 공격한다."
                   },
                   {
-                    "name": "푸른힘줄가면",
+                    "name": "아오스지가면",
                     "jp": "青すじ仮面",
                     "ep": "제26화",
                     "cat": "강철군단",
@@ -889,7 +990,7 @@ const DATA = {
                     "defeat": "석탄 폭탄"
                   },
                   {
-                    "name": "새엄니가면",
+                    "name": "조아가면",
                     "jp": "鳥牙仮面",
                     "ep": "제47화",
                     "cat": "분화군단",
@@ -1516,7 +1617,7 @@ function renderRoster(s,eraId){
     });
   });
   document.getElementById('series-body').innerHTML=
-    `<div class="roster">${out.join('')}</div>`;
+    `<div class="roster works">${out.join('')}</div>`;
 }
 function workCard(s,w,eIdx,wi){
   const img=w.img?`<img src="${w.img}" alt="${esc(w.ko)}" loading="lazy">`
@@ -1524,7 +1625,7 @@ function workCard(s,w,eIdx,wi){
   const tag=w.tag?`<span class="tag ${w.tag}">${tagLabel(w.tag)}</span>`
     :`<span class="dot" style="color:var(--${s.c})"></span>`;
   const sub=[w.year,w.motif].filter(Boolean).join(' · ');
-  return `<div class="rcard clk" style="--c:var(--${s.c})"
+  return `<div class="rcard wcard clk" style="--c:var(--${s.c})"
     onclick="openWork('${curSeriesKey}',${eIdx},${wi})">
     <div class="thumb"><span class="crail"></span>${tag}<span class="no">${esc(w.no||'—')}</span>${img}</div>
     <div class="meta"><div class="nm">${esc(w.ko)}</div><div class="jp">${esc(w.jp)}</div>${sub?`<div class="sub">${esc(sub)}</div>`:''}</div>
@@ -1663,11 +1764,13 @@ function mediaSlot(m,ph){
 }
 
 /* ===== 모달 ===== */
-function openModal(html){
-  document.getElementById('modal').innerHTML=html;
+function openModal(html,color){
+  const m=document.getElementById('modal');
+  m.innerHTML=html;
+  m.style.setProperty('--c',color||'var(--acc)');
   document.getElementById('modal-bd').classList.add('open');
   document.body.style.overflow='hidden';
-  document.getElementById('modal').scrollTop=0;
+  m.scrollTop=0;
 }
 function closeModal(){document.getElementById('modal-bd').classList.remove('open');document.body.style.overflow='';}
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
@@ -1696,7 +1799,7 @@ function openHero(key,eIdx,wi,hi){
         ${h.sub?`<div class="m-chips"><span class="m-chip">${esc(h.sub)}</span></div>`:''}
         ${h.desc?`<p class="m-desc">${esc(h.desc)}</p>`:''}
         <div class="m-sec"><div class="m-sec-h">🎬 미디어</div>${mediaSlot(h.media,'사진·영상')}</div>
-      </div>`);
+      </div>`,h.color);
     return;
   }
   const hasAlt=!!h.imgAlt;
@@ -1725,7 +1828,7 @@ function openHero(key,eIdx,wi,hi){
       </div>
       <div class="m-sec"><div class="m-sec-h">⚡ 스킬 · 필살기 <span class="cnt">${skills.length}</span></div>
         <ul class="m-skills">${skillList}</ul></div>
-    </div>`);
+    </div>`,h.color);
 }
 function openEntity(key,eIdx,wi,type,idx){
   const w=getSeries(key).eras[eIdx].works[wi];
@@ -1751,7 +1854,7 @@ function openEntity(key,eIdx,wi,type,idx){
       ${specs?`<div class="m-specs">${specs}</div>`:''}
       ${body?`<p class="m-desc">${esc(body)}</p>`:''}
       <div class="m-sec"><div class="m-sec-h">🎬 미디어</div>${mediaSlot(it.media,'GIF · 이미지 · 영상')}</div>
-    </div>`);
+    </div>`,it.color);
 }
 
 /* ===== UI 유틸 ===== */
