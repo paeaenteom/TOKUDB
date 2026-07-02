@@ -124,6 +124,9 @@ button{font-family:inherit}
 .scard .crn.tr{top:10px;right:10px;border-left:0;border-bottom:0}
 .scard .crn.bl{bottom:10px;left:10px;border-right:0;border-top:0}
 .scard .crn.br{bottom:10px;right:10px;border-left:0;border-top:0}
+.scard .sbg{position:absolute;inset:0;z-index:0;pointer-events:none}
+.scard .sbg img{width:100%;height:100%;object-fit:cover;opacity:.30;mask-image:linear-gradient(180deg,transparent 0%,#000 55%)}
+.scard>*:not(.sbg){position:relative;z-index:1}
 .scard .en{font-family:var(--disp);font-weight:700;font-size:30px;line-height:.95;letter-spacing:.02em;color:var(--ink)}
 .scard .jp{font-family:var(--jp);font-weight:500;font-size:13px;color:color-mix(in srgb,var(--c) 70%,var(--dim));margin-top:5px}
 .scard .ko{font-weight:700;font-size:16px;margin-top:10px}
@@ -157,8 +160,17 @@ button{font-family:inherit}
 .rcard .thumb img{width:100%;height:100%;object-fit:cover;transition:transform .4s}
 .rcard:hover .thumb img{transform:scale(1.05)}
 /* 슈트(전신) 사진 전용 썸네일: 잘리지 않고 전신이 다 보이도록 세로 비율+contain */
-.rcard .thumb.hero-thumb{aspect-ratio:2/5}
-.rcard .thumb.hero-thumb img{object-fit:contain}
+.rcard .thumb.hero-thumb{aspect-ratio:var(--hero-ar,2/5)}
+.rcard .thumb.hero-thumb img{object-fit:var(--hero-fit,contain)}
+/* 전역 이미지 설정 변수 (DATA._imgcfg → JS가 주입) */
+.rcard .thumb{aspect-ratio:var(--card-ar,3/4)}
+.rcard .thumb img{object-fit:var(--card-fit,cover)}
+.m-hero img{max-height:var(--modal-mh,520px)!important;object-fit:var(--modal-fit,contain)!important}
+/* 항목별 오버라이드: 인라인 스타일 변수로 개별 적용 */
+.rcard .thumb[data-ifit] img{object-fit:var(--i-fit)!important}
+.rcard .thumb[data-iar]{aspect-ratio:var(--i-ar)!important}
+.m-hero[data-mfit] img{object-fit:var(--m-fit)!important}
+.m-hero[data-mmh] img{max-height:var(--m-mh)!important}
 .rcard .thumb .ph{font-family:var(--disp);font-weight:700;font-size:48px;color:color-mix(in srgb,var(--c) 60%,var(--faint))}
 .rcard .thumb::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(0,0,0,.07) 0 1px,transparent 1px 3px);opacity:.5;pointer-events:none}
 .rcard .crail{position:absolute;left:0;top:0;bottom:0;width:5px;background:linear-gradient(180deg,var(--c),transparent 85%);z-index:2}
@@ -1610,8 +1622,32 @@ const DATA = {
 };
 
 /* ===== 헬퍼 ===== */
-function getSeries(key){for(const g of Object.values(DATA))if(g.series&&g.series[key])return g.series[key];return null;}
-function getSeriesGroup(key){for(const g of Object.values(DATA))if(g.series&&g.series[key])return g;return null;}
+/* 전역 이미지 표시 설정: DATA._imgcfg = {cardAr,cardFit,heroAr,heroFit,modalMh,modalFit} */
+function applyImgCfg(){
+  const c=DATA._imgcfg||{};
+  const r=document.documentElement.style;
+  r.setProperty('--card-ar',c.cardAr||'3/4');
+  r.setProperty('--card-fit',c.cardFit||'cover');
+  r.setProperty('--hero-ar',c.heroAr||'2/5');
+  r.setProperty('--hero-fit',c.heroFit||'contain');
+  r.setProperty('--modal-mh',(c.modalMh||520)+'px');
+  r.setProperty('--modal-fit',c.modalFit||'contain');
+}
+/* 항목별 이미지 오버라이드 인라인 속성 생성 (it.imgFit/imgAr → 카드, it.modalFit/modalMh → 팝업) */
+function itemThumbAttr(it){
+  let a='',s='';
+  if(it&&it.imgFit){a+=' data-ifit="1"';s+=`--i-fit:${it.imgFit};`;}
+  if(it&&it.imgAr){a+=' data-iar="1"';s+=`--i-ar:${it.imgAr};`;}
+  return a+(s?` style="${s}"`:'');
+}
+function itemModalAttr(it){
+  let a='',s='';
+  if(it&&it.modalFit){a+=' data-mfit="1"';s+=`--m-fit:${it.modalFit};`;}
+  if(it&&it.modalMh){a+=' data-mmh="1"';s+=`--m-mh:${it.modalMh}px;`;}
+  return a+(s?` style="${s}"`:'');
+}
+function getSeries(key){for(const g of Object.values(DATA))if(g&&g.series&&g.series[key])return g.series[key];return null;}
+function getSeriesGroup(key){for(const g of Object.values(DATA))if(g&&g.series&&g.series[key])return g;return null;}
 function seriesTotal(s){return s.eras.reduce((a,e)=>a+e.works.filter(w=>!w._todo).length,0);}
 function esc(s){return String(s==null?'':s);}
 function iu(p){
@@ -1641,8 +1677,8 @@ document.addEventListener('error',function(e){
 /* 누적 통계 */
 function totalStats(){
   let works=0,series=0,heroes=0,kaiju=0;
-  for(const g of Object.values(DATA))for(const k in g.series){series++;const s=g.series[k];
-    for(const e of s.eras)for(const w of e.works){works++;heroes+=(w.members||[]).length;kaiju+=(w.kaiju||[]).length;}}
+  for(const g of Object.values(DATA)){if(!g||!g.series)continue;for(const k in g.series){series++;const s=g.series[k];
+    for(const e of s.eras)for(const w of e.works){works++;heroes+=(w.members||[]).length;kaiju+=(w.kaiju||[]).length;}}}
   return {works,series,heroes,kaiju};
 }
 
@@ -1653,14 +1689,15 @@ function renderHome(){
     `<div><b>${st.series}</b>시리즈</div><div><b>${st.works}</b>작품</div><div><b>${st.heroes}</b>영웅</div><div><b>${st.kaiju}</b>괴수</div>`;
   renderSpotlight();
   const root=document.getElementById('groups');
-  root.innerHTML=Object.values(DATA).map(g=>{
+  root.innerHTML=Object.values(DATA).filter(g=>g&&g.series).map(g=>{
     const keys=Object.keys(g.series);
     const gWorks=keys.reduce((a,k)=>a+seriesTotal(g.series[k]),0);
     const cards=keys.map(k=>{
       const s=g.series[k];const total=seriesTotal(s);
+      const sbg=s.img?`<div class="sbg"><img src="${iu(s.img)}" alt="" loading="lazy"></div>`:'';
       return `<div class="scard" style="--c:var(--${s.c})" tabindex="0" role="button"
         onclick="showSeries('${k}')" onkeydown="if(event.key==='Enter')showSeries('${k}')">
-        <span class="crn tl"></span><span class="crn tr"></span><span class="crn bl"></span><span class="crn br"></span>
+        ${sbg}<span class="crn tl"></span><span class="crn tr"></span><span class="crn bl"></span><span class="crn br"></span>
         <div class="en">${esc(s.en)}</div>
         <div class="jp">${esc(s.jp)}</div>
         <div class="ko">${esc(s.ko)}</div>
@@ -1686,11 +1723,11 @@ function renderSpotlight(){
   if(!box)return;
   // 작품이 들어있는 시리즈만 후보로
   const cands=[];
-  for(const g of Object.values(DATA))for(const k in g.series){
+  for(const g of Object.values(DATA)){if(!g||!g.series)continue;for(const k in g.series){
     const s=g.series[k];
     const works=[];s.eras.forEach(e=>e.works.forEach(w=>{if(!w._todo)works.push(w);}));
     if(works.length)cands.push({k,s,g,works});
-  }
+  }}
   if(!cands.length){box.innerHTML='';return;}   // 데이터 없으면 아무것도 안 나옴
   // 가장 최근 작품(year 큰 값) 보유 시리즈를 스포트라이트로
   cands.forEach(c=>{c.latest=Math.max(...c.works.map(w=>parseInt(w.year)||0));});
@@ -1840,7 +1877,7 @@ function entCard(it,click,num,catId){
   const cvar=it.color?` style="--c:${it.color}"`:'';
   const thumbCls=catId==='heroes'?'thumb hero-thumb':'thumb';
   return `<div class="rcard clk"${cvar} onclick="${click}">
-    <div class="${thumbCls}">${rail}${dot}${no}${ep}${thumb}</div>
+    <div class="${thumbCls}"${itemThumbAttr(it)}>${rail}${dot}${no}${ep}${thumb}</div>
     <div class="meta"><div class="nm">${esc(it.name)}</div>${it.jp?`<div class="jp">${esc(it.jp)}</div>`:''}${sub?`<div class="sub">${esc(sub)}</div>`:''}</div>
   </div>`;
 }
@@ -1857,7 +1894,7 @@ function collectForms(w){
   (w.members||[]).forEach((h,hi)=>{
     if(h.person)return;
     if(h.formHidden)return;
-    forms.push({hi,name:h.name,jp:h.jp,img:h.img,color:h.color,sub:'기본 폼',kind:'base'});
+    forms.push({hi,name:h.name,jp:h.jp,img:h.img,color:h.color,sub:'기본 폼',kind:'base',_h:h});
   });
   return forms;
 }
@@ -1868,7 +1905,7 @@ function paneForms(forms,key,eIdx,wi){
     const rail=f.color?`<span class="crail" style="background:linear-gradient(180deg,${f.color},transparent 85%)"></span>`:`<span class="crail"></span>`;
     const cvar=f.color?` style="--c:${f.color}"`:'';
     return `<div class="rcard clk"${cvar} onclick="openHero('${key}',${eIdx},${wi},${f.hi})">
-      <div class="thumb hero-thumb">${rail}<span class="no">${esc(f.sub)}</span>${thumb}</div>
+      <div class="thumb hero-thumb"${itemThumbAttr(f._h)}>${rail}<span class="no">${esc(f.sub)}</span>${thumb}</div>
       <div class="meta"><div class="nm">${esc(f.name)}</div>${f.jp?`<div class="jp">${esc(f.jp)}</div>`:''}</div>
     </div>`;
   }).join('');
@@ -1928,7 +1965,7 @@ function openHero(key,eIdx,wi,hi){
   if(h.person){
     const pimg=h.img?`<img src="${iu(h.img)}" alt="${esc(h.name)}">`:`<span class="ph">${esc((h.name||'?')[0])}</span>`;
     openModal(`<button class="x" onclick="closeModal()">×</button>
-      <div class="m-hero entity">${rail}${pimg}</div>
+      <div class="m-hero entity"${itemModalAttr(h)}>${rail}${pimg}</div>
       <div class="m-body">
         <div class="m-kicker">인물 · 변신자</div>
         <div class="m-nm">${esc(h.name)}</div>
@@ -1951,7 +1988,7 @@ function openHero(key,eIdx,wi,hi){
     ?skills.map(s=>`<li><div class="sk-nm">${esc(s.name)}${s.jp?`<span>${esc(s.jp)}</span>`:''}</div>${s.desc?`<div class="sk-d">${esc(s.desc)}</div>`:''}${(s.media&&s.media.src)?`<div style="margin-top:8px">${mediaSlot(s.media)}</div>`:''}</li>`).join('')
     :`<li class="empty">스킬·필살기 데이터 준비 중</li>`;
   openModal(`<button class="x" onclick="closeModal()">×</button>
-    <div class="m-hero">${rail}${cloak}${img}</div>
+    <div class="m-hero"${itemModalAttr(h)}>${rail}${cloak}${img}</div>
     <div class="m-body">
       <div class="m-kicker">HERO</div>
       <div class="m-nm">${esc(h.name)}</div>
@@ -1982,7 +2019,7 @@ function openEntity(key,eIdx,wi,type,idx){
     it.suit?`<div class="m-spec">🎭 슈트 유용 · ${esc(it.suit)}</div>`:''].filter(Boolean).join('');
   const body=it.desc||it.sub||'';
   openModal(`<button class="x" onclick="closeModal()">×</button>
-    <div class="m-hero entity">${rail}${vis}</div>
+    <div class="m-hero entity"${itemModalAttr(it)}>${rail}${vis}</div>
     <div class="m-body">
       <div class="m-kicker">${kicker}</div>
       <div class="m-nm">${esc(it.name)}</div>
@@ -2033,6 +2070,7 @@ function routeTo(){
 }
 window.addEventListener('popstate',routeTo);
 
+applyImgCfg();
 renderHome();
 routeTo();
 </script>
