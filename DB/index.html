@@ -1646,6 +1646,7 @@ function itemModalAttr(it){
   if(it&&it.modalMh){a+=' data-mmh="1"';s+=`--m-mh:${it.modalMh}px;`;}
   return a+(s?` style="${s}"`:'');
 }
+function seriesColor(s){const c=(s&&s.c)||'acc';return c.startsWith('#')?c:`var(--${c})`;}
 function getSeries(key){for(const g of Object.values(DATA))if(g&&g.series&&g.series[key])return g.series[key];return null;}
 function getSeriesGroup(key){for(const g of Object.values(DATA))if(g&&g.series&&g.series[key])return g;return null;}
 function seriesTotal(s){return s.eras.reduce((a,e)=>a+e.works.filter(w=>!w._todo).length,0);}
@@ -1695,7 +1696,7 @@ function renderHome(){
     const cards=keys.map(k=>{
       const s=g.series[k];const total=seriesTotal(s);
       const sbg=s.img?`<div class="sbg"><img src="${iu(s.img)}" alt="" loading="lazy"></div>`:'';
-      return `<div class="scard" style="--c:var(--${s.c})" tabindex="0" role="button"
+      return `<div class="scard" style="--c:${seriesColor(s)}" tabindex="0" role="button"
         onclick="showSeries('${k}')" onkeydown="if(event.key==='Enter')showSeries('${k}')">
         ${sbg}<span class="crn tl"></span><span class="crn tr"></span><span class="crn bl"></span><span class="crn br"></span>
         <div class="en">${esc(s.en)}</div>
@@ -1736,7 +1737,7 @@ function renderSpotlight(){
   const lead=works.slice().sort((a,b)=>(parseInt(b.year)||0)-(parseInt(a.year)||0))[0];
   const entries=s.eras.reduce((a,e)=>a+e.works.filter(w=>!w._todo).reduce((x,w)=>x+1+(w.members||[]).length+(w.kaiju||[]).length,0),0);
   box.innerHTML=`
-    <div class="spot" style="--c:var(--${s.c})" onclick="showSeries('${k}')">
+    <div class="spot" style="--c:${seriesColor(s)}" onclick="showSeries('${k}')">
       <div class="spot-h"><span class="tag">// UPDATE</span><span class="ln"></span></div>
       <div class="spot-meta">${esc(g.jp)} ${esc(g.ko)}<br>${esc(s.jp)}</div>
       <div class="spot-badge">★ ${esc(s.en)}</div>
@@ -1795,9 +1796,9 @@ function workCard(s,w,eIdx,wi){
   const img=w.img?`<img src="${iu(w.img)}" alt="${esc(w.ko)}" loading="lazy">`
     :`<span class="ph">${(esc(w.no).replace(/[^0-9]/g,'')||esc(w.ko)[0]||'?')}</span>`;
   const tag=w.tag?`<span class="tag ${w.tag}">${tagLabel(w.tag)}</span>`
-    :`<span class="dot" style="color:var(--${s.c})"></span>`;
+    :`<span class="dot" style="color:${seriesColor(s)}"></span>`;
   const sub=[w.year,w.motif].filter(Boolean).join(' · ');
-  return `<div class="rcard wcard clk" style="--c:var(--${s.c})"
+  return `<div class="rcard wcard clk" style="--c:${seriesColor(s)}"
     onclick="openWork('${curSeriesKey}',${eIdx},${wi})">
     <div class="thumb"><span class="crail"></span>${tag}<span class="no">${esc(w.no||'—')}</span>${img}</div>
     <div class="meta"><div class="nm">${esc(w.ko)}</div><div class="jp">${esc(w.jp)}</div>${sub?`<div class="sub">${esc(sub)}</div>`:''}</div>
@@ -2033,7 +2034,7 @@ function openEntity(key,eIdx,wi,type,idx){
 
 /* ===== UI 유틸 ===== */
 function switchView(id){document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.getElementById(id).classList.add('active');}
-function setAccent(c){const r=document.documentElement.style;r.setProperty('--acc',`var(--${c})`);}
+function setAccent(c){const r=document.documentElement.style;r.setProperty('--acc',String(c).startsWith('#')?c:`var(--${c})`);}
 function setCrumb(items){
   document.getElementById('crumb').innerHTML=items.map((it,i)=>{
     const node=it.cur?`<span class="cur">${esc(it.t)}</span>`:`<a onclick="${it.fn}">${esc(it.t)}</a>`;
