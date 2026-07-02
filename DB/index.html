@@ -282,6 +282,12 @@ button{font-family:inherit}
 .m-row .k{font-size:12.5px;color:var(--dim)}
 .m-row .v{font-size:13px;text-align:right;max-width:62%}
 .m-row .v.dim{color:var(--faint);font-style:italic}
+/* 그룹 라인 (탭 내 카드 구분선) */
+.grp-line{grid-column:1/-1;display:flex;align-items:center;gap:10px;margin:10px 2px 2px}
+.grp-line::before{content:"";width:14px;height:3px;border-radius:3px;background:var(--acc);flex:0 0 auto}
+.grp-line .lbl{font-family:var(--disp);font-weight:600;font-size:16px;letter-spacing:.05em;color:var(--acc);white-space:nowrap}
+.grp-line .gjp{font-family:var(--jp);font-size:11px;color:var(--faint);white-space:nowrap}
+.grp-line::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,color-mix(in srgb,var(--acc) 40%,var(--line2)),transparent)}
 /* skills (스탯바 느낌) */
 .m-skills{list-style:none;display:flex;flex-direction:column;gap:11px}
 .m-skills li{border:1px solid var(--line);border-left:3px solid var(--c);border-radius:0 9px 9px 0;background:var(--panel2);padding:11px 13px}
@@ -1784,6 +1790,10 @@ function getSeries(key){for(const g of Object.values(DATA))if(g&&g.series&&g.ser
 function getSeriesGroup(key){for(const g of Object.values(DATA))if(g&&g.series&&g.series[key])return g;return null;}
 function seriesTotal(s){return s.eras.reduce((a,e)=>a+e.works.filter(w=>!w._todo).length,0);}
 function esc(s){return String(s==null?'':s);}
+/* ── 그룹 라인(구분선) 헬퍼 ── */
+function isDiv(it){return !!(it&&it._divider);}
+function realList(list){return (list||[]).filter(x=>!isDiv(x));}
+function grpLineHTML(it,idx){return `<div class="grp-line" data-idx="${idx==null?'':idx}"><span class="lbl">${esc(it.label||'그룹')}</span>${it.jp?`<span class="gjp">${esc(it.jp)}</span>`:''}</div>`;}
 function iu(p){
   const s=String(p==null?'':p);
   if(!s)return s;
@@ -1815,7 +1825,7 @@ document.addEventListener('error',function(e){
 function totalStats(){
   let works=0,series=0,heroes=0,kaiju=0;
   for(const g of Object.values(DATA)){if(!g||!g.series)continue;for(const k in g.series){series++;const s=g.series[k];
-    for(const e of s.eras)for(const w of e.works){works++;heroes+=(w.members||[]).length;kaiju+=(w.kaiju||[]).length;}}}
+    for(const e of s.eras)for(const w of e.works){works++;heroes+=realList(w.members).length;kaiju+=realList(w.kaiju).length;}}}
   return {works,series,heroes,kaiju};
 }
 
@@ -1871,7 +1881,7 @@ function renderSpotlight(){
   cands.sort((a,b)=>b.latest-a.latest);
   const {k,s,g,works}=cands[0];
   const lead=works.slice().sort((a,b)=>(parseInt(b.year)||0)-(parseInt(a.year)||0))[0];
-  const entries=s.eras.reduce((a,e)=>a+e.works.filter(w=>!w._todo).reduce((x,w)=>x+1+(w.members||[]).length+(w.kaiju||[]).length,0),0);
+  const entries=s.eras.reduce((a,e)=>a+e.works.filter(w=>!w._todo).reduce((x,w)=>x+1+realList(w.members).length+realList(w.kaiju).length,0),0);
   box.innerHTML=`
     <div class="spot" style="--c:${seriesColor(s)}" onclick="showSeries('${k}')">
       <div class="spot-h"><span class="tag">// UPDATE</span><span class="ln"></span></div>
@@ -1970,8 +1980,8 @@ function openWork(key,eIdx,wi,fromRoute){
     <div class="ko">${esc(w.ko)}</div><div class="jp">${esc(w.jp)}</div></div>`;
 
   // 탭 (데이터 있는 것 + 폼 + 항상 정보)
-  const counts={heroes:(w.members||[]).length,kaiju:(w.kaiju||[]).length,arsenal:(w.arsenal||[]).length,
-    machines:(w.machines||[]).length,forms:forms.length,org:(w.orgs||[]).length};
+  const counts={heroes:realList(w.members).length,kaiju:realList(w.kaiju).length,arsenal:realList(w.arsenal).length,
+    machines:realList(w.machines).length,forms:realList(forms).length,org:realList(w.orgs).length};
   const tabs=CAT.filter(c=>counts[c.id]>0).map(c=>({...c,n:counts[c.id]}));
   tabs.push({id:'info',label:'정보',ic:'📋',n:null});
   document.getElementById('w-tabs').innerHTML=tabs.map((t,i)=>
@@ -1995,14 +2005,17 @@ function switchTab(i){
 function catLabel(cat,c){return (cat.def&&cat.def[c])||cat.label;}
 
 function paneCards(cat,list,key,eIdx,wi){
-  if(!list.length)return emptyPane(cat.ic,cat.label);
-  const cards=list.map((it,i)=>{
+  if(!realList(list).length)return emptyPane(cat.ic,cat.label);
+  let num=0;
+  const cards=(list||[]).map((it,i)=>{
+    if(isDiv(it))return grpLineHTML(it,i);
+    num++;
     const click=cat.id==='heroes'?`openHero('${key}',${eIdx},${wi},${i})`:`openEntity('${key}',${eIdx},${wi},'${cat.id}',${i})`;
-    return entCard(it,click,i+1,cat.id);
+    return entCard(it,click,num,cat.id,i);
   }).join('');
   return `<div class="roster">${cards}</div>`;
 }
-function entCard(it,click,num,catId){
+function entCard(it,click,num,catId,idx){
   const thumb=(it.media&&it.media.src)?mediaInner(it.media)
     :(it.img||it.photo)?`<img src="${iu(it.img||it.photo)}" alt="${esc(it.name)}" loading="lazy">`
     :`<span class="ph">${esc((it.name||'?')[0])}</span>`;
@@ -2013,7 +2026,7 @@ function entCard(it,click,num,catId){
   const sub=it.sub||it.cat||'';
   const cvar=it.color?` style="--c:${it.color}"`:'';
   const thumbCls=catId==='heroes'?'thumb hero-thumb':'thumb';
-  return `<div class="rcard clk"${cvar} onclick="${click}">
+  return `<div class="rcard clk"${cvar} data-idx="${idx}" onclick="${click}">
     <div class="${thumbCls}"${itemThumbAttr(it)}>${rail}${dot}${no}${ep}${thumb}</div>
     <div class="meta"><div class="nm">${esc(it.name)}</div>${it.jp?`<div class="jp">${esc(it.jp)}</div>`:''}${sub?`<div class="sub">${esc(sub)}</div>`:''}</div>
   </div>`;
@@ -2029,7 +2042,7 @@ function emptyPane(ic,label){
    아직 폼 데이터가 없는 작품은 기존처럼 영웅 슈트에서 자동 생성(빈 탭 방지용 레거시 폴백). */
 function collectForms(w){
   if(Array.isArray(w.forms)&&w.forms.length){
-    return w.forms.map((f,fi)=>({fi,name:f.name,jp:f.jp,img:f.img,color:f.color,sub:f.sub||'폼',_f:f,_independent:true}));
+    return w.forms.map((f,fi)=> (f&&f._divider) ? {fi,_divider:true,label:f.label,jp:f.jp} : ({fi,name:f.name,jp:f.jp,img:f.img,color:f.color,sub:f.sub||'폼',_f:f,_independent:true}));
   }
   const forms=[];
   (w.members||[]).forEach((h,hi)=>{
@@ -2040,14 +2053,16 @@ function collectForms(w){
   return forms;
 }
 function paneForms(forms,key,eIdx,wi){
-  if(!forms.length)return emptyPane('🔥','폼');
+  if(!realList(forms).length)return emptyPane('🔥','폼');
   const cards=forms.map((f,i)=>{
+    if(isDiv(f))return grpLineHTML(f,f.fi);
     const thumb=f.img?`<img src="${iu(f.img)}" alt="${esc(f.name)}" loading="lazy">`:`<span class="ph">${esc((f.name||'?')[0])}</span>`;
     const rail=f.color?`<span class="crail" style="background:linear-gradient(180deg,${f.color},transparent 85%)"></span>`:`<span class="crail"></span>`;
     const cvar=f.color?` style="--c:${f.color}"`:'';
     const attrObj=f._independent?f._f:f._h;
+    const idx=f._independent?f.fi:f.hi;
     const click=f._independent?`openForm('${key}',${eIdx},${wi},${f.fi})`:`openHero('${key}',${eIdx},${wi},${f.hi})`;
-    return `<div class="rcard clk"${cvar} onclick="${click}">
+    return `<div class="rcard clk"${cvar} data-idx="${idx}" onclick="${click}">
       <div class="thumb hero-thumb"${itemThumbAttr(attrObj)}>${rail}<span class="no">${esc(f.sub)}</span>${thumb}</div>
       <div class="meta"><div class="nm">${esc(f.name)}</div>${f.jp?`<div class="jp">${esc(f.jp)}</div>`:''}</div>
     </div>`;
@@ -2103,7 +2118,7 @@ function toggleHeroImg(btn){
 }
 function openHero(key,eIdx,wi,hi){
   const w=getSeries(key).eras[eIdx].works[wi];
-  const h=(w.members||[])[hi];if(!h)return;
+  const h=(w.members||[])[hi];if(!h||h._divider)return;
   const rail=h.color?`<span class="crail" style="background:linear-gradient(180deg,${h.color},transparent 85%)"></span>`:`<span class="crail" style="background:var(--acc)"></span>`;
   if(h.person){
     const pimg=h.img?`<img src="${iu(h.img)}" alt="${esc(h.name)}">`:`<span class="ph">${esc((h.name||'?')[0])}</span>`;
@@ -2141,6 +2156,7 @@ function openHero(key,eIdx,wi,hi){
       <div class="m-sec"><div class="m-sec-h">✨ 변신</div>${mediaSlot(h.henshin,'변신 GIF·영상')}</div>
       <div class="m-sec"><div class="m-sec-h">스펙</div>
         <div class="m-row"><span class="k">🔧 변신 아이템</span><span class="v ${h.item&&h.item!=='—'?'':'dim'}">${(h.item&&h.item!=='—')?esc(h.item):'준비 중'}</span></div>
+        <div class="m-row"><span class="k">⚔️ 전용 무기</span><span class="v ${h.weapon&&h.weapon!=='—'?'':'dim'}">${(h.weapon&&h.weapon!=='—')?esc(h.weapon):'준비 중'}</span></div>
         <div class="m-row"><span class="k">🤖 전용 메카·탈것</span><span class="v ${h.mecha&&h.mecha!=='—'?'':'dim'}">${(h.mecha&&h.mecha!=='—')?esc(h.mecha):'준비 중'}</span></div>
       </div>
       <div class="m-sec"><div class="m-sec-h">⚡ 스킬 · 필살기 <span class="cnt">${skills.length}</span></div>
@@ -2150,7 +2166,7 @@ function openHero(key,eIdx,wi,hi){
 function openEntity(key,eIdx,wi,type,idx){
   const w=getSeries(key).eras[eIdx].works[wi];
   const map={arsenal:w.arsenal,machines:w.machines,kaiju:w.kaiju,org:w.orgs};
-  const list=map[type]||[];const it=list[idx];if(!it)return;
+  const list=map[type]||[];const it=list[idx];if(!it||it._divider)return;
   const kicker={arsenal:'⚔️ 무장 · 무기',machines:'🤖 장비 · 메카',kaiju:'👾 괴수 · 우주인',org:'🛡️ 조직 · 집단'}[type];
   const vis=(it.media&&it.media.src)?mediaInner(it.media)
     :(it.photo||it.img)?`<img src="${iu(it.photo||it.img)}" alt="${esc(it.name)}">`
@@ -2176,11 +2192,16 @@ function openEntity(key,eIdx,wi,type,idx){
 
 function openForm(key,eIdx,wi,fi){
   const w=getSeries(key).eras[eIdx].works[wi];
-  const f=(w.forms||[])[fi];if(!f)return;
+  const f=(w.forms||[])[fi];if(!f||f._divider)return;
   const rail=f.color?`<span class="crail" style="background:linear-gradient(180deg,${f.color},transparent 85%)"></span>`:`<span class="crail" style="background:var(--acc)"></span>`;
   const img=f.img?`<img src="${iu(f.img)}" alt="${esc(f.name)}">`:`<span class="ph">${esc((f.name||'?')[0])}</span>`;
-  const chips=[f.sub?`<span class="m-chip acc">${esc(f.sub)}</span>`:'',
-    f.item&&f.item!=='—'?`<span class="m-chip">🔧 ${esc(f.item)}</span>`:''].filter(Boolean).join('');
+  const chips=f.sub?`<span class="m-chip acc">${esc(f.sub)}</span>`:'';
+  const specRows=[
+    (f.item&&f.item!=='—')?`<div class="m-row"><span class="k">🔧 변신 아이템</span><span class="v">${esc(f.item)}</span></div>`:'',
+    (f.weapon&&f.weapon!=='—')?`<div class="m-row"><span class="k">⚔️ 전용 무기</span><span class="v">${esc(f.weapon)}</span></div>`:'',
+    (f.mecha&&f.mecha!=='—')?`<div class="m-row"><span class="k">🤖 전용 메카·탈것</span><span class="v">${esc(f.mecha)}</span></div>`:''
+  ].filter(Boolean).join('');
+  const specSec=specRows?`<div class="m-sec"><div class="m-sec-h">스펙</div>${specRows}</div>`:'';
   const skills=f.skills||[];
   const skillList=skills.length
     ?skills.map(s=>`<li><div class="sk-nm">${esc(s.name)}${s.jp?`<span>${esc(s.jp)}</span>`:''}</div>${s.desc?`<div class="sk-d">${esc(s.desc)}</div>`:''}${(s.media&&s.media.src)?`<div style="margin-top:8px">${mediaSlot(s.media)}</div>`:''}</li>`).join('')
@@ -2194,6 +2215,7 @@ function openForm(key,eIdx,wi,fi){
       ${f.jp?`<div class="m-jp">${esc(f.jp)}</div>`:''}
       ${chips?`<div class="m-chips">${chips}</div>`:''}
       ${f.desc?`<p class="m-desc">${esc(f.desc)}</p>`:''}
+      ${specSec}
       ${henshin}
       <div class="m-sec"><div class="m-sec-h">⚡ 스킬 · 필살기 <span class="cnt">${skills.length}</span></div>
         <ul class="m-skills">${skillList}</ul></div>
