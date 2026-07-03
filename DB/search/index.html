@@ -65,6 +65,37 @@ h1 .jp{display:block;font-family:var(--jp);font-weight:700;font-size:.24em;lette
 .qk{padding:5px 11px;border:1px dashed var(--line2);border-radius:999px;background:none;color:var(--faint);font-size:11.5px;cursor:pointer;transition:.15s;font-family:var(--jp)}
 .qk:hover{color:var(--cyan);border-color:var(--cyan)}
 
+/* ── 3분류 태그 필터 (이름/폼/행동 — 편집기 이미지 관리와 동일 데이터) ── */
+.tagbar{max-width:760px;margin:16px auto 0;display:none;flex-direction:column;gap:7px;padding:13px 15px;background:var(--panel);border:1px solid var(--line);border-radius:13px}
+.tagbar.show{display:flex}
+.trow{display:flex;align-items:flex-start;gap:9px;flex-wrap:wrap}
+.tlabel{flex:0 0 auto;width:38px;font-family:var(--mono);font-size:10px;letter-spacing:.5px;padding-top:6px;text-transform:uppercase;color:var(--faint)}
+.trow[data-cat="name"] .tlabel{color:#87CEFF}
+.trow[data-cat="form"] .tlabel{color:#9be29b}
+.trow[data-cat="action"] .tlabel{color:#FFB3C8}
+.tchips{display:flex;flex-wrap:wrap;gap:6px;flex:1;min-width:0}
+.tchips .none{font-size:10.5px;color:var(--faint);align-self:center}
+.tchip{display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border:1px solid var(--line2);border-radius:999px;background:var(--bg2);color:var(--dim);font-size:12px;cursor:pointer;transition:.14s;font-family:var(--jp)}
+.tchip:hover{color:var(--ink);border-color:var(--dim);transform:translateY(-1px)}
+.tchip .n{font-family:var(--mono);font-size:9.5px;opacity:.7}
+.tchip.on{color:#06080f;font-weight:700;border-color:transparent}
+.trow[data-cat="name"] .tchip.on{background:#87CEFF}
+.trow[data-cat="form"] .tchip.on{background:#9be29b}
+.trow[data-cat="action"] .tchip.on{background:#FFB3C8}
+.tagbar .tfoot{display:flex;align-items:center;gap:10px;margin-top:2px}
+.tagbar .tclr{border:1px solid var(--line2);background:none;color:var(--faint);border-radius:7px;font-family:var(--mono);font-size:10px;padding:5px 11px;cursor:pointer}
+.tagbar .tclr:hover{color:var(--ink);border-color:var(--pink)}
+.tagbar .tinfo{font-size:10.5px;color:var(--faint)}
+.tagbar .tinfo b{color:var(--cyan);font-weight:400}
+/* 카드/라이트박스 태그 칩 */
+.card .tgs{display:flex;flex-wrap:wrap;gap:3px;margin-top:5px}
+.tg{font-size:9px;padding:2px 7px;border-radius:999px;line-height:1.35;font-family:var(--jp)}
+.tg.name{background:rgba(135,206,255,.14);color:#bfe0ff}
+.tg.form{background:rgba(155,226,155,.14);color:#c6ecc6}
+.tg.action{background:rgba(255,179,200,.15);color:#ffcede}
+.lb .tgs{display:flex;flex-wrap:wrap;gap:5px;margin-top:10px}
+.lb .tgs .tg{font-size:11px;padding:4px 10px}
+
 /* status / results */
 .status{max-width:1100px;margin:30px auto 0;font-family:var(--mono);font-size:12px;letter-spacing:.14em;color:var(--faint);display:flex;align-items:center;gap:12px}
 .status .ln{flex:1;height:1px;background:linear-gradient(90deg,var(--line2),transparent)}
@@ -141,7 +172,7 @@ h1 .jp{display:block;font-family:var(--jp);font-weight:700;font-size:.24em;lette
   <div class="eye">TOKUSATSU IMAGE FINDER</div>
   <h1><span class="jp">画像検索</span>이미지 검색</h1>
   <p class="lead">DEX에 등록된 <b>사이트 안의 사진</b>을 한글로 찾습니다. 파일명이 영어여도 상관없어요 —
-    <b>고레인저 레드</b>, <b>아카 전신</b>, <b>변신 전</b>, <b>바리도린</b>처럼 이름·색·상태로 검색하세요.</p>
+    <b>고레인저 레드</b>, <b>아카 전신</b>, <b>변신 전</b>처럼 검색하거나, 아래 <b>이름·폼·행동</b> 태그를 눌러 골라내세요.</p>
 
   <div class="searchbox">
     <div class="field">
@@ -151,6 +182,13 @@ h1 .jp{display:block;font-family:var(--jp);font-weight:700;font-size:.24em;lette
     </div>
     <div class="filters" id="filters"></div>
     <div class="quick" id="quick"></div>
+  </div>
+
+  <div class="tagbar" id="tagbar">
+    <div class="trow" data-cat="name"><span class="tlabel">이름</span><div class="tchips" data-chips="name"></div></div>
+    <div class="trow" data-cat="form"><span class="tlabel">폼</span><div class="tchips" data-chips="form"></div></div>
+    <div class="trow" data-cat="action"><span class="tlabel">행동</span><div class="tchips" data-chips="action"></div></div>
+    <div class="tfoot"><button class="tclr" id="tagClr">태그 초기화</button><span class="tinfo" id="tagInfo"></span></div>
   </div>
 
   <div class="gate" id="gate">
@@ -180,6 +218,19 @@ h1 .jp{display:block;font-family:var(--jp);font-weight:700;font-size:.24em;lette
 const $=s=>document.querySelector(s);
 let INDEX=[];            // 검색 인덱스 (이미지 1장 = 1항목)
 let activeCat='all';
+/* ── 3분류 태그 (편집기 '이미지 관리'와 동일한 DATA._imgmeta 사용) ── */
+const TAG_CATS=['name','form','action'];
+const TAG_LABEL={name:'이름',form:'폼',action:'행동'};
+let META={pool:{},tags:{},gallery:[]};
+let tagSel={name:new Set(),form:new Set(),action:new Set()};
+function tagsOf(p){
+  const t=p&&META.tags&&META.tags[p];
+  return {
+    name:(t&&Array.isArray(t.name))?t.name:[],
+    form:(t&&Array.isArray(t.form))?t.form:[],
+    action:(t&&Array.isArray(t.action))?t.action:[]
+  };
+}
 
 /* ── 유틸 ── */
 function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
@@ -227,16 +278,23 @@ function colorName(hex){
 }
 
 /* ── DATA → 검색 인덱스 ── */
-const CAT_ORDER=['영웅','폼','괴수','무장','장비','조직','배너','기타'];
+const CAT_ORDER=['영웅','폼','괴수','무장','장비','조직','배너','갤러리','기타'];
 function pushEntry(list,e){
   if(!e.img)return;
-  /* 확장: tags / alias 필드가 있으면 그대로 검색 대상 (편집기에서 나중에 태그 입력 지원 예정) */
+  /* 확장: tags / alias 필드 + 3분류 태그(이름/폼/행동)가 있으면 그대로 검색 대상 */
   const extra=[].concat(e.src&&e.src.tags||[],e.src&&e.src.alias||[],e.src&&e.src.aliases||[]).filter(Boolean);
-  const hay1=[e.name,e.jp,e.sub,e.kind,e.cat,e.work,e.workJp,e.series,e.seriesEn,e.colorKw,...(e.kw||[]),...extra].map(norm).join('¦');
+  const tg=tagsOf(e.img);
+  const hay1=[e.name,e.jp,e.sub,e.kind,e.cat,e.work,e.workJp,e.series,e.seriesEn,e.colorKw,...(e.kw||[]),...extra,...tg.name,...tg.form,...tg.action].map(norm).join('¦');
   const hay2=[e.item,e.weapon,e.mecha,e.desc].map(norm).join('¦');
-  list.push({...e,hay1,hay2,nName:norm(e.name),nJp:norm(e.jp)});
+  list.push({...e,tg,hay1,hay2,nName:norm(e.name),nJp:norm(e.jp)});
 }
 function buildIndex(DATA){
+  const m=(DATA&&DATA._imgmeta&&typeof DATA._imgmeta==='object')?DATA._imgmeta:{};
+  META={
+    pool:(m.pool&&typeof m.pool==='object')?m.pool:{},
+    tags:(m.tags&&typeof m.tags==='object')?m.tags:{},
+    gallery:Array.isArray(m.gallery)?m.gallery:[]
+  };
   const out=[];
   for(const g of Object.values(DATA)){
     if(!g||!g.series)continue;
@@ -273,15 +331,32 @@ function buildIndex(DATA){
       });});
     }
   }
+  /* 갤러리(느슨한) 이미지 — 편집기 '이미지 관리'에서 드롭/업로드한 사진 */
+  META.gallery.forEach(gi=>{
+    if(!gi||!gi.img)return;
+    const tg=tagsOf(gi.img);
+    const nm=tg.name[0]||tg.form[0]||tg.action[0]||String(gi.img).split('/').pop().replace(/\.[a-z0-9]+$/i,'');
+    pushEntry(out,{src:gi,img:gi.img,name:nm,jp:'',sub:'',cat:'갤러리',kind:'갤러리',work:'갤러리',workJp:'',series:'',seriesEn:'',href:'',color:'',kw:['갤러리','gallery']});
+  });
   return out;
 }
 
 /* ── 검색 ── */
+function tagMatch(e){
+  for(const c of TAG_CATS){
+    if(!tagSel[c].size)continue;
+    const have=(e.tg&&e.tg[c])||[];
+    for(const t of tagSel[c])if(!have.includes(t))return false;
+  }
+  return true;
+}
+function tagSelCount(){return TAG_CATS.reduce((a,c)=>a+tagSel[c].size,0);}
 function search(q){
   const nq=norm(q);
   const tokens=q.split(/\s+/).map(norm).filter(Boolean);
   let pool=INDEX;
   if(activeCat!=='all')pool=pool.filter(e=>e.cat===activeCat);
+  if(tagSelCount())pool=pool.filter(tagMatch);
   if(!nq)return pool.map(e=>({e,score:0}));
   const res=[];
   for(const e of pool){
@@ -324,13 +399,50 @@ function renderQuick(){
     const q=$('#q');q.value=(q.value.trim()+' '+b.textContent).trim();q.focus();run();
   }));
 }
+/* ── 3분류 태그 필터 렌더 ──
+   이름→폼→행동을 조합해 골라도 되고, 아무 태그 하나만 단독으로 눌러도 됨.
+   누른 태그를 전부 가진 사진만 남는다. */
+function tagPool(c){
+  const set=new Set(Array.isArray(META.pool[c])?META.pool[c]:[]);
+  for(const p in META.tags){const t=META.tags[p];if(t&&Array.isArray(t[c]))for(const x of t[c])set.add(x);}
+  return [...set];
+}
+function tagCount(c,t){let n=0;for(const e of INDEX)if(e.tg&&e.tg[c].includes(t))n++;return n;}
+function renderTagBar(){
+  const bar=$('#tagbar');
+  let any=false;
+  for(const c of TAG_CATS){
+    const host=bar.querySelector(`[data-chips="${c}"]`);
+    const pool=tagPool(c);
+    if(pool.length)any=true;
+    host.innerHTML=pool.map(t=>
+      `<button class="tchip ${tagSel[c].has(t)?'on':''}" data-c="${c}" data-t="${esc(t)}">${esc(t)}<span class="n">${tagCount(c,t)}</span></button>`
+    ).join('')||'<span class="none">태그 없음 — 편집기 🖼 이미지 관리에서 붙일 수 있어</span>';
+    host.querySelectorAll('.tchip').forEach(b=>b.addEventListener('click',()=>{
+      const s=tagSel[b.dataset.c];
+      if(s.has(b.dataset.t))s.delete(b.dataset.t);else s.add(b.dataset.t);
+      renderTagBar();run();
+    }));
+  }
+  bar.classList.toggle('show',any);
+  const sel=[];for(const c of TAG_CATS)for(const t of tagSel[c])sel.push(t);
+  $('#tagInfo').innerHTML=sel.length?`선택: <b>${sel.map(esc).join(' + ')}</b>`:'태그를 누르면 그 태그가 붙은 사진만 나와';
+  $('#tagClr').style.visibility=sel.length?'visible':'hidden';
+}
+$('#tagClr').addEventListener('click',()=>{
+  for(const c of TAG_CATS)tagSel[c].clear();
+  renderTagBar();run();
+});
 function cardHTML(e,i){
-  const sq=(e.cat==='괴수'||e.cat==='무장'||e.cat==='장비'||e.cat==='조직');
+  const sq=(e.cat==='괴수'||e.cat==='무장'||e.cat==='장비'||e.cat==='조직'||e.cat==='갤러리');
+  const tgs=[];
+  for(const c of TAG_CATS)for(const t of (e.tg&&e.tg[c])||[])tgs.push(`<span class="tg ${c}">${esc(t)}</span>`);
   return `<div class="card ${sq?'sq':''}" data-i="${i}" style="--c:${e.color||'var(--cyan)'}">
     <div class="th"><span class="rail"></span><span class="kd">${esc(e.kind)}</span>
       <img loading="lazy" src="${iu(e.img)}" alt="${esc(e.name)}" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'ph',textContent:'${esc((e.name||'?')[0])}'}))"></div>
     <div class="bd"><div class="nm">${esc(e.name)}</div>
-      <div class="sub">${e.jp?`<span>${esc(e.jp)}</span>`:''}<span class="w">${esc(e.work)}</span></div></div>
+      <div class="sub">${e.jp?`<span>${esc(e.jp)}</span>`:''}<span class="w">${esc(e.work)}</span></div>
+      ${tgs.length?`<div class="tgs">${tgs.join('')}</div>`:''}</div>
   </div>`;
 }
 let lastRes=[];
@@ -341,7 +453,9 @@ function run(){
   const res=search(q);
   lastRes=res;
   $('#status').style.display='flex';
-  $('#stTx').innerHTML=q.trim()?`"<b>${esc(q.trim())}</b>" 결과 <b>${res.length}</b>장`:`전체 <b>${res.length}</b>장`;
+  const sel=[];for(const c of TAG_CATS)for(const t of tagSel[c])sel.push(t);
+  const selTx=sel.length?` · 태그 <b>${sel.map(esc).join(' + ')}</b>`:'';
+  $('#stTx').innerHTML=(q.trim()?`"<b>${esc(q.trim())}</b>" 결과 <b>${res.length}</b>장`:`전체 <b>${res.length}</b>장`)+selTx;
   $('#grid').innerHTML=res.map((r,i)=>cardHTML(r.e,i)).join('');
   $('#grid').querySelectorAll('.card').forEach(c=>c.addEventListener('click',()=>openLB(+c.dataset.i)));
   const emp=$('#empty');
@@ -361,6 +475,9 @@ function openLB(i){
   const r=lastRes[i];if(!r)return;
   const e=r.e;
   $('#lbBox').style.setProperty('--c',e.color||'var(--cyan)');
+  const tgs=[];
+  for(const c of TAG_CATS)for(const t of (e.tg&&e.tg[c])||[])tgs.push(`<span class="tg ${c}">${esc(t)}</span>`);
+  const meta=[e.series,e.work,e.sub].filter(Boolean).map(v=>`<span>${esc(v)}</span>`).join('');
   $('#lbBox').innerHTML=`
     <div class="img"><span class="rail"></span><img src="${iu(e.img)}" alt="${esc(e.name)}">
       <button class="x" onclick="closeLB()">×</button></div>
@@ -368,10 +485,11 @@ function openLB(i){
       <div class="kick">${esc(e.cat)} · ${esc(e.kind)}</div>
       <div class="nm">${esc(e.name)}</div>
       ${e.jp?`<div class="jp2">${esc(e.jp)}</div>`:''}
-      <div class="meta"><span>${esc(e.series)}</span><span>${esc(e.work)}</span>${e.sub?`<span>${esc(e.sub)}</span>`:''}</div>
+      ${meta?`<div class="meta">${meta}</div>`:''}
+      ${tgs.length?`<div class="tgs">${tgs.join('')}</div>`:''}
       <div class="acts">
-        <a class="pri" href="${esc(e.href)}">DEX에서 열기</a>
-        <a href="${iu(e.img)}" target="_blank" rel="noopener">원본 새 탭</a>
+        ${e.href?`<a class="pri" href="${esc(e.href)}">DEX에서 열기</a>`:''}
+        <a ${e.href?'':'class="pri"'} href="${iu(e.img)}" target="_blank" rel="noopener">원본 새 탭</a>
       </div>
     </div>`;
   $('#lb').classList.add('open');
@@ -398,7 +516,7 @@ function boot(text){
   catch(err){$('#gate').classList.add('show');return;}
   INDEX=buildIndex(data);
   $('#gate').classList.remove('show');
-  renderFilters();renderQuick();run();
+  renderFilters();renderQuick();renderTagBar();run();
 }
 fetch('../index.html',{cache:'no-store'}).then(r=>{
   if(!r.ok)throw 0;return r.text();
