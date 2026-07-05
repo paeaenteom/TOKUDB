@@ -2104,7 +2104,7 @@ function openModal(html,color){
   document.body.style.overflow='hidden';
   m.scrollTop=0;
 }
-function closeModal(){document.getElementById('modal-bd').classList.remove('open');document.body.style.overflow='';}
+function closeModal(){document.getElementById('modal-bd').classList.remove('open');document.body.style.overflow='';if(!HASH_LOCK&&location.hash)pushURL(location.pathname);}
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
 
 function toggleHeroImg(btn){
@@ -2119,6 +2119,7 @@ function toggleHeroImg(btn){
 function openHero(key,eIdx,wi,hi){
   const w=getSeries(key).eras[eIdx].works[wi];
   const h=(w.members||[])[hi];if(!h||h._divider)return;
+  setModalHash(w,h);
   const rail=h.color?`<span class="crail" style="background:linear-gradient(180deg,${h.color},transparent 85%)"></span>`:`<span class="crail" style="background:var(--acc)"></span>`;
   if(h.person){
     const pimg=h.img?`<img src="${iu(h.img)}" alt="${esc(h.name)}">`:`<span class="ph">${esc((h.name||'?')[0])}</span>`;
@@ -2167,6 +2168,7 @@ function openEntity(key,eIdx,wi,type,idx){
   const w=getSeries(key).eras[eIdx].works[wi];
   const map={arsenal:w.arsenal,machines:w.machines,kaiju:w.kaiju,org:w.orgs};
   const list=map[type]||[];const it=list[idx];if(!it||it._divider)return;
+  setModalHash(w,it);
   const kicker={arsenal:'⚔️ 무장 · 무기',machines:'🤖 장비 · 메카',kaiju:'👾 괴수 · 우주인',org:'🛡️ 조직 · 집단'}[type];
   const vis=(it.media&&it.media.src)?mediaInner(it.media)
     :(it.photo||it.img)?`<img src="${iu(it.photo||it.img)}" alt="${esc(it.name)}">`
@@ -2193,6 +2195,7 @@ function openEntity(key,eIdx,wi,type,idx){
 function openForm(key,eIdx,wi,fi){
   const w=getSeries(key).eras[eIdx].works[wi];
   const f=(w.forms||[])[fi];if(!f||f._divider)return;
+  setModalHash(w,f);
   const rail=f.color?`<span class="crail" style="background:linear-gradient(180deg,${f.color},transparent 85%)"></span>`:`<span class="crail" style="background:var(--acc)"></span>`;
   const img=f.img?`<img src="${iu(f.img)}" alt="${esc(f.name)}">`:`<span class="ph">${esc((f.name||'?')[0])}</span>`;
   const chips=f.sub?`<span class="m-chip acc">${esc(f.sub)}</span>`:'';
@@ -2249,12 +2252,53 @@ function findWorkBySlug(key,slug){
     if(workSlug(s.eras[e].works[i],e,i)===slug)return{eIdx:e,wi:i};
   return null;
 }
+/* ── 모달 해시 딥링크 (#アカレンジャー) ──
+   모달을 열면 주소 뒤에 #이름(일본어 우선)이 붙어 새로고침·공유·뒤로가기가 모달 단위로 동작.
+   해시가 이미 다른 항목에 쓰였으면 한국어 이름으로, 그것도 겹치면 '·'를 붙여 유일화한다
+   (영웅 탭과 폼 탭에 같은 이름이 양쪽 존재하는 경우 대비). */
+let HASH_LOCK=false;
+function modalLists(w){return [w.members,w.forms,w.kaiju,w.arsenal,w.machines,w.orgs];}
+function modalOpeners(key,eIdx,wi){return [
+  i=>openHero(key,eIdx,wi,i), i=>openForm(key,eIdx,wi,i),
+  i=>openEntity(key,eIdx,wi,'kaiju',i), i=>openEntity(key,eIdx,wi,'arsenal',i),
+  i=>openEntity(key,eIdx,wi,'machines',i), i=>openEntity(key,eIdx,wi,'org',i)];}
+function hashIndex(w){
+  const out=[],used=Object.create(null);
+  modalLists(w).forEach((L,c)=>(L||[]).forEach((it,i)=>{
+    if(!it||it._divider)return;
+    const jp=(it.jp||'').trim(),nm=(it.name||'').trim();
+    let h=jp||nm;if(!h)return;
+    if(used[h]&&nm&&!used[nm])h=nm;
+    while(used[h])h+='·';
+    used[h]=1;out.push({h,c,i,it});
+  }));
+  return out;
+}
+function setModalHash(w,it){
+  if(HASH_LOCK)return;
+  const e=hashIndex(w).find(e=>e.it===it);
+  if(e)pushURL(location.pathname+'#'+encodeURIComponent(e.h));
+}
+function applyHashModal(key,eIdx,wi){
+  let h=(location.hash||'').replace(/^#/,'');
+  try{h=decodeURIComponent(h);}catch(err){}
+  HASH_LOCK=true;
+  try{
+    if(h){
+      const w=getSeries(key).eras[eIdx].works[wi];
+      const idx=hashIndex(w);
+      const e=idx.find(e=>e.h===h)||idx.find(e=>(e.it.jp||'').trim()===h||(e.it.name||'').trim()===h);
+      if(e){modalOpeners(key,eIdx,wi)[e.c](e.i);return;}
+    }
+    closeModal();
+  }finally{HASH_LOCK=false;}
+}
 function routeTo(){
   const rest=location.pathname.replace(/^.*\/DB\/?/,'').replace(/\/$/,'');
   const parts=rest.split('/').filter(Boolean);
   const skey=parts[0],wslug=parts[1];
   if(skey&&getSeries(skey)){
-    if(wslug){const f=findWorkBySlug(skey,wslug);if(f){showSeries(skey,true);openWork(skey,f.eIdx,f.wi,true);return;}}
+    if(wslug){const f=findWorkBySlug(skey,wslug);if(f){showSeries(skey,true);openWork(skey,f.eIdx,f.wi,true);applyHashModal(skey,f.eIdx,f.wi);return;}}
     showSeries(skey,true);return;
   }
   showHome(true);
