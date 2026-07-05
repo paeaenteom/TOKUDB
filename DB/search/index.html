@@ -336,8 +336,10 @@ function buildIndex(DATA){
           if(!h||h._divider)return;
           const ckw=colorName(h.color);
           const common={...base,src:h,name:h.name,jp:h.jp,sub:h.sub,color:h.color,colorKw:ckw,item:h.item,weapon:h.weapon,mecha:h.mecha,desc:h.desc,cat:'영웅'};
-          if(h.img)pushEntry(out,{...common,img:h.img,kind:h.person?'인물':'슈트 전신',kw:h.person?['인물','사람']:['전신','슈트','풀바디','히어로','변신 후']});
-          if(h.imgAlt)pushEntry(out,{...common,img:h.imgAlt,kind:h.imgAltLabel||'변신 전 (본명)',kw:['변신전','변신 전','본명','배우','평상시','민낯']});
+          if(h.img)pushEntry(out,{...common,img:h.img,kind:h.person?'인물':'변신 전',kw:h.person?['인물','사람']:['인물','사람','배우','본명','변신전','변신 전','평상시','민낯']});
+          /* 변신체(슈트) 카드는 사람 이름이 아니라 폼 이름으로 표기 — sub "아카레인저 (アカレンジャー)"에서 추출 */
+          if(h.imgAlt){const fm=String(h.sub||'').match(/^(.+?)\s*[（(](.+?)[）)]\s*$/);
+            pushEntry(out,{...common,name:fm?fm[1].trim():h.name,jp:fm?fm[2].trim():h.jp,img:h.imgAlt,kind:h.imgAltLabel||'기본',kw:['변신체','변신 후','슈트','전신','풀바디','히어로','폼','기본','기본 폼']});}
           (h.skills||[]).forEach(sk=>{ if(sk&&sk.media&&sk.media.type==='image'&&sk.media.src)
             pushEntry(out,{...common,src:sk,img:sk.media.src,name:sk.name||h.name,jp:sk.jp,cat:'영웅',kind:'스킬 · '+(h.name||''),kw:['스킬','필살기','기술']}); });
         });
@@ -366,7 +368,10 @@ function buildIndex(DATA){
     const nm=tg.name[0]||tg.form[0]||tg.action[0]||String(gi.img).split('/').pop().replace(/\.[a-z0-9]+$/i,'');
     pushEntry(out,{src:gi,img:gi.img,name:nm,jp:'',sub:'',cat:'갤러리',kind:'갤러리',work:'갤러리',workJp:'',series:'',seriesEn:'',href:'',color:'',kw:['갤러리','gallery']});
   });
-  return out;
+  /* 같은 이미지 파일은 그리드에 1회만 — 영웅의 변신체(imgAlt)와 폼 탭 '기본 폼'이
+     같은 슈트 사진을 공유하므로 먼저 등록된 항목(영웅 쪽 라벨)만 남긴다 */
+  const seenImg=Object.create(null);
+  return out.filter(e=>{const k=String(e.img);if(seenImg[k])return false;seenImg[k]=1;return true;});
 }
 
 /* ── 검색 ── */
