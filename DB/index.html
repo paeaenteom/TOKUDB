@@ -295,6 +295,7 @@ button{font-family:inherit}
 .sk-nm{font-weight:700;font-size:13.5px;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
 .sk-nm span{font-family:var(--jp);font-weight:400;font-size:11.5px;color:var(--dim)}
 .sk-d{font-size:12.5px;color:var(--dim);line-height:1.6;margin-top:5px}
+.fx-sound{margin-top:6px;font-family:var(--mono);font-size:12.5px;color:var(--c);letter-spacing:.3px;line-height:1.5}
 /* media */
 .media{position:relative;width:100%;aspect-ratio:16/9;border-radius:9px;overflow:hidden;background:var(--bg2);border:1px solid var(--line);display:grid;place-items:center;margin-top:8px}
 .media img,.media video,.media iframe{width:100%;height:100%;object-fit:cover;border:0}
@@ -2137,6 +2138,19 @@ function mediaSlot(m,ph){
 }
 
 /* ===== 모달 ===== */
+/* '기능·기믹' 섹션 — 스킬 리스트와 같은 스타일.
+   각 항목: 이름(+일본어) / 🔊 사운드 텍스트(변신음 등, 선택) / 설명(선택) / 미디어 GIF·영상(선택) */
+function funcsSec(list,icon,title){
+  const L=(list||[]).filter(f=>f&&(f.name||f.sound||f.desc||(f.media&&f.media.src)));
+  if(!L.length)return '';
+  const items=L.map(f=>`<li>
+    <div class="sk-nm">${esc(f.name||'기능')}${f.jp?`<span>${esc(f.jp)}</span>`:''}</div>
+    ${f.sound?`<div class="fx-sound">🔊 「${esc(f.sound)}」</div>`:''}
+    ${f.desc?`<div class="sk-d">${esc(f.desc)}</div>`:''}
+    ${(f.media&&f.media.src)?`<div style="margin-top:8px">${mediaSlot(f.media)}</div>`:''}
+  </li>`).join('');
+  return `<div class="m-sec"><div class="m-sec-h">${icon} ${title} <span class="cnt">${L.length}</span></div><ul class="m-skills">${items}</ul></div>`;
+}
 function openModal(html,color){
   const m=document.getElementById('modal');
   m.innerHTML=html;
@@ -2196,6 +2210,7 @@ function openHero(key,eIdx,wi,hi){
       ${chips?`<div class="m-chips">${chips}</div>`:''}
       ${h.desc?`<p class="m-desc">${esc(h.desc)}</p>`:''}
       <div class="m-sec"><div class="m-sec-h">✨ 변신</div>${mediaSlot(h.henshin,'변신 GIF·영상')}</div>
+      ${funcsSec(h.funcs,'⚙️','기능 · 사운드')}
       <div class="m-sec"><div class="m-sec-h">스펙</div>
         <div class="m-row"><span class="k">🔧 변신 아이템</span><span class="v ${h.item&&h.item!=='—'?'':'dim'}">${(h.item&&h.item!=='—')?esc(h.item):'준비 중'}</span></div>
         <div class="m-row"><span class="k">⚔️ 전용 무기</span><span class="v ${h.weapon&&h.weapon!=='—'?'':'dim'}">${(h.weapon&&h.weapon!=='—')?esc(h.weapon):'준비 중'}</span></div>
@@ -2229,6 +2244,7 @@ function openEntity(key,eIdx,wi,type,idx){
       ${chips?`<div class="m-chips">${chips}</div>`:''}
       ${specs?`<div class="m-specs">${specs}</div>`:''}
       ${body?`<p class="m-desc">${esc(body)}</p>`:''}
+      ${funcsSec(it.funcs,'⚙️','기능 · 기믹')}
       <div class="m-sec"><div class="m-sec-h">🎬 미디어</div>${mediaSlot(it.media,'GIF · 이미지 · 영상')}</div>
     </div>`,it.color);
 }
@@ -2261,6 +2277,7 @@ function openForm(key,eIdx,wi,fi){
       ${f.desc?`<p class="m-desc">${esc(f.desc)}</p>`:''}
       ${specSec}
       ${henshin}
+      ${funcsSec(f.funcs,'⚙️','기능 · 사운드')}
       <div class="m-sec"><div class="m-sec-h">⚡ 스킬 · 필살기 <span class="cnt">${skills.length}</span></div>
         <ul class="m-skills">${skillList}</ul></div>
     </div>`,f.color);
