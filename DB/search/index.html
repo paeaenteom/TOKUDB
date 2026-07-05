@@ -342,6 +342,8 @@ function buildIndex(DATA){
             pushEntry(out,{...common,name:fm?fm[1].trim():h.name,jp:fm?fm[2].trim():h.jp,img:h.imgAlt,kind:h.imgAltLabel||'기본',kw:['변신체','변신 후','슈트','전신','풀바디','히어로','폼','기본','기본 폼']});}
           (h.skills||[]).forEach(sk=>{ if(sk&&sk.media&&sk.media.type==='image'&&sk.media.src)
             pushEntry(out,{...common,src:sk,img:sk.media.src,name:sk.name||h.name,jp:sk.jp,cat:'영웅',kind:'스킬 · '+(h.name||''),kw:['스킬','필살기','기술']}); });
+          (h.funcs||[]).forEach(fx=>{ if(fx&&fx.media&&fx.media.type==='image'&&fx.media.src)
+            pushEntry(out,{...common,src:fx,img:fx.media.src,name:fx.name||h.name,jp:fx.jp,cat:'영웅',kind:'기능 · '+(h.name||''),kw:['기능','기믹','사운드','변신음']}); });
         });
         (w.forms||[]).forEach(f=>{
           if(!f||f._divider)return;
@@ -350,10 +352,14 @@ function buildIndex(DATA){
           if(f.img)pushEntry(out,{...common,img:f.img,kind:f.sub||'폼',kw:['전신','폼','슈트','form']});
           (f.skills||[]).forEach(sk=>{ if(sk&&sk.media&&sk.media.type==='image'&&sk.media.src)
             pushEntry(out,{...common,src:sk,img:sk.media.src,name:sk.name||f.name,jp:sk.jp,kind:'스킬 · '+(f.name||''),kw:['스킬','필살기','기술']}); });
+          (f.funcs||[]).forEach(fx=>{ if(fx&&fx.media&&fx.media.type==='image'&&fx.media.src)
+            pushEntry(out,{...common,src:fx,img:fx.media.src,name:fx.name||f.name,jp:fx.jp,kind:'기능 · '+(f.name||''),kw:['기능','기믹','사운드','변신음']}); });
         });
         const flat=[['kaiju','괴수',['괴인','몬스터','적']],['arsenal','무장',['무기','웨폰','장비']],['machines','장비',['메카','머신','탈것','비클']],['orgs','조직',['단체','조직','팀']]];
         for(const [k,cat,kw] of flat)(w[k]||[]).forEach(it=>{
           if(!it||it._divider)return;
+          (it.funcs||[]).forEach(fx=>{ if(fx&&fx.media&&fx.media.type==='image'&&fx.media.src)
+            pushEntry(out,{...base,src:fx,img:fx.media.src,name:fx.name||it.name,jp:fx.jp,sub:it.name,color:it.color,colorKw:colorName(it.color),desc:fx.desc,cat,kind:'기능 · '+(it.name||''),kw:['기능','기믹','사운드']}); });
           const img=it.img||it.photo||(it.media&&it.media.type==='image'&&it.media.src)||'';
           if(!img)return;
           pushEntry(out,{...base,src:it,img,name:it.name,jp:it.jp,sub:it.sub||it.cat,color:it.color,colorKw:colorName(it.color),desc:it.desc,cat,kind:it.sub||it.cat||cat,kw});
