@@ -1,8 +1,9 @@
 {
   "cleanUrls": true,
   "rewrites": [
-    { "source": "/IMG/:seg*", "destination": "/DB/search" },
-    { "source": "/DB/:path*", "destination": "/DB" },
-    { "source": "/sim/:path*", "destination": "/sim" }
+    { "source": "/IMG", "destination": "/DB/search" },
+    { "source": "/IMG/(.*)", "destination": "/DB/search" },
+    { "source": "/DB/(.*)", "destination": "/DB" },
+    { "source": "/sim/(.*)", "destination": "/sim" }
   ]
 }
