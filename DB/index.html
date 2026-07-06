@@ -2733,7 +2733,7 @@ function entCard(it,click,num,catId,idx){
     :`<span class="ph">${esc((it.name||'?')[0])}</span>`;
   const rail=it.color?`<span class="crail" style="background:linear-gradient(180deg,${it.color},transparent 85%)"></span>`:`<span class="crail"></span>`;
   const dot=it.color?'':`<span class="dot" style="color:var(--acc)"></span>`;
-  const no=`<span class="no">No.${String(num).padStart(3,'0')}</span>`;
+  const no=`<span class="no">${it.badge?esc(it.badge):'No.'+String(num).padStart(3,'0')}</span>`;
   const ep=it.ep?`<span class="ep">${esc(it.ep)}</span>`:'';
   const sub=it.sub||it.cat||'';
   const cvar=it.color?` style="--c:${it.color}"`:'';
