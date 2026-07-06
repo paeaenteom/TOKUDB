@@ -78,7 +78,7 @@ function buildMap(DATA) {
           for (const fx of (f.funcs || [])) if (fx && fx.media && fx.media.type === 'image' && fx.media.src)
             add(fx.media.src, [fx.name, fx.jp, f.name], [], ['기능', '기믹']);
         }
-        for (const k of ['kaiju', 'arsenal', 'machines', 'orgs']) for (const it of (w[k] || [])) {
+        for (const k of ['people', 'kaiju', 'arsenal', 'machines', 'orgs']) for (const it of (w[k] || [])) {
           if (!it || it._divider) continue;
           const img = it.img || it.photo || (it.media && it.media.type === 'image' && it.media.src);
           if (img) add(img, [it.name, it.jp], [], ['전신']);
