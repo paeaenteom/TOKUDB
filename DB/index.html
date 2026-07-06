@@ -2665,6 +2665,7 @@ function workCard(s,w,eIdx,wi){
 /* ===== 작품 뷰 ===== */
 const CAT=[
   {id:'heroes', key:'members', label:'영웅', ic:'🦸', def:{sentai:'전사',rider:'라이더',metalhero:'메탈히어로',ultra:'울트라전사',gridman:'전사',projectred:'전사',ishinomori:'히어로',toeietc:'히어로',tsuetc:'전사'}},
+  {id:'people', key:'people',  label:'인물', ic:'🧑', def:{}},
   {id:'kaiju',  key:'kaiju',   label:'괴수', ic:'👾', def:{}},
   {id:'arsenal',key:'arsenal', label:'무장', ic:'⚔️', def:{}},
   {id:'machines',key:'machines',label:'장비', ic:'🤖', def:{rider:'머신·장비',sentai:'메카·로봇',ultra:'장비·메카',metalhero:'장비·메카'}},
@@ -2691,7 +2692,7 @@ function openWork(key,eIdx,wi,fromRoute){
     <div class="ko">${esc(w.ko)}</div><div class="jp">${esc(w.jp)}</div></div>`;
 
   // 탭 (데이터 있는 것 + 폼 + 항상 정보)
-  const counts={heroes:realList(w.members).length,kaiju:realList(w.kaiju).length,arsenal:realList(w.arsenal).length,
+  const counts={heroes:realList(w.members).length,people:realList(w.people).length,kaiju:realList(w.kaiju).length,arsenal:realList(w.arsenal).length,
     machines:realList(w.machines).length,forms:realList(forms).length,org:realList(w.orgs).length};
   const tabs=CAT.filter(c=>counts[c.id]>0).map(c=>({...c,n:counts[c.id]}));
   tabs.push({id:'info',label:'정보',ic:'📋',n:null});
@@ -2891,10 +2892,10 @@ function openHero(key,eIdx,wi,hi){
 }
 function openEntity(key,eIdx,wi,type,idx){
   const w=getSeries(key).eras[eIdx].works[wi];
-  const map={arsenal:w.arsenal,machines:w.machines,kaiju:w.kaiju,org:w.orgs};
+  const map={people:w.people,arsenal:w.arsenal,machines:w.machines,kaiju:w.kaiju,org:w.orgs};
   const list=map[type]||[];const it=list[idx];if(!it||it._divider)return;
   setModalHash(w,it);
-  const kicker={arsenal:'⚔️ 무장 · 무기',machines:'🤖 장비 · 메카',kaiju:'👾 괴수 · 우주인',org:'🛡️ 조직 · 집단'}[type];
+  const kicker={people:'🧑 인물 · 관계자',arsenal:'⚔️ 무장 · 무기',machines:'🤖 장비 · 메카',kaiju:'👾 괴수 · 우주인',org:'🛡️ 조직 · 집단'}[type];
   const vis=(it.media&&it.media.src)?mediaInner(it.media)
     :(it.photo||it.img)?`<img src="${iu(it.photo||it.img)}" alt="${esc(it.name)}">`
     :`<span class="ph">${esc((it.name||'?')[0])}</span>`;
@@ -2984,11 +2985,12 @@ function findWorkBySlug(key,slug){
    해시가 이미 다른 항목에 쓰였으면 한국어 이름으로, 그것도 겹치면 '·'를 붙여 유일화한다
    (영웅 탭과 폼 탭에 같은 이름이 양쪽 존재하는 경우 대비). */
 let HASH_LOCK=false;
-function modalLists(w){return [w.members,w.forms,w.kaiju,w.arsenal,w.machines,w.orgs];}
+function modalLists(w){return [w.members,w.forms,w.kaiju,w.arsenal,w.machines,w.orgs,w.people];}
 function modalOpeners(key,eIdx,wi){return [
   i=>openHero(key,eIdx,wi,i), i=>openForm(key,eIdx,wi,i),
   i=>openEntity(key,eIdx,wi,'kaiju',i), i=>openEntity(key,eIdx,wi,'arsenal',i),
-  i=>openEntity(key,eIdx,wi,'machines',i), i=>openEntity(key,eIdx,wi,'org',i)];}
+  i=>openEntity(key,eIdx,wi,'machines',i), i=>openEntity(key,eIdx,wi,'org',i),
+  i=>openEntity(key,eIdx,wi,'people',i)];}
 function hashIndex(w){
   const out=[],used=Object.create(null);
   modalLists(w).forEach((L,c)=>(L||[]).forEach((it,i)=>{
