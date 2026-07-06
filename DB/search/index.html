@@ -355,7 +355,7 @@ function buildIndex(DATA){
           (f.funcs||[]).forEach(fx=>{ if(fx&&fx.media&&fx.media.type==='image'&&fx.media.src)
             pushEntry(out,{...common,src:fx,img:fx.media.src,name:fx.name||f.name,jp:fx.jp,kind:'기능 · '+(f.name||''),kw:['기능','기믹','사운드','변신음']}); });
         });
-        const flat=[['kaiju','괴수',['괴인','몬스터','적']],['arsenal','무장',['무기','웨폰','장비']],['machines','장비',['메카','머신','탈것','비클']],['orgs','조직',['단체','조직','팀']]];
+        const flat=[['people','인물',['인물','사람','조연','관계자','배우']],['kaiju','괴수',['괴인','몬스터','적']],['arsenal','무장',['무기','웨폰','장비']],['machines','장비',['메카','머신','탈것','비클']],['orgs','조직',['단체','조직','팀']]];
         for(const [k,cat,kw] of flat)(w[k]||[]).forEach(it=>{
           if(!it||it._divider)return;
           (it.funcs||[]).forEach(fx=>{ if(fx&&fx.media&&fx.media.type==='image'&&fx.media.src)
