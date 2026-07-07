@@ -2,6 +2,7 @@
   "cleanUrls": true,
   "rewrites": [
     { "source": "/i/(.*)", "destination": "/api/img?p=$1" },
+    { "source": "/summ/(.*)", "destination": "/api/char?p=$1" },
     { "source": "/IMG", "destination": "/DB/search" },
     { "source": "/IMG/(.*)", "destination": "/DB/search" },
     { "source": "/DB/(.*)", "destination": "/DB" },
