@@ -250,8 +250,8 @@ button{font-family:inherit}
 /* ===== 모달 (도시에 카드) ===== */
 .modal-bd{position:fixed;inset:0;z-index:100;background:rgba(4,5,11,.78);backdrop-filter:blur(7px);display:none;align-items:center;justify-content:center;padding:24px}
 .modal-bd.open{display:flex;animation:vin .25s}
-.modal{--c:var(--acc);position:relative;width:100%;max-width:430px;max-height:90vh;overflow-y:auto;background:var(--panel);border:1px solid var(--line2);border-radius:16px;box-shadow:0 30px 80px -30px #000}
-.modal::-webkit-scrollbar{width:8px}.modal::-webkit-scrollbar-thumb{background:var(--line2);border-radius:8px}
+.modal{--c:var(--acc);position:relative;width:100%;max-width:430px;max-height:90vh;overflow-y:auto;background:var(--panel);border:1px solid var(--line2);border-radius:16px;box-shadow:0 30px 80px -30px #000;scrollbar-width:none;-ms-overflow-style:none}
+.modal::-webkit-scrollbar{width:0;height:0;display:none}
 .modal .x{position:absolute;top:13px;right:13px;z-index:6;width:34px;height:34px;border-radius:50%;border:none;cursor:pointer;background:rgba(6,8,15,.6);color:#fff;font-size:19px;display:grid;place-items:center;transition:.18s}
 .modal .x:hover{background:var(--pink-d)}
 .m-hero{position:relative;overflow:hidden;background:linear-gradient(150deg,color-mix(in srgb,var(--c) 30%,var(--panel2)),var(--bg) 125%);display:grid;place-items:center;min-height:230px;border-radius:16px 16px 0 0}
