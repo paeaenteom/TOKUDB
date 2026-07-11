@@ -55,6 +55,7 @@ body{background:var(--bg);color:var(--txt);font-family:'Noto Sans KR',sans-serif
 .entity-panel{background:var(--card);border:1px solid var(--line2);border-radius:5px;padding:14px}
 .entity-name{font-family:'Noto Sans KR';font-weight:700;font-size:15px;color:var(--sky);margin-bottom:3px}
 .entity-series{font-family:var(--mono);font-size:10px;color:var(--dim);letter-spacing:1px;margin-bottom:12px}
+.entity-img{width:100%;max-height:130px;object-fit:contain;border-radius:5px;border:1px solid var(--line2);background:var(--bg);margin-bottom:11px;display:block}
 .bar-row{margin-bottom:8px}
 .bar-label{font-family:var(--mono);font-size:9px;letter-spacing:1px;color:var(--dim);display:flex;justify-content:space-between;margin-bottom:4px}
 .bar-label b{color:var(--txt2)}
@@ -75,6 +76,8 @@ body{background:var(--bg);color:var(--txt);font-family:'Noto Sans KR',sans-serif
 .cmd-btn.pink:hover{border-color:var(--pink);color:var(--pink);background:rgba(255,179,200,.06)}
 .cmd-btn .ico{font-size:11px;opacity:.7}
 .cmd-btn .tag{font-size:9px;color:var(--mute);margin-left:auto;letter-spacing:1px}
+.sel{width:100%;background:var(--bg);border:1px solid var(--line2);border-radius:4px;padding:8px 10px;color:var(--txt);font-family:var(--mono);font-size:11px;outline:none;cursor:pointer}
+.sel:focus{border-color:var(--sky)}
 
 /* ── CHAT ── */
 .chat-wrap{flex:1;min-width:0;display:flex;flex-direction:column;overflow:hidden}
@@ -160,6 +163,7 @@ body{background:var(--bg);color:var(--txt);font-family:'Noto Sans KR',sans-serif
         <div id="entityInfo" style="display:none">
           <div class="entity-name" id="entityName">—</div>
           <div class="entity-series" id="entitySeries">—</div>
+          <img class="entity-img" id="entityImg" style="display:none" alt="">
           <div class="bar-row">
             <div class="bar-label">HP <b id="hpVal">—</b></div>
             <div class="bar"><div class="bar-fill hp" id="hpBar"></div></div>
@@ -173,18 +177,22 @@ body{background:var(--bg);color:var(--txt);font-family:'Noto Sans KR',sans-serif
       </div>
     </div>
     <div class="cmd-section">
-      <!-- API 키 설정 -->
+      <!-- API 키 · 모델 설정 -->
       <div id="apiPanel" style="margin-bottom:16px;padding:12px;border:1px solid var(--line);border-radius:5px;background:rgba(7,10,15,.7)">
-        <div class="cmd-title" style="margin-bottom:8px">// GEMINI API KEY</div>
+        <div class="cmd-title" style="margin-bottom:8px">// CLAUDE API KEY</div>
         <div style="position:relative">
-          <input type="password" id="apiKeyInput" placeholder="Google AI Studio 키 입력..." style="width:100%;background:var(--bg);border:1px solid var(--line2);border-radius:4px;padding:8px 32px 8px 10px;color:var(--txt);font-family:var(--mono);font-size:11px;outline:none">
+          <input type="password" id="apiKeyInput" placeholder="Anthropic 키 (sk-ant-...) 입력..." style="width:100%;background:var(--bg);border:1px solid var(--line2);border-radius:4px;padding:8px 32px 8px 10px;color:var(--txt);font-family:var(--mono);font-size:11px;outline:none">
           <button onclick="toggleKeyVis()" style="position:absolute;right:6px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--mute);cursor:pointer;font-size:12px" id="eyeBtn">👁</button>
         </div>
         <div style="display:flex;gap:6px;margin-top:7px">
           <button onclick="saveApiKey()" class="cmd-btn" style="flex:1;justify-content:center;font-size:11px;padding:6px">저장</button>
-          <a href="https://aistudio.google.com/apikey" target="_blank" class="cmd-btn" style="flex:1;justify-content:center;font-size:10px;padding:6px;text-decoration:none;color:var(--sky)">발급받기 ↗</a>
+          <a href="https://console.anthropic.com/settings/keys" target="_blank" class="cmd-btn" style="flex:1;justify-content:center;font-size:10px;padding:6px;text-decoration:none;color:var(--sky)">발급받기 ↗</a>
         </div>
-        <div id="keyStatus" style="font-family:var(--mono);font-size:9px;color:var(--mute);margin-top:5px;text-align:center">키 미설정</div>
+        <div style="margin-top:9px">
+          <div class="cmd-group-label" style="margin-bottom:5px">모델 선택</div>
+          <select id="modelSel" class="sel" onchange="onModelChange()"></select>
+        </div>
+        <div id="keyStatus" style="font-family:var(--mono);font-size:9px;color:var(--mute);margin-top:6px;text-align:center">키 미설정</div>
       </div>
       <div class="cmd-title">// 빠른 명령</div>
       <div class="cmd-group">
@@ -228,26 +236,27 @@ body{background:var(--bg);color:var(--txt);font-family:'Noto Sans KR',sans-serif
       </div>
       <div class="cmd-group" style="margin-top:16px;padding-top:14px;border-top:1px solid var(--line)">
         <div class="cmd-group-label">예시</div>
+        <button class="cmd-btn" style="font-size:10px" onclick="insertCmd('【소환】[시리즈: 슈퍼전대] [전사: 아카레인저]')">
+          아카레인저 소환 (도감)
+        </button>
         <button class="cmd-btn" style="font-size:10px" onclick="insertCmd('【소환】[시리즈: 울트라맨] [전사: 울트라맨]')">
           울트라맨 소환
         </button>
         <button class="cmd-btn" style="font-size:10px" onclick="insertCmd('【장착】[시리즈: 가면라이더] [전사: 가면라이더 가브]')">
           가브 장착
         </button>
-        <button class="cmd-btn" style="font-size:10px" onclick="insertCmd('【장착】[시리즈: 메탈히어로] [전사: 우주형사 갸반]')">
-          갸반 장착
-        </button>
       </div>
-      <!-- 위키 소스 패널 -->
+      <!-- 데이터 소스 패널 -->
       <div style="margin:16px 0 0;padding:12px;border:1px solid var(--line);border-radius:5px;background:rgba(7,10,15,.5)">
         <div class="cmd-title" style="margin-bottom:8px">// 데이터 소스</div>
         <div style="font-family:var(--mono);font-size:9px;color:var(--mute);line-height:1.8">
+          <div style="color:var(--sky)">☑ 도감 (paeaenteom DB)</div>
           <div>☑ kamenrider.fandom.com</div>
           <div>☑ powerrangers.fandom.com</div>
           <div>☑ metalheroes.fandom.com</div>
-          <div>☑ project-red.fandom.com</div>
-          <div style="margin-top:6px;color:var(--dim)">소환 시 자동 조회</div>
-          <div style="color:var(--sky)">→ Claude 번역 적용</div>
+          <div>☑ ultra.fandom.com</div>
+          <div style="margin-top:6px;color:var(--dim)">소환 시 도감 우선 조회 →</div>
+          <div style="color:var(--sky)">Claude 연출·전투 엔진</div>
         </div>
       </div>
     </div>
@@ -269,15 +278,20 @@ body{background:var(--bg);color:var(--txt);font-family:'Noto Sans KR',sans-serif
 </div>
 
 <script>
-/* ════ Gemini API ════ */
-const GEMINI_MODEL = 'gemini-2.5-flash';
-const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
-
-function getApiKey(){ return localStorage.getItem('gemini_api_key')||''; }
+/* ════ Claude API (모델 선택 · 브라우저 직통) ════ */
+const CLAUDE_MODELS=[
+  {id:'claude-opus-4-8',label:'Opus 4.8 · 최고 성능'},
+  {id:'claude-sonnet-5',label:'Sonnet 5 · 균형'},
+  {id:'claude-haiku-4-5',label:'Haiku 4.5 · 빠름·저렴'},
+  {id:'claude-fable-5',label:'Fable 5 · 창작 특화'},
+];
+function getApiKey(){ return localStorage.getItem('claude_api_key')||''; }
+function getModel(){ const m=localStorage.getItem('claude_model'); return CLAUDE_MODELS.some(x=>x.id===m)?m:'claude-opus-4-8'; }
+function setModel(m){ localStorage.setItem('claude_model',m); }
 function saveApiKey(){
   const v=document.getElementById('apiKeyInput').value.trim();
   if(!v){alert('키를 입력하세요');return;}
-  localStorage.setItem('gemini_api_key',v);
+  localStorage.setItem('claude_api_key',v);
   updateKeyStatus();
   toast('API 키 저장됨');
 }
@@ -287,28 +301,119 @@ function toggleKeyVis(){
 }
 function updateKeyStatus(){
   const k=getApiKey(),el=document.getElementById('keyStatus');if(!el)return;
-  if(k){el.textContent='✓ 키 설정됨 ('+k.slice(0,8)+'...)';el.style.color='var(--green)';}
-  else{el.textContent='⚠ 키 미설정 (연출·전투에 필요)';el.style.color='var(--pink)';}
+  const ml=(CLAUDE_MODELS.find(x=>x.id===getModel())||{}).label||getModel();
+  if(k){el.innerHTML='✓ 키 설정됨 ('+k.slice(0,10)+'...)<br>모델: '+ml;el.style.color='var(--green)';}
+  else{el.innerHTML='⚠ 키 미설정 (연출·전투에 필요)';el.style.color='var(--pink)';}
 }
+function initModelSel(){
+  const sel=document.getElementById('modelSel');if(!sel)return;
+  sel.innerHTML=CLAUDE_MODELS.map(m=>`<option value="${m.id}">${m.label}</option>`).join('');
+  sel.value=getModel();
+}
+function onModelChange(){ setModel(document.getElementById('modelSel').value); updateKeyStatus(); toast('모델: '+((CLAUDE_MODELS.find(x=>x.id===getModel())||{}).label||getModel())); }
 function toast(msg){
   const t=document.createElement('div');t.textContent=msg;
   t.style.cssText='position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--card);border:1px solid var(--sky);border-radius:5px;padding:10px 18px;font-family:var(--mono);font-size:12px;color:var(--sky);z-index:999';
   document.body.appendChild(t);setTimeout(()=>t.remove(),2000);
 }
-async function callGemini(systemPrompt, msgs, maxTokens=2000){
+async function callClaude(systemPrompt, msgs, maxTokens=2000){
   const key=getApiKey();
-  if(!key) throw new Error('Gemini API 키를 사이드바에서 설정하세요');
-  const r=await fetch(GEMINI_URL+'?key='+key,{
-    method:'POST',headers:{'Content-Type':'application/json'},
+  if(!key) throw new Error('Claude API 키를 사이드바에서 설정하세요');
+  const r=await fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{
+      'content-type':'application/json',
+      'x-api-key':key,
+      'anthropic-version':'2023-06-01',
+      'anthropic-dangerous-direct-browser-access':'true'
+    },
     body:JSON.stringify({
-      system_instruction:{parts:[{text:systemPrompt}]},
-      contents:msgs.map(m=>({role:m.role==='assistant'?'model':'user',parts:[{text:m.content}]})),
-      generationConfig:{maxOutputTokens:maxTokens,temperature:0.85}
+      model:getModel(),
+      max_tokens:maxTokens,
+      system:systemPrompt,
+      messages:msgs.map(m=>({role:m.role==='assistant'?'assistant':'user',content:m.content}))
     })
   });
-  const d=await r.json();
-  if(d.error) throw new Error(d.error.message||'Gemini 오류');
-  return d.candidates?.[0]?.content?.parts?.[0]?.text||'[응답 없음]';
+  let d;
+  try{ d=await r.json(); }catch(e){ throw new Error('Claude 응답 파싱 실패 (HTTP '+r.status+')'); }
+  if(d&&d.type==='error') throw new Error((d.error&&d.error.message)||'Claude 오류');
+  if(!r.ok) throw new Error('Claude HTTP '+r.status+((d&&d.error&&d.error.message)?' — '+d.error.message:''));
+  return (d.content||[]).filter(b=>b&&b.type==='text').map(b=>b.text).join('')||'[응답 없음]';
+}
+
+/* ════ 도감(DB) 연동 ════ */
+let DB_INDEX=null;
+function normName(s){ return String(s||'').normalize('NFC').toLowerCase().replace(/\s+/g,''); }
+function parenParts(s){ const m=String(s||'').match(/^(.+?)\s*[（(](.+?)[）)]\s*$/); return m?[m[1].trim(),m[2].trim()]:[String(s||'').trim()]; }
+function dbImgSrc(p){ if(!p) return ''; if(/^https?:\/\//.test(p)||p.charAt(0)==='/') return p; return '/DB/'+p; }
+/* DB/index.html의 const DATA = {...} 블록 추출 (중괄호 깊이) */
+function findDataBlock(t){
+  const mk='const DATA = ';const mi=t.indexOf(mk);if(mi<0)return null;
+  let i=mi+mk.length;if(t[i]!=='{')return null;
+  let d=0,inStr=false,sc='',ef=false;const s=i;
+  for(;i<t.length;i++){const c=t[i];
+    if(inStr){ if(ef)ef=false; else if(c==='\\')ef=true; else if(c===sc)inStr=false; continue; }
+    if(c==='"'||c==="'"||c==='`'){inStr=true;sc=c;continue;}
+    if(c==='{')d++; else if(c==='}'){d--;if(d===0){i++;break;}}
+  }
+  return t.slice(s,i);
+}
+async function loadDB(){
+  if(DB_INDEX)return DB_INDEX;
+  try{ const c=sessionStorage.getItem('sim_dbindex_v1'); if(c){DB_INDEX=JSON.parse(c);return DB_INDEX;} }catch(e){}
+  try{
+    const r=await fetch('/DB/',{headers:{'user-agent':'sim'}});
+    const html=await r.text();
+    const block=findDataBlock(html);
+    if(!block){DB_INDEX=[];return DB_INDEX;}
+    const DATA=JSON.parse(block);
+    const out=[];
+    const push=(kind,it,series,workjp,slug,extra)=>{
+      if(!it||it._divider||!it.name)return;
+      out.push(Object.assign({
+        kind:kind, name:it.name, jp:it.jp||'', sub:it.sub||'', desc:it.desc||'',
+        img:it.imgAlt||it.img||it.photo||'', img2:it.img||'',
+        skills:(it.skills||[]).map(sk=>({name:sk.name,jp:sk.jp||'',desc:sk.desc||''})),
+        funcs:(it.funcs||[]).map(fx=>({name:fx.name,jp:fx.jp||'',sound:fx.sound||'',desc:fx.desc||''})),
+        series:series, workjp:workjp, slug:slug
+      }, extra||{}));
+    };
+    for(const g of Object.values(DATA)){
+      if(!g||!g.series)continue;
+      for(const s of Object.values(g.series)){
+        if(!s||!Array.isArray(s.eras))continue;
+        for(const era of s.eras) for(const w of (era.works||[])){
+          const series=w.ko||w.no||''; const workjp=w.jp||''; const slug=w.slug||'';
+          const forms=(w.forms||[]).filter(f=>f&&!f._divider).map(f=>f.name);
+          for(const h of (w.members||[])) push('hero',h,series,workjp,slug,{forms:forms,imgAltLabel:h.imgAltLabel||''});
+          for(const f of (w.forms||[]))   push('form',f,series,workjp,slug,{});
+          for(const p of (w.people||[]))  push('person',p,series,workjp,slug,{});
+          for(const k of (w.kaiju||[]))   push('kaiju',k,series,workjp,slug,{});
+          for(const a of (w.arsenal||[])) push('arsenal',a,series,workjp,slug,{});
+          for(const m of (w.machines||[]))push('machine',m,series,workjp,slug,{});
+          for(const o of (w.orgs||[]))    push('org',o,series,workjp,slug,{});
+        }
+      }
+    }
+    DB_INDEX=out;
+    try{ sessionStorage.setItem('sim_dbindex_v1',JSON.stringify(out)); }catch(e){}
+    return out;
+  }catch(e){ DB_INDEX=[]; return DB_INDEX; }
+}
+function lookupDB(warrior){
+  if(!DB_INDEX||!DB_INDEX.length)return null;
+  const q=normName(warrior); if(!q)return null;
+  const cand=[];
+  for(const e of DB_INDEX){
+    const keys=[e.name,e.jp];
+    if(e.sub){const p=parenParts(e.sub);keys.push(p[0]);if(p[1])keys.push(p[1]);}
+    for(const k of keys){ const nk=normName(k); if(!nk)continue;
+      if(nk===q)return e;                       // 정확 일치 → 즉시 확정
+      if(nk.includes(q)||q.includes(nk))cand.push(e);
+    }
+  }
+  cand.sort((a,b)=>(a.kind==='hero'?0:a.kind==='form'?1:2)-(b.kind==='hero'?0:b.kind==='form'?1:2));
+  return cand[0]||null;
 }
 
 /* ════ 위키 설정 ════ */
@@ -316,10 +421,10 @@ const WIKIS={
   '가면라이더':'kamenrider.fandom.com', 'kamen rider':'kamenrider.fandom.com',
   '슈퍼전대':'powerrangers.fandom.com', 'sentai':'powerrangers.fandom.com', '전대':'powerrangers.fandom.com',
   '메탈히어로':'metalheroes.fandom.com', 'metal hero':'metalheroes.fandom.com',
-  '울트라맨':'ultra.fandom.com', 'ultraman':'ultra.fandom.com',
+  '울트라맨':'ultra.fandom.com', 'ultraman':'ultra.fandom.com', '울트라':'ultra.fandom.com',
   'project red':'project-red.fandom.com', 'project r.e.d.':'project-red.fandom.com',
 };
-function getWikiHost(series){const s=series.toLowerCase();for(const[k,v]of Object.entries(WIKIS))if(s.includes(k))return v;return null;}
+function getWikiHost(series){const s=(series||'').toLowerCase();for(const[k,v]of Object.entries(WIKIS))if(s.includes(k))return v;return null;}
 
 /* ════ wikitext 파서 ════ */
 function parseWikitext(wt){
@@ -345,7 +450,6 @@ function parseWikitext(wt){
   if(yr)out.year=yr[1]||yr[2]||yr[3];
   const ac=wt.match(/\|\s*actor\s*=\s*([^\n|{<\[]+)/i);
   if(ac)out.actor=ac[1].trim();
-  // 폼체인지 (forms 파라미터)
   const fm=wt.match(/\|\s*forms?\s*=\s*([^\n|<{]+)/i);
   if(fm){out.forms=fm[1].trim().replace(/\[\[([^\]|]+)(?:\|[^\]]+)?\]\]/g,'$1');}
   return out;
@@ -360,9 +464,9 @@ const SERIES_DEF={
   def:   {REF:70,STM:70,CTL:70,RNG:55,DUR:65,CST:68,INT:70,WIL:75,ADP:65},
 };
 function seriesKey(s){
-  const l=s.toLowerCase();
-  if(l.includes('가면라이더')||l.includes('kamen'))return 'rider';
-  if(l.includes('전대')||l.includes('sentai'))return 'sentai';
+  const l=(s||'').toLowerCase();
+  if(l.includes('가면라이더')||l.includes('kamen')||l.includes('라이더'))return 'rider';
+  if(l.includes('전대')||l.includes('sentai')||l.includes('레인저')||l.includes('ranger'))return 'sentai';
   if(l.includes('메탈')||l.includes('metal'))return 'metal';
   if(l.includes('울트라')||l.includes('ultra'))return 'ultra';
   return 'def';
@@ -373,7 +477,7 @@ function scaleAGI(s){if(!s)return 68;if(s>15)return 40;if(s>10)return 50;if(s>7)
 function scaleEND(w){if(!w)return 72;if(w<50)return 58;if(w<70)return 64;if(w<90)return 70;if(w<120)return 76;if(w<200)return 82;if(w<500)return 88;return 94;}
 function bpGrade(bp){if(bp>=2001)return 'EX';if(bp>=1700)return 'SSS';if(bp>=1500)return 'SS';if(bp>=1300)return 'S';if(bp>=1100)return 'A';if(bp>=900)return 'B';if(bp>=700)return 'C';if(bp>=500)return 'D';if(bp>=300)return 'E';return 'F';}
 
-function specsToStats(parsed, series){
+function specsToStats(parsed, series, dbEntity){
   const sp=parsed?.specs||{};
   const def=SERIES_DEF[seriesKey(series)]||SERIES_DEF.def;
   const STR=scaleSTR(sp.punch);
@@ -389,8 +493,11 @@ function specsToStats(parsed, series){
   const INT=def.INT;
   const WIL=def.WIL;
   let ADP=def.ADP;
-  // 폼체인지 있으면 ADP 상향
-  if(parsed?.forms){const fc=(parsed.forms.match(/,/g)||[]).length+1;if(fc>=3)ADP=Math.min(ADP+10,95);else if(fc>=1)ADP=Math.min(ADP+5,90);}
+  // 폼체인지 있으면 ADP 상향 (위키 forms 또는 도감 폼 수)
+  let fc=0;
+  if(parsed?.forms) fc=(parsed.forms.match(/,/g)||[]).length+1;
+  if(dbEntity&&dbEntity.forms&&dbEntity.forms.length>fc) fc=dbEntity.forms.length;
+  if(fc>=3)ADP=Math.min(ADP+10,95);else if(fc>=1)ADP=Math.min(ADP+5,90);
   const HP=END*12+STM*6+50;
   const ENG=(PWR+DUR)*5;
   const BP=Math.round((STR+AGI+REF+END+STM)*1.0+(PWR+CTL+RNG+DUR)*1.2+(INT+WIL+ADP)*0.8);
@@ -410,34 +517,50 @@ function fmtSpec(parsed){
   return parts.length?parts.join(' / '):'[위키 스펙 없음]';
 }
 function pad(n,w=2){return String(n).padStart(w);}
-function generateAutoOutput(cmd, wikiFound, stats){
+function generateAutoOutput(cmd, wikiFound, stats, dbEntity){
   const p=wikiFound?.result?.parsed||{};
-  const title=wikiFound?.result?.title||cmd.warrior;
   const sp=p.specs||{};
   const hasSpec=sp.punch||sp.kick||sp.height;
-  const forms=p.forms||'없음';
-  const year=p.year||'—';
   const isEquip=cmd.isEquip;
-  const giant=cmd.series.toLowerCase().includes('울트라');
+  const seriesStr=dbEntity?dbEntity.series:cmd.series;
+  const giant=(seriesStr||'').toLowerCase().includes('울트라')||(seriesStr||'').toLowerCase().includes('ultra');
+  // 대표 타이틀: 도감 우선
+  const title=dbEntity?(dbEntity.name+(dbEntity.sub?' / '+dbEntity.sub:'')):(wikiFound?.result?.title||cmd.warrior);
+  const year=p.year||'—';
 
   const step1=`STEP 1 — 영창 / 마력 연산
 > 픽션 좌표 스캔 ████ 100%
 > 변신 데이터 대조 ████ 100%
 > 마력(ENG) 연산 ████ 100%`;
 
-  const specLine=hasSpec?`✓ ${fmtSpec(p)}`:'[위키 스펙 미수록 — 기본값 추정 적용]';
-  const step2=`☄ MANIFEST VERIFICATION
+  const srcLine = dbEntity
+    ? '도감 (paeaenteom DB)' + (wikiFound ? ' + '+wikiFound.result.title+' (Fandom)' : '')
+    : (wikiFound ? wikiFound.result.title+' (Fandom)' : '자체 추정');
+  const specLine=hasSpec?`✓ ${fmtSpec(p)}`:'[공식 전투 스펙 미수록 — 기본값 추정]';
+  const step2=`☄ MANIFEST VERIFICATION ☄
 ▸ 작품/전사 실재  : ✓ ${title}${year!=='—'?' ('+year+')':''}
-▸ 데이터 출처     : ${wikiFound?wikiFound.result.title+' (Fandom)':'자체 추정'}
+▸ 데이터 출처     : ${srcLine}
 ▸ 공식 스펙       : ${specLine}
-▸ 폼체인지        : ${forms}
-▸ 배우            : ${p.actor||'—'}
 ▸ 기척 은폐       : ✓ 항시 (ZERO-SIGNATURE)
-강림 등급: ${hasSpec?'◎ 완전강림':'○ 부분강림 (스펙 추정)'}`
+강림 등급: ${(dbEntity||hasSpec)?'◎ 완전강림':'○ 부분강림 (스펙 추정)'}`;
 
+  // 도감 상세 블록
+  let dexBlock='';
+  if(dbEntity){
+    const lines=[];
+    lines.push(`▸ 본명 / 변신체 : ${dbEntity.name}${dbEntity.jp?' ('+dbEntity.jp+')':''}${dbEntity.sub?'  →  '+dbEntity.sub:''}`);
+    lines.push(`▸ 시리즈        : ${dbEntity.series}${dbEntity.workjp?' ('+dbEntity.workjp+')':''}`);
+    if(dbEntity.forms&&dbEntity.forms.length) lines.push(`▸ 폼체인지      : ${dbEntity.forms.join(' / ')}`);
+    if(dbEntity.skills&&dbEntity.skills.length) lines.push(`▸ 스킬          : ${dbEntity.skills.map(s=>s.name).join(' · ')}`);
+    const sounds=(dbEntity.funcs||[]).filter(f=>f.sound);
+    if(sounds.length) lines.push(`▸ 변신 사운드   : ${sounds.map(f=>'「'+f.sound+'」').join('  ')}`);
+    dexBlock=`\n\n📖 도감 연동 데이터\n`+lines.join('\n');
+  }
+
+  const nm=dbEntity?dbEntity.name:cmd.warrior;
   const sheet=`┌ BATTLE SHEET ─────────────────────────────────┐
-│ ${cmd.warrior.padEnd(24)} [AUTO-GEN]│
-│ ${title.slice(0,30).padEnd(30)}│
+│ ${nm.slice(0,24).padEnd(24)} [AUTO-GEN]│
+│ ${String(title).slice(0,30).padEnd(30)}│
 │ 시전: 【${isEquip?'장착':'소환'}】 · 등급: ${stats.grade.padEnd(3)} (BP ${stats.BP})    │
 ├────────────────────────────────────────────────┤
 │ STR${pad(stats.STR,3)} AGI${pad(stats.AGI,3)} REF${pad(stats.REF,3)} END${pad(stats.END,3)} STM${pad(stats.STM,3)}      │
@@ -450,13 +573,13 @@ function generateAutoOutput(cmd, wikiFound, stats){
 └────────────────────────────────────────────────┘`;
 
   const step5=`─────────────────────────────────────────────────
-  /연출        — Gemini로 변신 연출 생성
-  /전투 [상대] — 전투 시작 (Gemini)
+  /연출        — Claude로 변신 연출 생성
+  /전투 [상대] — 전투 시작 (Claude)
   /폼체인지 [폼명] — 폼 변경
   /해제        — 강림 해제
 ─────────────────────────────────────────────────`;
 
-  return step1+'\n\n'+step2+'\n\n'+sheet+'\n\n'+step5;
+  return step1+'\n\n'+step2+dexBlock+'\n\n'+sheet+'\n\n'+step5;
 }
 
 /* ════ 위키 스마트 검색 ════ */
@@ -486,36 +609,29 @@ function hasKorean(s){return /[가-힣]/.test(s);}
 async function translateToWikiName(name,series){
   const key=getApiKey();if(!key)return name;
   try{
-    const r=await fetch(GEMINI_URL+'?key='+key,{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        contents:[{role:'user',parts:[{text:`특촬 캐릭터 "${name}" (시리즈: "${series}")의 Fandom 영문 위키 검색어를 딱 한 구절로만. 예: Shinken Gold`}]}],
-        generationConfig:{maxOutputTokens:12,temperature:0}
-      }),signal:AbortSignal.timeout(5000)
-    });
-    const d=await r.json();
-    return(d.candidates?.[0]?.content?.parts?.[0]?.text||'').trim().replace(/["""]/g,'')||name;
+    const out=await callClaude(
+      '너는 특촬 위키 검색 보조자다. 사용자가 준 캐릭터의 Fandom 영문 위키 검색어를 딱 한 구절로만 답하라. 다른 설명·문장·따옴표 금지. 예: Shinken Gold',
+      [{role:'user',content:`특촬 캐릭터 "${name}" (시리즈: "${series}")의 영문 위키 검색어 한 구절`}],
+      24
+    );
+    return (out||'').trim().replace(/["""]/g,'').split('\n')[0].trim()||name;
   }catch(e){return name;}
 }
 async function smartSearch(warrior,series,host){
   let searchName=warrior;
-  // 1) 직접 제목
   let r=await fetchWikiPage(host,warrior.replace(/\s+/g,'_'));
   if(r?.parsed)return{result:r,foundAs:r.title};
-  // 2) 한글이면 번역 후 재시도
   if(hasKorean(warrior)){
-    showSearchStatus('영문명 변환 중…');
+    showSearchStatus('영문명 변환 중… (Claude)');
     searchName=await translateToWikiName(warrior,series);
     r=await fetchWikiPage(host,searchName.replace(/\s+/g,'_'));
     if(r?.parsed)return{result:r,foundAs:r.title,translated:searchName};
   }
-  // 3) MediaWiki 검색
   showSearchStatus(`검색: "${searchName}"`);
   for(const t of await searchWikiPages(host,searchName)){
     r=await fetchWikiPage(host,t);
     if(r?.parsed)return{result:r,foundAs:t,translated:searchName!==warrior?searchName:null};
   }
-  // 4) 원본으로 검색
   if(searchName!==warrior){
     for(const t of await searchWikiPages(host,warrior)){
       r=await fetchWikiPage(host,t);
@@ -527,40 +643,41 @@ async function smartSearch(warrior,series,host){
 function showSearchStatus(msg){const el=document.getElementById('searchStatusMsg');if(el)el.textContent=msg;}
 
 /* ════ 상태 ════ */
-let messages=[]; // Gemini 대화 히스토리 (연출·전투용)
+let messages=[]; // Claude 대화 히스토리 (연출·전투용)
 let loading=false;
 let currentManifest=null; // 현재 강림체 상태
-let entityState={name:'',hp:0,hpMax:0,eng:0,engMax:0,bp:''};
+let entityState={name:'',hp:0,hpMax:0,eng:0,engMax:0,bp:'',img:'',series:''};
 
 const GREETING=`╔════════════════════════════════════════════╗
 ║  虚構顕現  ::  特撮 ONLINE  [하이브리드]    ║
-║  BATTLE SHEET — 자동 생성                  ║
-║  연출·전투       — Gemini                   ║
+║  BATTLE SHEET — 도감 연동 · 자동 생성      ║
+║  연출·전투       — Claude                   ║
 ╚════════════════════════════════════════════╝
 > 술사 인증 ████████████ OK
 > 기척 은폐 프로토콜 ████ 상시 ON
-> Fandom API 연결됨 / 스펙→스탯 변환 엔진 ON
+> 도감(paeaenteom DB) 연결 / Fandom 폴백 / 스펙→스탯 엔진 ON
 
-【소환】/【장착】 → BATTLE SHEET 즉시 자동 생성 (API 키 불필요)
-/연출            → 변신 연출 생성 (Gemini 필요)
-/전투 [상대]     → 전투 시작 (Gemini 필요)
+【소환】/【장착】 → 도감 우선 조회 후 BATTLE SHEET 자동 생성 (키 불필요)
+/연출            → 변신 연출 생성 (Claude 키 필요)
+/전투 [상대]     → 전투 시작 (Claude 키 필요)
 
 무엇을 현현시킬까.`;
 
-/* ════ Gemini 시스템 프롬프트 (연출·전투용) ════ */
+/* ════ Claude 시스템 프롬프트 (연출·전투용) ════ */
 const SYSTEM_NARRATIVE=`너는 「특촬(特撮 / TOKU)」 시스템이다. 술사를 "술사"로 부른다. 한국어 반말, 간결·단정적, 콘솔 톤.
 
 ※ BATTLE SHEET는 이미 자동 생성됨. 너는 연출·전투 내러티브만 담당한다.
+※ [도감 데이터]가 주어지면 그 스킬·폼·변신 사운드를 최우선 근거로 삼는다. 도감에 있는 변신 구호/사운드는 그대로 인용한다.
 
 【/연출 요청 시】
 STEP 3 — 강림/변신 연출만 출력:
 ① 효과음/변신 시퀀스 (의성어, 시간순)
-② 변신 구호/각성 선언 — 「일본어 원문」 + 로마자 + 「한글 독음」 + (뜻)  
+② 변신 구호/각성 선언 — 도감 사운드가 있으면 그것을 「일본어/한글 독음」으로, 없으면 「일본어 원문」 + 로마자 + 「한글 독음」 + (뜻)
 ③ 강림 비주얼 묘사 (기척 은폐 유지 — 외부엔 평범한 사람으로만 보임)
 
 【/전투 시】
 포켓몬식 턴제. 매 턴: 헤더+양측 HP/ENG → 행동 메뉴 → 입력 대기.
-행동 메뉴: [스킬]/[필살기] 분리. 필살기는 ENG 소비 표기.
+행동 메뉴: [스킬]/[필살기] 분리. 도감 스킬을 우선 사용. 필살기는 ENG 소비 표기.
 HP 0 = 결착 연출.
 
 모르는 변신음·대사는 [데이터 불충분]으로 표기. 거짓 생성 금지.`;
@@ -580,18 +697,20 @@ function renderMsg(role,text,cls=''){
   const box=document.getElementById('messages');
   const msg=document.createElement('div');msg.className=`msg ${role==='user'?'user':'ai'} ${cls}`;
   const meta=document.createElement('div');meta.className='msg-meta';
-  meta.textContent=role==='user'?'술사':role==='auto'?'SYSTEM [AUTO]':'SYSTEM [Gemini]';
+  meta.textContent=role==='user'?'술사':role==='auto'?'SYSTEM [AUTO]':'SYSTEM [Claude]';
   const bubble=document.createElement('div');bubble.className='bubble';
   if(role==='auto'){bubble.style.borderLeftColor='var(--pink)';bubble.style.fontSize='12px';}
   if(role!=='user'){
     bubble.innerHTML=escHtml(text)
       .replace(/(☄[^☄\n]*☄)/g,'<span style="color:var(--sky)">$1</span>')
+      .replace(/(📖[^\n]*)/g,'<span style="color:var(--sky)">$1</span>')
       .replace(/(✓[^\n]*)/g,'<span style="color:var(--green)">$1</span>')
       .replace(/(✕[^\n]*|△[^\n]*)/g,'<span style="color:var(--pink)">$1</span>')
       .replace(/(◎[^\n]*)/g,'<span style="color:var(--sky)">$1</span>')
       .replace(/(HP=[\d,]+)/g,'<span style="color:var(--green)">$1</span>')
       .replace(/(ENG=[\d,]+)/g,'<span style="color:var(--sky)">$1</span>')
-      .replace(/(BP=[\d,]+)/g,'<span style="color:var(--amber)">$1</span>');
+      .replace(/(BP=[\d,]+)/g,'<span style="color:var(--amber)">$1</span>')
+      .replace(/(「[^」\n]*」)/g,'<span style="color:var(--amber)">$1</span>');
   }else{bubble.textContent=text;}
   msg.appendChild(meta);msg.appendChild(bubble);
   box.appendChild(msg);box.scrollTop=box.scrollHeight;
@@ -600,16 +719,41 @@ function renderMsg(role,text,cls=''){
 function showLoading(label){
   const box=document.getElementById('messages');
   const el=document.createElement('div');el.className='msg ai loading-msg';el.id='loadingEl';
-  el.innerHTML=`<div class="msg-meta">SYSTEM [Gemini]</div><div class="loading-bubble">${label||'연산 중'} <div class="loading-dots"><span></span><span></span><span></span></div></div>`;
+  el.innerHTML=`<div class="msg-meta">SYSTEM [Claude]</div><div class="loading-bubble">${label||'연산 중'} <div class="loading-dots"><span></span><span></span><span></span></div></div>`;
   box.appendChild(el);box.scrollTop=box.scrollHeight;
 }
 function removeLoading(){const el=document.getElementById('loadingEl');if(el)el.remove();}
+function showDexLoading(name){
+  const box=document.getElementById('messages');
+  const el=document.createElement('div');el.id='dexLoadEl';el.className='msg ai';
+  el.innerHTML=`<div class="msg-meta">도감 조회</div>
+  <div class="bubble" style="border-left-color:var(--sky);font-size:11px;padding:9px 14px">
+    <span style="color:var(--dim)">도감 인덱스 대조</span> <span style="color:var(--sky)">"${escHtml(name)}"</span>
+    <div class="loading-dots" style="display:inline-flex;margin-left:8px"><span></span><span></span><span></span></div>
+  </div>`;
+  box.appendChild(el);box.scrollTop=box.scrollHeight;
+}
+function removeDexLoading(){const el=document.getElementById('dexLoadEl');if(el)el.remove();}
+function renderDexResult(dbEntity){
+  const box=document.getElementById('messages');
+  const el=document.createElement('div');el.className='msg ai';
+  const forms=(dbEntity.forms&&dbEntity.forms.length)?` · 폼 ${dbEntity.forms.length}`:'';
+  const skl=(dbEntity.skills&&dbEntity.skills.length)?` · 스킬 ${dbEntity.skills.length}`:'';
+  el.innerHTML=`<div class="msg-meta">도감 HIT</div>
+  <div class="bubble" style="border-left-color:var(--sky);font-size:11px;padding:9px 14px">
+    <span style="color:var(--sky)">✓ 도감 확보</span> <span style="color:var(--txt2)">${escHtml(dbEntity.name)}</span>
+    ${dbEntity.sub?`<span style="color:var(--pink)"> · ${escHtml(dbEntity.sub)}</span>`:''}
+    <span style="color:var(--mute)"> ← ${escHtml(dbEntity.series)}</span>
+    <span style="color:var(--green);font-size:10px">${escHtml(forms+skl)}</span>
+  </div>`;
+  box.appendChild(el);box.scrollTop=box.scrollHeight;
+}
 function showWikiLoading(name,host){
   const box=document.getElementById('messages');
   const el=document.createElement('div');el.id='wikiLoadEl';el.className='msg ai';
   el.innerHTML=`<div class="msg-meta">WIKI FETCH</div>
   <div class="bubble" style="border-left-color:var(--pink);font-size:11px;padding:9px 14px">
-    <span style="color:var(--dim)">픽션 좌표 스캔</span> <span style="color:var(--pink)">"${name}"</span>
+    <span style="color:var(--dim)">픽션 좌표 스캔</span> <span style="color:var(--pink)">"${escHtml(name)}"</span>
     <span style="color:var(--mute)"> ← ${host}</span>
     <div class="loading-dots" style="display:inline-flex;margin-left:8px"><span></span><span></span><span></span></div>
     <div id="searchStatusMsg" style="color:var(--mute);font-size:9px;margin-top:4px"></div>
@@ -626,8 +770,8 @@ function renderWikiResult(found,host){
   el.innerHTML=`<div class="msg-meta">WIKI FETCH</div>
   <div class="bubble" style="border-left-color:${found?'var(--sky)':'var(--dim)'};font-size:11px;padding:9px 14px">
     ${found
-      ?`<span style="color:var(--sky)">✓ 데이터 확보</span> <span style="color:var(--txt2)">${found.result.title}</span>${tr}<span style="color:var(--mute)"> ← ${host}</span>${specs?`<br><span style="color:var(--green);font-size:10px">${specs}</span>`:''}`
-      :`<span style="color:var(--mute)">⚠ 위키 없음 — 시리즈 기본값으로 스탯 추정</span>`
+      ?`<span style="color:var(--sky)">✓ 스펙 확보</span> <span style="color:var(--txt2)">${escHtml(found.result.title)}</span>${escHtml(tr)}<span style="color:var(--mute)"> ← ${host}</span>${specs?`<br><span style="color:var(--green);font-size:10px">${escHtml(specs)}</span>`:''}`
+      :`<span style="color:var(--mute)">⚠ 위키 스펙 없음 — 기본값으로 스탯 추정</span>`
     }
   </div>`;
   box.appendChild(el);box.scrollTop=box.scrollHeight;
@@ -640,23 +784,31 @@ function parseEntity(text){
   if(hm){
     const hp=parseInt(hm[1].replace(/,/g,''));const eng=em?parseInt(em[1].replace(/,/g,'')):entityState.eng;
     const nm=text.match(/┌ BATTLE SHEET[─ ]*\n│\s*([^\n│\[]+)/);
-    entityState={name:nm?nm[1].trim():'강림체',hp,hpMax:Math.max(hp,entityState.hpMax||hp),eng,engMax:Math.max(eng,entityState.engMax||eng),bp:bm?bm[1]:entityState.bp};
+    entityState=Object.assign({},entityState,{name:nm?nm[1].trim():(entityState.name||'강림체'),hp,hpMax:Math.max(hp,entityState.hpMax||hp),eng,engMax:Math.max(eng,entityState.engMax||eng),bp:bm?bm[1]:entityState.bp});
     updateEntityPanel();
   }
 }
+function setEntityMeta(dbEntity){
+  entityState.name=dbEntity?dbEntity.name:entityState.name;
+  entityState.series=dbEntity?dbEntity.series:'';
+  entityState.img=dbEntity&&dbEntity.img?dbImgSrc(dbEntity.img):'';
+}
 function updateEntityPanel(){
-  const{name,hp,hpMax,eng,engMax,bp}=entityState;
+  const{name,hp,hpMax,eng,engMax,bp,img,series}=entityState;
   document.getElementById('noEntity').style.display='none';
   document.getElementById('entityInfo').style.display='block';
-  document.getElementById('entityName').textContent=name.slice(0,18);
-  document.getElementById('entitySeries').textContent='// 강림 중';
+  document.getElementById('entityName').textContent=(name||'강림체').slice(0,18);
+  document.getElementById('entitySeries').textContent=series?('// '+series.slice(0,22)):'// 강림 중';
+  const imgEl=document.getElementById('entityImg');
+  if(img){imgEl.src=img;imgEl.style.display='block';imgEl.onerror=function(){imgEl.style.display='none';};}
+  else{imgEl.style.display='none';}
   document.getElementById('hpVal').textContent=hp.toLocaleString();
   document.getElementById('engVal').textContent=eng.toLocaleString();
   document.getElementById('bpBadge').textContent=`BP ${bp||'—'}`;
   document.getElementById('hpBar').style.width=hpMax?Math.max(0,hp/hpMax*100)+'%':'100%';
   document.getElementById('engBar').style.width=engMax?Math.max(0,eng/engMax*100)+'%':'100%';
 }
-function clearEntity(){entityState={name:'',hp:0,hpMax:0,eng:0,engMax:0,bp:''};document.getElementById('noEntity').style.display='block';document.getElementById('entityInfo').style.display='none';}
+function clearEntity(){entityState={name:'',hp:0,hpMax:0,eng:0,engMax:0,bp:'',img:'',series:''};document.getElementById('noEntity').style.display='block';document.getElementById('entityInfo').style.display='none';}
 
 /* ════ 메인 send ════ */
 async function send(){
@@ -668,27 +820,37 @@ async function send(){
 
   const summonCmd=extractSummonCmd(text);
 
-  /* ── 소환/장착: 완전 자동 (Gemini 없음) ── */
+  /* ── 소환/장착: 도감 우선 + Fandom 폴백 (Claude 불필요) ── */
   if(summonCmd&&(summonCmd.isSummon||summonCmd.isEquip)){
     loading=true;document.getElementById('sendBtn').disabled=true;
-    const host=getWikiHost(summonCmd.series);
+
+    // 1) 도감 조회
+    await loadDB();
+    showDexLoading(summonCmd.warrior);
+    const dbEntity=lookupDB(summonCmd.warrior);
+    removeDexLoading();
+    if(dbEntity)renderDexResult(dbEntity);
+
+    // 2) Fandom 스펙 (선택) — 시리즈 위키가 있으면 수치 스펙 보강
+    const seriesForWiki=dbEntity?dbEntity.series:summonCmd.series;
+    const host=getWikiHost(seriesForWiki);
+    let found=null;
     if(host){
       showWikiLoading(summonCmd.warrior,host);
-      const found=await smartSearch(summonCmd.warrior,summonCmd.series,host);
+      found=await smartSearch(summonCmd.warrior,seriesForWiki,host);
       removeWikiLoading();
       renderWikiResult(found,host);
-      const stats=specsToStats(found?.result?.parsed,summonCmd.series);
-      const output=generateAutoOutput(summonCmd,found,stats);
-      currentManifest={cmd:summonCmd,wikiFound:found,stats,output};
-      renderMsg('auto',output);
-      parseEntity(output);
-    }else{
-      const stats=specsToStats(null,summonCmd.series);
-      const output=generateAutoOutput(summonCmd,null,stats);
-      currentManifest={cmd:summonCmd,wikiFound:null,stats,output};
-      renderMsg('auto',output);
-      parseEntity(output);
     }
+
+    // 3) 스탯 + 시트
+    const seriesStr=dbEntity?dbEntity.series:summonCmd.series;
+    const stats=specsToStats(found?.result?.parsed,seriesStr,dbEntity);
+    const output=generateAutoOutput(summonCmd,found,stats,dbEntity);
+    currentManifest={cmd:summonCmd,wikiFound:found,dbEntity,stats,output};
+    setEntityMeta(dbEntity);
+    renderMsg('auto',output);
+    parseEntity(output);
+
     loading=false;document.getElementById('sendBtn').disabled=false;
     return;
   }
@@ -700,12 +862,20 @@ async function send(){
     return;
   }
 
-  /* ── 연출·전투: Gemini ── */
+  /* ── 연출·전투: Claude ── */
   if(isNarrativeCmd(text)||messages.length>0){
-    // 현재 강림체 컨텍스트 주입
     let ctx=SYSTEM_NARRATIVE;
     if(currentManifest){
       ctx+=`\n\n[현재 강림체 BATTLE SHEET]\n${currentManifest.output}`;
+      const e=currentManifest.dbEntity;
+      if(e){
+        ctx+=`\n\n[도감 데이터]\n이름: ${e.name} (${e.jp})\n변신체: ${e.sub}\n시리즈: ${e.series}`;
+        if(e.forms&&e.forms.length)ctx+=`\n폼: ${e.forms.join(', ')}`;
+        if(e.skills&&e.skills.length)ctx+=`\n스킬:\n`+e.skills.map(s=>`- ${s.name}${s.jp?'('+s.jp+')':''}: ${s.desc||''}`).join('\n');
+        const sounds=(e.funcs||[]).filter(f=>f.sound);
+        if(sounds.length)ctx+=`\n변신/기믹 사운드:\n`+sounds.map(f=>`- ${f.name}${f.jp?'('+f.jp+')':''}: 「${f.sound}」`).join('\n');
+        if(e.desc)ctx+=`\n설명: ${e.desc}`;
+      }
       if(currentManifest.wikiFound?.result?.wt_snippet)
         ctx+=`\n\n[위키 원문(일부)]\n${currentManifest.wikiFound.result.wt_snippet.slice(0,800)}`;
     }
@@ -713,7 +883,7 @@ async function send(){
     loading=true;document.getElementById('sendBtn').disabled=true;
     showLoading(text.startsWith('/연출')?'연출 생성 중':'전투 연산 중');
     try{
-      const reply=await callGemini(ctx,messages,text.startsWith('/연출')?600:2000);
+      const reply=await callClaude(ctx,messages,text.startsWith('/연출')?800:2000);
       removeLoading();
       messages.push({role:'assistant',content:reply});
       renderMsg('ai',reply);
@@ -722,7 +892,6 @@ async function send(){
     return;
   }
 
-  // 그 외 명령어 (알 수 없는)
   renderMsg('auto','【소환】 또는 【장착】 명령으로 강림을 시작하라.\n전투는 /전투 [상대] 로.');
 }
 
@@ -733,8 +902,10 @@ function sendCmd(cmd){const inp=document.getElementById('input');inp.value=cmd;i
 function clearChat(){if(!confirm('초기화?'))return;messages=[];clearEntity();currentManifest=null;document.getElementById('messages').innerHTML='';renderMsg('auto',GREETING);}
 
 window.addEventListener('DOMContentLoaded',()=>{
+  initModelSel();
   updateKeyStatus();
   const k=getApiKey();if(k)document.getElementById('apiKeyInput').placeholder='••••••••••• (저장됨)';
+  loadDB(); // 도감 인덱스 프리페치 (비차단)
   renderMsg('auto',GREETING);
   document.getElementById('input').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();}autoResize(e.target);});
   document.getElementById('input').addEventListener('input',e=>autoResize(e.target));
