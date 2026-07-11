@@ -8,6 +8,8 @@
     { "source": "/DB/(.*)", "destination": "/DB" },
     { "source": "/wapon", "destination": "/WAPON" },
     { "source": "/wapon/(.*)", "destination": "/WAPON" },
+    { "source": "/unpack", "destination": "/UNPACK" },
+    { "source": "/unpack/(.*)", "destination": "/UNPACK" },
     { "source": "/sim/(.*)", "destination": "/sim" }
   ]
 }
