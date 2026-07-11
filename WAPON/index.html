@@ -275,7 +275,8 @@ function renderModal(w,sel){
         '<div class="m-sec"><h4>IMAGE API — 링크로 이미지 열기</h4>'+
           '<div class="api-row"><div class="api-url" id="apiUrl">'+esc(apiUrl)+'</div>'+
           '<button class="api-btn" onclick="copyApi()">복사</button>'+
-          '<a class="api-btn" href="'+esc(apiUrl)+'" target="_blank" rel="noopener">열기 ↗</a></div>'+
+          (img?'<a class="api-btn" href="'+esc(apiUrl)+'" target="_blank" rel="noopener">열기 ↗</a>':'')+'</div>'+
+          (img?'':'<div class="stydesc">아직 사진 등록 전이라 이 주소는 준비 중 — 사진을 넣으면 바로 이 주소로 열려.</div>')+
         '</div>'+
       '</div>'+
     '</div>';
