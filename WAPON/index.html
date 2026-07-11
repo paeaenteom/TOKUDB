@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#06080f">
+<title>WAPON 武器庫 — 특촬 무기 아카이브</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Teko:wght@400;500;600;700&family=Share+Tech+Mono&family=Noto+Sans+KR:wght@400;500;700;900&family=Noto+Sans+JP:wght@400;500;700&display=swap');
+:root{
+  --bg:#06080f; --bg2:#080b14; --panel:#0c1018; --panel2:#10141f;
+  --line:#1a2231; --line2:#27324a;
+  --ink:#eef2ff; --dim:#8b95b3; --faint:#525d7a; --mute:#39435c;
+  --cyan:#87CEFF; --cyan-d:#5ba8e6; --pink:#FFB3C8; --pink-d:#e887a3;
+  --gold:#ffc233; --acc:var(--gold);
+  --disp:'Teko',sans-serif; --mono:'Share Tech Mono',monospace;
+  --jp:'Noto Sans JP',sans-serif; --kr:'Noto Sans KR',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:var(--kr);background:var(--bg);color:var(--ink);min-height:100vh;overflow-x:hidden}
+::selection{background:rgba(255,194,51,.3)}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit}
+.bg{position:fixed;inset:0;z-index:0;pointer-events:none}
+.bg.grad{background:
+  radial-gradient(900px 520px at 14% -6%,rgba(255,194,51,.10),transparent 60%),
+  radial-gradient(820px 520px at 88% 2%,rgba(135,206,255,.08),transparent 58%),
+  linear-gradient(180deg,#05070e,#080b15 55%,#05070e)}
+.bg.grid{background-image:linear-gradient(rgba(255,255,255,.022) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.022) 1px,transparent 1px);background-size:52px 52px;mask-image:radial-gradient(ellipse 90% 70% at 50% 12%,#000 35%,transparent 100%)}
+.bg.scan{background:repeating-linear-gradient(0deg,rgba(255,255,255,.014) 0 1px,transparent 1px 4px);opacity:.5}
+
+.nav{position:sticky;top:0;z-index:60;background:linear-gradient(180deg,rgba(6,8,15,.96),rgba(6,8,15,.84));backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.nav-in{max-width:1240px;margin:0 auto;padding:0 22px;height:60px;display:flex;align-items:center;gap:16px}
+.brand{display:flex;align-items:baseline;gap:9px;cursor:pointer;white-space:nowrap}
+.brand .mk{font-family:var(--disp);font-weight:700;font-size:27px;letter-spacing:1.5px;line-height:1;background:linear-gradient(110deg,#fff,var(--gold) 55%,var(--pink));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.brand .jp{font-family:var(--jp);font-weight:700;font-size:13px;color:var(--faint);letter-spacing:2px}
+.home-btn{display:inline-flex;align-items:center;gap:7px;height:34px;padding:0 15px;border:1px solid var(--line2);border-radius:8px;background:var(--panel);color:var(--dim);font-family:var(--mono);font-size:12px;letter-spacing:1px;cursor:pointer;transition:.18s;text-decoration:none}
+.home-btn:hover{color:var(--ink);border-color:var(--cyan-d);background:rgba(135,206,255,.07)}
+.crumb{flex:1;font-family:var(--mono);font-size:12px;color:var(--faint);letter-spacing:.4px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+
+.hero{max-width:1240px;margin:0 auto;padding:52px 22px 10px;position:relative;z-index:1}
+.hero h1{font-family:var(--disp);font-weight:700;font-size:64px;letter-spacing:2px;line-height:.95}
+.hero h1 span{background:linear-gradient(110deg,var(--gold),var(--pink));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{margin-top:10px;color:var(--dim);font-size:14px}
+.hero .cnt{font-family:var(--mono);font-size:12px;color:var(--faint);margin-top:4px;letter-spacing:1px}
+
+.wrap{max-width:1240px;margin:0 auto;padding:18px 22px 80px;position:relative;z-index:1}
+.toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:14px 0 22px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;flex:1}
+.chip{height:32px;padding:0 14px;border:1px solid var(--line2);border-radius:20px;background:var(--panel);color:var(--dim);font-size:12.5px;cursor:pointer;transition:.15s;display:inline-flex;align-items:center;gap:6px}
+.chip:hover{color:var(--ink);border-color:var(--cyan-d)}
+.chip.on{color:#06080f;background:var(--gold);border-color:var(--gold);font-weight:700}
+.chip .n{font-family:var(--mono);font-size:10.5px;opacity:.7}
+#q{height:36px;width:220px;padding:0 14px;border:1px solid var(--line2);border-radius:8px;background:var(--panel);color:var(--ink);font-family:var(--kr);font-size:13px;outline:none}
+#q:focus{border-color:var(--cyan-d)}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:14px}
+.card{position:relative;border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel2),var(--panel));overflow:hidden;cursor:pointer;transition:.18s}
+.card:hover{transform:translateY(-3px);border-color:var(--line2);box-shadow:0 10px 26px rgba(0,0,0,.4),0 0 0 1px rgba(255,194,51,.15)}
+.card .imgbox{aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;background:radial-gradient(80% 80% at 50% 40%,rgba(255,255,255,.035),transparent);border-bottom:1px solid var(--line);position:relative}
+.card .imgbox img{width:100%;height:100%;object-fit:contain;padding:10px}
+.card .ph{width:52%;height:52%;color:var(--mute);opacity:.9}
+.card .info{padding:10px 12px 12px}
+.card .nm{font-weight:700;font-size:15px}
+.card .jp2{font-family:var(--jp);font-size:11.5px;color:var(--faint);margin-top:1px}
+.card .meta{display:flex;gap:6px;margin-top:7px;flex-wrap:wrap}
+.tag{font-family:var(--mono);font-size:10px;letter-spacing:.5px;color:var(--dim);border:1px solid var(--line2);border-radius:5px;padding:2px 7px}
+.tag.gold{color:var(--gold);border-color:rgba(255,194,51,.4)}
+.card .stn{position:absolute;top:8px;right:8px;font-family:var(--mono);font-size:10px;color:#06080f;background:var(--gold);border-radius:10px;padding:2px 8px;font-weight:700}
+
+footer{position:relative;z-index:1;border-top:1px solid var(--line);padding:26px 22px;text-align:center;color:var(--mute);font-family:var(--mono);font-size:11px;letter-spacing:1px}
+
+/* ── 모달 ── */
+.mback{position:fixed;inset:0;z-index:100;background:rgba(3,5,10,.78);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;padding:24px}
+.mback.open{display:flex}
+.modal{width:min(940px,100%);max-height:88vh;overflow-y:auto;border:1px solid var(--line2);border-radius:18px;background:linear-gradient(180deg,#0d1119,#0a0d15);box-shadow:0 30px 80px rgba(0,0,0,.6);
+  scrollbar-width:none;-ms-overflow-style:none}
+.modal::-webkit-scrollbar{width:0;height:0;display:none}
+.m-in{display:grid;grid-template-columns:minmax(0,46%) 1fr;gap:0}
+@media (max-width:720px){.m-in{grid-template-columns:1fr}}
+.m-img{aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;background:radial-gradient(75% 75% at 50% 42%,rgba(255,194,51,.07),transparent);border-right:1px solid var(--line);position:relative}
+@media (max-width:720px){.m-img{border-right:none;border-bottom:1px solid var(--line)}}
+.m-img img{width:100%;height:100%;object-fit:contain;padding:20px}
+.m-img .ph{width:44%;height:44%;color:var(--mute)}
+.m-img .noimg{position:absolute;bottom:14px;left:0;right:0;text-align:center;font-family:var(--mono);font-size:11px;color:var(--mute);letter-spacing:1px}
+.m-body{padding:26px 26px 30px;min-width:0}
+.m-kick{font-family:var(--mono);font-size:11px;color:var(--gold);letter-spacing:2px}
+.m-nm{font-family:var(--disp);font-weight:700;font-size:44px;line-height:1;margin-top:6px}
+.m-jp{font-family:var(--jp);font-size:14px;color:var(--dim);margin-top:2px}
+.m-desc{margin-top:14px;color:var(--dim);font-size:13.5px;line-height:1.75}
+.m-sec{margin-top:22px}
+.m-sec h4{font-family:var(--mono);font-size:11px;letter-spacing:2px;color:var(--faint);border-bottom:1px solid var(--line);padding-bottom:7px;margin-bottom:11px}
+.stychips{display:flex;flex-wrap:wrap;gap:8px}
+.sty{height:30px;padding:0 13px;border:1px solid var(--line2);border-radius:16px;background:var(--panel);color:var(--dim);font-size:12px;cursor:pointer;transition:.15s}
+.sty:hover{color:var(--ink);border-color:var(--cyan-d)}
+.sty.on{color:#06080f;background:var(--gold);border-color:var(--gold);font-weight:700}
+.stydesc{margin-top:11px;color:var(--dim);font-size:12.5px;line-height:1.7;min-height:1em}
+.api-row{display:flex;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap}
+.api-url{flex:1;min-width:180px;font-family:var(--mono);font-size:11px;color:var(--cyan);background:var(--panel);border:1px solid var(--line);border-radius:7px;padding:8px 11px;overflow-x:auto;white-space:nowrap;
+  scrollbar-width:none}
+.api-url::-webkit-scrollbar{display:none}
+.api-btn{height:30px;padding:0 12px;border:1px solid var(--line2);border-radius:7px;background:var(--panel2);color:var(--dim);font-size:11.5px;cursor:pointer;transition:.15s;white-space:nowrap}
+.api-btn:hover{color:var(--ink);border-color:var(--cyan-d)}
+.m-x{position:sticky;top:0;float:right;margin:12px 12px 0 0;width:34px;height:34px;border:1px solid var(--line2);border-radius:9px;background:rgba(12,16,24,.9);color:var(--dim);font-size:15px;cursor:pointer;z-index:5}
+.m-x:hover{color:var(--ink);border-color:var(--pink-d)}
+</style>
+</head>
+<body>
+<div class="bg grad"></div><div class="bg grid"></div><div class="bg scan"></div>
+
+<nav class="nav"><div class="nav-in">
+  <a class="home-btn" href="/">⌂ HOME</a>
+  <div class="brand" onclick="closeModal()"><span class="mk">WAPON</span><span class="jp">武器庫</span></div>
+  <div class="crumb">특촬 무기 아카이브 — 무기별 기본형 · 스타일별 모습</div>
+  <a class="home-btn" href="/DB/">📚 DB</a>
+</div></nav>
+
+<header class="hero">
+  <h1>WEAPON <span>ARCHIVE</span></h1>
+  <p>무기를 고르면 그 무기의 스타일별 모습을 볼 수 있어. 이미지는 <span style="font-family:var(--mono);color:var(--cyan)">/i/무기명/스타일</span> API로도 열린다.</p>
+  <div class="cnt" id="cnt"></div>
+</header>
+
+<div class="wrap">
+  <div class="toolbar">
+    <div class="chips" id="catChips"></div>
+    <input id="q" placeholder="무기 검색…">
+  </div>
+  <div class="grid" id="grid"></div>
+</div>
+
+<footer>PAEAENTEOM · WAPON ARCHIVE — DB와 별개의 무기 전용 데이터</footer>
+
+<div class="mback" id="mback">
+  <div class="modal" id="modal"></div>
+</div>
+
+<script>
+const DATA = {
+  "meta": { "title": "WAPON", "sub": "특촬 무기 아카이브" },
+  "weapons": [
+    { "name": "검", "jp": "剣", "cat": "도검", "img": "", "desc": "가장 기본이 되는 한손 직검. 전대 히어로의 표준 무장부터 거대 괴수전까지 어디에나 등장하는 만능 무기.", "styles": [] },
+    { "name": "대검", "jp": "大剣", "cat": "도검", "img": "", "desc": "양손으로 휘두르는 대형 검. 파워형 전사와 최종폼의 상징적 무장.", "styles": [] },
+    { "name": "쌍검", "jp": "双剣", "cat": "도검", "img": "", "desc": "양손에 한 자루씩 쥐는 두 자루 검. 스피드형 전사의 단골 무장.", "styles": [] },
+    { "name": "단검", "jp": "短剣", "cat": "도검", "img": "", "desc": "한 손에 들어오는 짧은 날. 은밀 행동과 근접 호신용.", "styles": [] },
+    { "name": "일본도", "jp": "日本刀", "cat": "도검", "img": "", "desc": "외날 곡도. 사무라이 모티프 히어로와 괴인의 필수 무장.", "styles": [] },
+    { "name": "광선검", "jp": "光線剣", "cat": "도검", "img": "", "desc": "날이 에너지로 이루어진 검. 광선 계열 필살기와 함께 특촬 검격전의 꽃.", "styles": [] },
+    { "name": "창", "jp": "槍", "cat": "장병", "img": "", "desc": "찌르기 중심의 장병기. 리치를 살린 견제와 일점 돌파에 강하다.", "styles": [] },
+    { "name": "삼지창", "jp": "三叉槍", "cat": "장병", "img": "", "desc": "끝이 세 갈래로 갈라진 창. 해양·마왕 모티프 캐릭터의 단골.", "styles": [] },
+    { "name": "낫", "jp": "鎌", "cat": "장병", "img": "", "desc": "안쪽으로 휜 날을 단 수확구형 무기. 사신·어둠 계열 캐릭터의 상징.", "styles": [] },
+    { "name": "사슬낫", "jp": "鎖鎌", "cat": "장병", "img": "", "desc": "낫에 사슬과 분동을 단 복합 무기. 변칙적인 중거리 견제가 특기.", "styles": [] },
+    { "name": "나기나타", "jp": "薙刀", "cat": "장병", "img": "", "desc": "긴 자루 끝에 휜 날을 단 일본식 장병기. 베기 위주의 우아한 궤적.", "styles": [] },
+    { "name": "봉 (막대기)", "jp": "棒", "cat": "장병", "img": "", "desc": "가장 원초적인 무기, 막대기. 날이 없어 다루기 쉽고 변형·합체 기믹의 베이스로도 단골.", "styles": [] },
+    { "name": "지팡이", "jp": "杖", "cat": "장병", "img": "", "desc": "마법·주술 계열의 지휘봉. 선단의 보석이나 문양에서 힘을 발한다.", "styles": [] },
+    { "name": "도끼", "jp": "斧", "cat": "타격", "img": "", "desc": "묵직한 날로 내리찍는 무기. 괴력형 전사의 상징.", "styles": [] },
+    { "name": "해머", "jp": "ハンマー", "cat": "타격", "img": "", "desc": "대형 망치. 한 방의 파괴력으로 승부한다.", "styles": [] },
+    { "name": "철퇴", "jp": "メイス", "cat": "타격", "img": "", "desc": "머리에 가시나 능선을 세운 타격 무기. 갑주째 부수는 용도.", "styles": [] },
+    { "name": "쌍절곤", "jp": "ヌンチャク", "cat": "타격", "img": "", "desc": "두 막대를 사슬로 이은 무기. 화려한 연격이 특기.", "styles": [] },
+    { "name": "활", "jp": "弓", "cat": "사격", "img": "", "desc": "화살을 쏘는 사격 무기. 아오레인저의 블루체리처럼 궁수 포지션의 상징.", "styles": [] },
+    { "name": "석궁", "jp": "弩", "cat": "사격", "img": "", "desc": "방아쇠식 활. 안정된 조준과 관통력.", "styles": [] },
+    { "name": "권총", "jp": "銃", "cat": "사격", "img": "", "desc": "한손 화기. 변신 아이템을 겸하는 총기도 특촬의 단골.", "styles": [] },
+    { "name": "라이플", "jp": "ライフル", "cat": "사격", "img": "", "desc": "양손 장총. 저격과 연사 모두 소화한다.", "styles": [] },
+    { "name": "캐논포", "jp": "キャノン砲", "cat": "사격", "img": "", "desc": "어깨에 메는 대구경 포. 팀 전원이 합체시키는 바주카의 로망.", "styles": [] },
+    { "name": "부메랑", "jp": "ブーメラン", "cat": "투척", "img": "", "desc": "던지면 되돌아오는 곡선 무기. 미도메란이 대표격.", "styles": [] },
+    { "name": "수리검", "jp": "手裏剣", "cat": "투척", "img": "", "desc": "닌자의 투척날. 별형·십자형 등 형태도 다양.", "styles": [] },
+    { "name": "폭탄", "jp": "爆弾", "cat": "투척", "img": "", "desc": "던져서 폭발시키는 무기. 고레인저 스톰의 공 폭탄처럼 필살기로도 쓰인다.", "styles": [] },
+    { "name": "방패", "jp": "盾", "cat": "방어", "img": "", "desc": "막는 것이 곧 무기. 던지거나 빔을 반사하는 응용도 많다.", "styles": [] },
+    { "name": "채찍", "jp": "鞭", "cat": "특수", "img": "", "desc": "유연한 줄 무기. 포박과 타격을 겸한다. 레드뷰트가 대표격.", "styles": [] },
+    { "name": "요요", "jp": "ヨーヨー", "cat": "특수", "img": "", "desc": "실 끝의 원반을 쏘아 되돌리는 트릭 무기.", "styles": [] },
+    { "name": "카드", "jp": "カード", "cat": "특수", "img": "", "desc": "던지고, 긋고, 변신한다. 카드형 아이템 무기.", "styles": [] },
+    { "name": "우산", "jp": "傘", "cat": "특수", "img": "", "desc": "찌르고 막고 활공하는 만능 소도구형 무기.", "styles": [] }
+  ]
+};
+
+/* ── 카테고리 플레이스홀더 SVG ── */
+var CAT_ICON = {
+  '도검': '<svg class="ph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M19 3 8.5 13.5"/><path d="M6.5 15.5 5 17"/><path d="M4.5 13.5 10.5 19.5"/><path d="M3 19 5 21"/></svg>',
+  '장병': '<svg class="ph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M12 21V6"/><path d="M12 6 9.5 3.5M12 6l2.5-2.5M12 3v3"/></svg>',
+  '타격': '<svg class="ph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="7" y="3" width="10" height="6" rx="1.2"/><path d="M12 9v12"/></svg>',
+  '사격': '<svg class="ph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M6 3c6 3 6 15 0 18"/><path d="M6 3v18"/><path d="M6 12h13M19 12l-3-2.2M19 12l-3 2.2"/></svg>',
+  '투척': '<svg class="ph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M4 14c2-6 10-9 16-8-2 5-8 10-14 10z"/></svg>',
+  '방어': '<svg class="ph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M12 3 5 6v6c0 4.5 3 7.5 7 9 4-1.5 7-4.5 7-9V6z"/></svg>',
+  '특수': '<svg class="ph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M13 3 6 13h5l-1 8 8-11h-5z"/></svg>'
+};
+var CATS = ['전체','도검','장병','타격','사격','투척','방어','특수'];
+var curCat = '전체', curQ = '';
+
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function W(){return (DATA.weapons||[]).filter(function(w){return w&&w.name;});}
+function imgSrc(p){ if(!p) return ''; if(/^https?:\/\//.test(p)||p.charAt(0)==='/') return p; return p; }
+
+function renderChips(){
+  var el=document.getElementById('catChips'); var h='';
+  for(var i=0;i<CATS.length;i++){var c=CATS[i];
+    var n=(c==='전체')?W().length:W().filter(function(w){return w.cat===c;}).length;
+    h+='<button class="chip'+(curCat===c?' on':'')+'" onclick="setCat(\''+c+'\')">'+c+' <span class="n">'+n+'</span></button>';
+  }
+  el.innerHTML=h;
+}
+function setCat(c){curCat=c;renderChips();renderGrid();}
+
+function renderGrid(){
+  var q=curQ.toLowerCase();
+  var list=W().filter(function(w){
+    if(curCat!=='전체'&&w.cat!==curCat)return false;
+    if(!q)return true;
+    var hay=(w.name+' '+(w.jp||'')+' '+(w.styles||[]).map(function(s){return s.name;}).join(' ')).toLowerCase();
+    return hay.indexOf(q)!==-1;
+  });
+  var h='';
+  for(var i=0;i<list.length;i++){var w=list[i];
+    var im=w.img?('<img src="'+esc(imgSrc(w.img))+'" alt="'+esc(w.name)+'" loading="lazy" onerror="this.outerHTML=CAT_ICON[\''+esc(w.cat)+'\']||CAT_ICON[\'특수\']">'):(CAT_ICON[w.cat]||CAT_ICON['특수']);
+    var stn=(w.styles&&w.styles.length)?('<span class="stn">스타일 '+w.styles.length+'</span>'):'';
+    h+='<div class="card" onclick="openW(\''+encodeURIComponent(w.name)+'\')">'+stn+
+       '<div class="imgbox">'+im+'</div>'+
+       '<div class="info"><div class="nm">'+esc(w.name)+'</div><div class="jp2">'+esc(w.jp||'')+'</div>'+
+       '<div class="meta"><span class="tag gold">'+esc(w.cat||'')+'</span></div></div></div>';
+  }
+  document.getElementById('grid').innerHTML=h||'<div style="color:var(--faint);padding:30px 4px">검색 결과가 없어.</div>';
+  document.getElementById('cnt').textContent='WEAPONS: '+W().length+' — 표시 중 '+list.length;
+}
+
+/* ── 모달 + 해시 딥링크 (#무기명 / #무기명/스타일명) ── */
+var HASH_LOCK=false;
+function findW(name){ var n=String(name||'').trim(); return W().find(function(w){return w.name===n||w.jp===n;})||null; }
+function setHash(w,sty){
+  HASH_LOCK=true;
+  var h='#'+encodeURIComponent(w.name)+(sty?'/'+encodeURIComponent(sty):'');
+  if(location.hash!==h) history.replaceState(null,'',h);
+  setTimeout(function(){HASH_LOCK=false;},0);
+}
+function clearHash(){
+  HASH_LOCK=true;
+  history.replaceState(null,'',location.pathname+location.search);
+  setTimeout(function(){HASH_LOCK=false;},0);
+}
+function openW(encName,styName){
+  var w=findW(decodeURIComponent(encName)); if(!w)return;
+  var sel=-1;
+  if(styName){ for(var i=0;i<(w.styles||[]).length;i++){ if(w.styles[i].name===styName){sel=i;break;} } }
+  renderModal(w,sel);
+  document.getElementById('mback').classList.add('open');
+  document.body.style.overflow='hidden';
+  setHash(w, sel>=0?w.styles[sel].name:null);
+}
+function renderModal(w,sel){
+  var cur=(sel>=0&&w.styles&&w.styles[sel])?w.styles[sel]:null;
+  var img=cur&&cur.img?cur.img:w.img;
+  var imEl=img?('<img src="'+esc(imgSrc(img))+'" alt="'+esc(w.name)+'">'):((CAT_ICON[w.cat]||CAT_ICON['특수'])+'<div class="noimg">NO IMAGE — 사진 준비중</div>');
+  var apiBase=location.origin+'/i/'+encodeURIComponent(w.name);
+  var apiUrl=cur?apiBase+'/'+encodeURIComponent(cur.name):apiBase;
+  var chips='<button class="sty'+(sel<0?' on':'')+'" onclick="reSel(\''+encodeURIComponent(w.name)+'\',-1)">기본</button>';
+  for(var i=0;i<(w.styles||[]).length;i++){
+    chips+='<button class="sty'+(sel===i?' on':'')+'" onclick="reSel(\''+encodeURIComponent(w.name)+'\','+i+')">'+esc(w.styles[i].name)+'</button>';
+  }
+  var stydesc=cur?(cur.desc||''):'';
+  document.getElementById('modal').innerHTML=
+    '<button class="m-x" onclick="closeModal()">✕</button>'+
+    '<div class="m-in">'+
+      '<div class="m-img">'+imEl+'</div>'+
+      '<div class="m-body">'+
+        '<div class="m-kick">'+esc(w.cat||'무기')+' / WEAPON</div>'+
+        '<div class="m-nm">'+esc(w.name)+'</div>'+
+        '<div class="m-jp">'+esc(w.jp||'')+'</div>'+
+        '<div class="m-desc">'+esc(w.desc||'')+'</div>'+
+        '<div class="m-sec"><h4>STYLES — 스타일별 모습</h4>'+
+          '<div class="stychips">'+chips+'</div>'+
+          (stydesc?'<div class="stydesc">'+esc(stydesc)+'</div>':'')+
+        '</div>'+
+        '<div class="m-sec"><h4>IMAGE API — 링크로 이미지 열기</h4>'+
+          '<div class="api-row"><div class="api-url" id="apiUrl">'+esc(apiUrl)+'</div>'+
+          '<button class="api-btn" onclick="copyApi()">복사</button>'+
+          '<a class="api-btn" href="'+esc(apiUrl)+'" target="_blank" rel="noopener">열기 ↗</a></div>'+
+        '</div>'+
+      '</div>'+
+    '</div>';
+}
+function reSel(encName,i){
+  var w=findW(decodeURIComponent(encName)); if(!w)return;
+  renderModal(w,i);
+  setHash(w, i>=0&&w.styles[i]?w.styles[i].name:null);
+}
+function copyApi(){
+  var t=document.getElementById('apiUrl').textContent;
+  if(navigator.clipboard){navigator.clipboard.writeText(t);}
+  else{var ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();}
+}
+function closeModal(){
+  document.getElementById('mback').classList.remove('open');
+  document.body.style.overflow='';
+  clearHash();
+}
+document.getElementById('mback').addEventListener('click',function(e){if(e.target===this)closeModal();});
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeModal();});
+
+function applyHash(){
+  if(HASH_LOCK)return;
+  var h=location.hash.replace(/^#/,''); if(!h){closeModalSilent();return;}
+  var parts=h.split('/').map(function(x){try{return decodeURIComponent(x);}catch(e){return x;}});
+  var w=findW(parts[0]); if(!w)return;
+  openW(encodeURIComponent(w.name), parts[1]||null);
+}
+function closeModalSilent(){
+  document.getElementById('mback').classList.remove('open');
+  document.body.style.overflow='';
+}
+window.addEventListener('hashchange',applyHash);
+
+document.getElementById('q').addEventListener('input',function(){curQ=this.value.trim();renderGrid();});
+
+renderChips();renderGrid();applyHash();
+</script>
+</body>
+</html>
