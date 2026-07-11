@@ -122,7 +122,7 @@ footer{position:relative;z-index:1;border-top:1px solid var(--line);padding:26px
 
 <header class="hero">
   <h1>WEAPON <span>ARCHIVE</span></h1>
-  <p>무기를 고르면 그 무기의 스타일별 모습을 볼 수 있어. 이미지는 <span style="font-family:var(--mono);color:var(--cyan)">/i/무기명/스타일</span> API로도 열린다.</p>
+  <p>무기를 고르면 그 무기의 스타일별 모습을 볼 수 있어. 이미지는 <span style="font-family:var(--mono);color:var(--cyan)">/i/무기명/스타일/x</span> API로도 열린다 (기본형은 스타일=기본).</p>
   <div class="cnt" id="cnt"></div>
 </header>
 
@@ -252,8 +252,8 @@ function renderModal(w,sel){
   var cur=(sel>=0&&w.styles&&w.styles[sel])?w.styles[sel]:null;
   var img=cur&&cur.img?cur.img:w.img;
   var imEl=img?('<img src="'+esc(imgSrc(img))+'" alt="'+esc(w.name)+'">'):((CAT_ICON[w.cat]||CAT_ICON['특수'])+'<div class="noimg">NO IMAGE — 사진 준비중</div>');
-  var apiBase=location.origin+'/i/'+encodeURIComponent(w.name);
-  var apiUrl=cur?apiBase+'/'+encodeURIComponent(cur.name):apiBase;
+  /* 삼박자 정확 일치 형식: /i/무기명/스타일/x (기본형은 스타일=기본) */
+  var apiUrl=location.origin+'/i/'+encodeURIComponent(w.name)+'/'+encodeURIComponent(cur?cur.name:'기본')+'/x';
   var chips='<button class="sty'+(sel<0?' on':'')+'" onclick="reSel(\''+encodeURIComponent(w.name)+'\',-1)">기본</button>';
   for(var i=0;i<(w.styles||[]).length;i++){
     chips+='<button class="sty'+(sel===i?' on':'')+'" onclick="reSel(\''+encodeURIComponent(w.name)+'\','+i+')">'+esc(w.styles[i].name)+'</button>';
