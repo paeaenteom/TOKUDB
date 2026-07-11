@@ -97,6 +97,34 @@ function buildMap(DATA) {
   return out;
 }
 
+/* /WAPON/ 무기고 데이터 → 매핑 (무기 기본형 + 스타일별). 경로는 /WAPON/ 기준으로 절대화 */
+function buildWaponMap(DATA) {
+  const out = [];
+  const abs = (p) => {
+    if (!p) return '';
+    if (/^https?:\/\//.test(p) || p.startsWith('/')) return p;
+    return '/WAPON/' + p;
+  };
+  const add = (img, names, forms) => {
+    if (!img) return;
+    out.push({
+      img: abs(String(img)),
+      names: names.filter(Boolean).map(norm),
+      forms: forms.filter(Boolean).map(norm),
+      actions: ['전신', '무기'].map(norm)
+    });
+  };
+  for (const w of (DATA.weapons || [])) {
+    if (!w || !w.name) continue;
+    if (w.img) add(w.img, [w.name, w.jp], ['기본']);
+    for (const s of (w.styles || [])) {
+      if (!s) continue;
+      add(s.img || w.img, [w.name, w.jp], [s.name]);
+    }
+  }
+  return out;
+}
+
 async function getMap(host) {
   const now = Date.now();
   if (CACHE && now - CACHE_AT < TTL) return CACHE;
@@ -105,7 +133,16 @@ async function getMap(host) {
   const html = await r.text();
   const block = findDataBlock(html);
   if (!block) throw new Error('DATA block not found');
-  CACHE = buildMap(JSON.parse(block));
+  let map = buildMap(JSON.parse(block));
+  /* WAPON 무기고 병합 — 페이지가 없거나 실패해도 DB 리졸빙은 유지 */
+  try {
+    const rw = await fetch(`${proto}://${host}/WAPON/`, { headers: { 'user-agent': 'toku-img-resolver' } });
+    if (rw.ok) {
+      const wblock = findDataBlock(await rw.text());
+      if (wblock) map = map.concat(buildWaponMap(JSON.parse(wblock)));
+    }
+  } catch (e) { /* 무기고 없음 — 무시 */ }
+  CACHE = map;
   CACHE_AT = now;
   return CACHE;
 }
@@ -119,6 +156,8 @@ module.exports = async (req, res) => {
     const map = await getMap(req.headers.host);
     /* 이름 → 폼 → 행동 순으로 좁히되, 폼·행동은 매칭이 없으면 무시(관대한 폴백) */
     let hits = map.filter(e => e.names.some(n => n === nameQ || n.includes(nameQ) || nameQ.includes(n)));
+    /* 정확히 일치하는 이름이 있으면 부분일치보다 우선 (예: /i/낫 이 '큰낫가면'에 잡히지 않게) */
+    { const ex = hits.filter(e => e.names.some(n => n === nameQ)); if (ex.length) hits = ex; }
     if (formQ) { const f = hits.filter(e => e.forms.some(x => x === formQ || x.includes(formQ) || formQ.includes(x))); if (f.length) hits = f; }
     if (actQ) { const a = hits.filter(e => e.actions.some(x => x === actQ || x.includes(actQ) || actQ.includes(x))); if (a.length) hits = a; }
     if (!hits.length) {
