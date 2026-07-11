@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<meta name="theme-color" content="#06080f">
+<title>RPG UNPACKER — RPG Maker 언팩커</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Teko:wght@400;500;600;700&family=Share+Tech+Mono&family=Noto+Sans+KR:wght@400;500;700;900&family=Noto+Sans+JP:wght@400;500;700&display=swap');
+:root{
+  --bg:#06080f; --bg2:#080b14; --panel:#0c1018; --panel2:#10141f;
+  --line:#1a2231; --line2:#27324a;
+  --ink:#eef2ff; --dim:#8b95b3; --faint:#525d7a; --mute:#39435c;
+  --cyan:#87CEFF; --cyan-d:#5ba8e6; --pink:#FFB3C8;
+  --grn:#23d98a; --grn-d:#17b673; --red:#ff6b83; --amber:#ffc233;
+  --acc:var(--grn);
+  --disp:'Teko',sans-serif; --mono:'Share Tech Mono',monospace;
+  --jp:'Noto Sans JP',sans-serif; --kr:'Noto Sans KR',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:var(--kr);background:var(--bg);color:var(--ink);min-height:100vh;overflow-x:hidden}
+::selection{background:rgba(35,217,138,.3)}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit;cursor:pointer}
+.bg{position:fixed;inset:0;z-index:0;pointer-events:none}
+.bg.grad{background:
+  radial-gradient(900px 520px at 14% -6%,rgba(35,217,138,.10),transparent 60%),
+  radial-gradient(820px 520px at 88% 2%,rgba(135,206,255,.08),transparent 58%),
+  linear-gradient(180deg,#05070e,#080b15 55%,#05070e)}
+.bg.grid{background-image:linear-gradient(rgba(255,255,255,.022) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.022) 1px,transparent 1px);background-size:52px 52px;mask-image:radial-gradient(ellipse 90% 70% at 50% 12%,#000 35%,transparent 100%)}
+.bg.scan{background:repeating-linear-gradient(0deg,rgba(255,255,255,.014) 0 1px,transparent 1px 4px);opacity:.5}
+
+.nav{position:sticky;top:0;z-index:60;background:linear-gradient(180deg,rgba(6,8,15,.96),rgba(6,8,15,.84));backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.nav-in{max-width:1120px;margin:0 auto;padding:0 22px;height:60px;display:flex;align-items:center;gap:16px}
+.brand{display:flex;align-items:baseline;gap:9px;white-space:nowrap}
+.brand .mk{font-family:var(--disp);font-weight:700;font-size:27px;letter-spacing:1.5px;line-height:1;background:linear-gradient(110deg,#fff,var(--grn) 55%,var(--cyan));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.brand .jp{font-family:var(--jp);font-weight:700;font-size:13px;color:var(--faint);letter-spacing:2px}
+.home-btn{display:inline-flex;align-items:center;gap:7px;height:34px;padding:0 15px;border:1px solid var(--line2);border-radius:8px;background:var(--panel);color:var(--dim);font-family:var(--mono);font-size:12px;letter-spacing:1px;transition:.18s}
+.home-btn:hover{color:var(--ink);border-color:var(--cyan-d);background:rgba(135,206,255,.07)}
+.crumb{flex:1;font-family:var(--mono);font-size:12px;color:var(--faint);letter-spacing:.4px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+
+.hero{max-width:1120px;margin:0 auto;padding:46px 22px 6px;position:relative;z-index:1}
+.hero h1{font-family:var(--disp);font-weight:700;font-size:58px;letter-spacing:2px;line-height:.95}
+.hero h1 span{background:linear-gradient(110deg,var(--grn),var(--cyan));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{margin-top:10px;color:var(--dim);font-size:14px;line-height:1.7}
+.hero .fmts{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px}
+.fmt{font-family:var(--mono);font-size:11px;color:var(--dim);border:1px solid var(--line2);border-radius:20px;padding:5px 12px}
+.fmt b{color:var(--grn);font-weight:400}
+
+.wrap{max-width:1120px;margin:0 auto;padding:18px 22px 80px;position:relative;z-index:1}
+
+.drop{margin-top:14px;border:1.5px dashed var(--line2);border-radius:16px;background:linear-gradient(180deg,var(--panel2),var(--panel));padding:40px 22px;text-align:center;transition:.18s;cursor:pointer}
+.drop:hover,.drop.over{border-color:var(--grn);background:rgba(35,217,138,.05)}
+.drop .ic{width:46px;height:46px;margin:0 auto 12px;color:var(--grn)}
+.drop .ic svg{width:100%;height:100%;stroke:currentColor;fill:none;stroke-width:1.5}
+.drop .t1{font-size:16px;font-weight:700}
+.drop .t2{font-size:12.5px;color:var(--faint);margin-top:6px;font-family:var(--mono)}
+
+.keybar{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:16px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--panel)}
+.keybar .lbl{font-family:var(--mono);font-size:11px;color:var(--faint);letter-spacing:1px}
+.keybar input{flex:1;min-width:200px;height:34px;padding:0 12px;border:1px solid var(--line2);border-radius:8px;background:var(--panel2);color:var(--ink);font-family:var(--mono);font-size:12.5px;outline:none;letter-spacing:.5px}
+.keybar input:focus{border-color:var(--grn-d)}
+.keybar .st{font-family:var(--mono);font-size:11px;padding:5px 10px;border-radius:6px;white-space:nowrap}
+.keybar .st.on{color:#06080f;background:var(--grn);font-weight:700}
+.keybar .st.off{color:var(--faint);border:1px solid var(--line2)}
+
+.acts{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+.btn{height:40px;padding:0 18px;border:1px solid var(--line2);border-radius:9px;background:var(--panel2);color:var(--dim);font-size:13px;transition:.15s;display:inline-flex;align-items:center;gap:8px}
+.btn:hover{color:var(--ink);border-color:var(--cyan-d)}
+.btn.pri{color:#06080f;background:var(--grn);border-color:var(--grn);font-weight:700}
+.btn.pri:hover{filter:brightness(1.08)}
+.btn:disabled{opacity:.4;cursor:default;filter:none}
+.btn.ghost{background:transparent}
+
+.summ{font-family:var(--mono);font-size:12px;color:var(--faint);margin:22px 0 10px;letter-spacing:.5px;display:flex;flex-wrap:wrap;gap:14px}
+.summ b{color:var(--grn);font-weight:400}
+.summ .warn{color:var(--amber)}
+
+.list{display:flex;flex-direction:column;gap:8px}
+.row{display:grid;grid-template-columns:26px 1fr auto auto;align-items:center;gap:12px;padding:11px 14px;border:1px solid var(--line);border-radius:11px;background:var(--panel)}
+.row .rc{width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:10px;font-weight:700}
+.rc.png{background:rgba(135,206,255,.14);color:var(--cyan)}
+.rc.ogg,.rc.m4a{background:rgba(255,179,200,.14);color:var(--pink)}
+.rc.arc{background:rgba(255,194,51,.14);color:var(--amber)}
+.rc.dat{background:rgba(139,149,179,.14);color:var(--dim)}
+.row .meta{min-width:0}
+.row .nm{font-size:13.5px;font-weight:500;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.row .sub{font-family:var(--mono);font-size:10.5px;color:var(--faint);margin-top:2px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.row .vd{font-family:var(--mono);font-size:10px;padding:3px 8px;border-radius:5px;white-space:nowrap}
+.vd.ok{color:var(--grn);border:1px solid rgba(35,217,138,.4)}
+.vd.bad{color:var(--red);border:1px solid rgba(255,107,131,.4)}
+.vd.wait{color:var(--faint);border:1px solid var(--line2)}
+.row .dl{width:30px;height:30px;border:1px solid var(--line2);border-radius:7px;background:var(--panel2);color:var(--dim);display:flex;align-items:center;justify-content:center;transition:.15s}
+.row .dl:hover{color:var(--grn);border-color:var(--grn-d)}
+.row .dl svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.7}
+.grp{font-family:var(--mono);font-size:11px;color:var(--grn);letter-spacing:1px;margin:16px 0 4px;padding-left:2px}
+
+.note{margin-top:26px;padding:14px 16px;border:1px solid var(--line);border-left:3px solid var(--amber);border-radius:9px;background:var(--panel);font-size:12.5px;color:var(--dim);line-height:1.75}
+.note b{color:var(--ink)}
+.note code{font-family:var(--mono);color:var(--cyan);font-size:11px}
+.priv{margin-top:12px;font-family:var(--mono);font-size:11px;color:var(--faint);letter-spacing:.4px}
+.priv b{color:var(--grn);font-weight:400}
+footer{position:relative;z-index:1;border-top:1px solid var(--line);padding:26px 22px;text-align:center;color:var(--mute);font-family:var(--mono);font-size:11px;letter-spacing:1px}
+.empty{color:var(--faint);padding:26px 4px;font-size:13.5px}
+</style>
+</head>
+<body>
+<div class="bg grad"></div><div class="bg grid"></div><div class="bg scan"></div>
+
+<nav class="nav"><div class="nav-in">
+  <a class="home-btn" href="/">⌂ HOME</a>
+  <div class="brand"><span class="mk">UNPACK</span><span class="jp">解凍</span></div>
+  <div class="crumb">RPG Maker 언팩커 — 전 버전 아카이브 해제 · 에셋 복호화</div>
+  <a class="home-btn" href="/rpgedit">✎ RPG</a>
+</div></nav>
+
+<header class="hero">
+  <h1>RPG <span>UNPACKER</span></h1>
+  <p>RPG Maker의 암호화된 아카이브와 에셋을 브라우저에서 바로 풀어. 파일은 <b style="color:var(--grn)">서버로 전송되지 않고</b> 이 페이지 안에서만 처리돼.</p>
+  <div class="fmts">
+    <span class="fmt">XP · VX <b>.rgssad / .rgss2a</b></span>
+    <span class="fmt">VX Ace <b>.rgss3a</b></span>
+    <span class="fmt">MV <b>.rpgmvp / .rpgmvo / .rpgmvm</b></span>
+    <span class="fmt">MZ <b>.png_ / .ogg_ / .m4a_</b></span>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="drop" id="drop">
+    <div class="ic"><svg viewBox="0 0 24 24"><path d="M12 15V3M8 7l4-4 4 4"/><path d="M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/></svg></div>
+    <div class="t1">파일을 여기로 끌어다 놓거나 클릭해서 선택</div>
+    <div class="t2">.rgssad · .rgss2a · .rgss3a · .rpgmvp · .png_ · .ogg_ · .m4a_ · System.json · 폴더 통째로</div>
+    <input type="file" id="file" multiple style="display:none">
+  </div>
+
+  <div class="keybar">
+    <span class="lbl">MV/MZ 암호키</span>
+    <input id="key" placeholder="System.json을 넣으면 자동 · 또는 32자리 hex 직접 입력" spellcheck="false">
+    <span class="st off" id="keyst">키 없음</span>
+  </div>
+
+  <div class="acts">
+    <button class="btn pri" id="zipAll" disabled>⬇ 전체 추출 → ZIP</button>
+    <button class="btn ghost" id="clear" disabled>비우기</button>
+  </div>
+
+  <div class="summ" id="summ"></div>
+  <div class="list" id="list"><div class="empty">아직 파일이 없어. 위에 RPG Maker 파일을 넣어줘.</div></div>
+
+  <div class="note">
+    <b>사용법</b><br>
+    · <b>XP/VX/VX Ace</b>: <code>Game.rgssad</code>·<code>.rgss2a</code>·<code>.rgss3a</code>를 넣으면 안에 든 파일을 전부 목록으로 풀어. 키 불필요.<br>
+    · <b>MV/MZ</b>: 암호화 에셋(<code>.rpgmvp</code> 등)과 함께 게임의 <code>data/System.json</code>(또는 <code>www/data/System.json</code>)을 같이 넣으면 <b>암호키가 자동 입력</b>돼. 키가 없으면 System.json만 먼저 넣거나 32자리 키를 직접 붙여넣어도 돼.<br>
+    · 각 파일은 복호 후 <b>매직바이트로 유효성(✓/✗)</b>을 표시해 — ✓면 정상 복원된 거야.
+    <div class="priv">■ 모든 처리는 <b>이 브라우저 안에서만</b> 이뤄지고 어떤 파일도 업로드되지 않아. 자기 게임/합법적 용도(번역·백업·개조)로 써.</div>
+  </div>
+</div>
+
+<footer>PAEAENTEOM · RPG UNPACKER — 클라이언트 사이드 · 서버 전송 없음</footer>
+
+<script>
+/* ═══════════ 저수준 유틸 ═══════════ */
+function u32(n){ return n >>> 0; }
+function advance(key){ return u32(key * 7 + 3); }
+function keyBytesLE(key){ return [key & 0xff, (key>>>8)&0xff, (key>>>16)&0xff, (key>>>24)&0xff]; }
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+
+/* ═══════════ RGSSAD 파일 데이터 복호 (v1·v3 공통) ═══════════ */
+function decryptFileData(data, fileKey){
+  var out = new Uint8Array(data.length);
+  var key = u32(fileKey), kb = keyBytesLE(key), j = 0;
+  for (var i = 0; i < data.length; i++){
+    if (j === 4){ key = advance(key); kb = keyBytesLE(key); j = 0; }
+    out[i] = data[i] ^ kb[j]; j++;
+  }
+  return out;
+}
+
+/* ═══════════ RGSSAD 파싱 (버전 자동판별) ═══════════ */
+function parseRGSSAD(buf){
+  // 헤더 "RGSSAD\0" + 버전바이트(1 또는 3)
+  var sig = String.fromCharCode(buf[0],buf[1],buf[2],buf[3],buf[4],buf[5]);
+  if (sig !== 'RGSSAD') throw new Error('RGSSAD 아카이브가 아니야');
+  var ver = buf[7];
+  return ver === 3 ? parseV3(buf) : parseV1(buf);
+}
+function parseV1(buf){
+  var dv = new DataView(buf.buffer, buf.byteOffset, buf.byteLength);
+  var key = 0xDEADCAFE >>> 0, pos = 8, files = [];
+  while (pos < buf.length){
+    var nameLen = u32(dv.getUint32(pos, true) ^ key); pos += 4; key = advance(key);
+    if (nameLen <= 0 || nameLen > 4096 || pos + nameLen > buf.length) break;
+    var name = '';
+    for (var i = 0; i < nameLen; i++){ name += String.fromCharCode(buf[pos+i] ^ (key & 0xff)); key = advance(key); }
+    pos += nameLen;
+    var size = u32(dv.getUint32(pos, true) ^ key); pos += 4; key = advance(key);
+    files.push({ name: name.replace(/\\/g,'/'), size: size, offset: pos, fileKey: key, ver: 1 });
+    pos += size;
+  }
+  return files;
+}
+function parseV3(buf){
+  var dv = new DataView(buf.buffer, buf.byteOffset, buf.byteLength);
+  var pos = 8;
+  var key = u32(dv.getInt32(pos, true) * 9 + 3); pos += 4;
+  var files = [], guard = 0;
+  while (guard++ < 100000){
+    var offset = u32(dv.getUint32(pos, true) ^ key); pos += 4;
+    var size   = u32(dv.getUint32(pos, true) ^ key); pos += 4;
+    var fileKey= u32(dv.getUint32(pos, true) ^ key); pos += 4;
+    var nameLen= u32(dv.getUint32(pos, true) ^ key); pos += 4;
+    if (offset === 0) break;
+    if (nameLen > 4096 || pos + nameLen > buf.length) break;
+    var kb = keyBytesLE(key), name = '';
+    for (var i = 0; i < nameLen; i++) name += String.fromCharCode(buf[pos+i] ^ kb[i % 4]);
+    pos += nameLen;
+    files.push({ name: name.replace(/\\/g,'/'), size: size, offset: offset, fileKey: fileKey, ver: 3 });
+  }
+  return files;
+}
+
+/* ═══════════ MV/MZ 복호 ═══════════ */
+function hexToBytes(hex){
+  hex = String(hex||'').replace(/[^0-9a-fA-F]/g,'');
+  if (hex.length < 32) return null;
+  var b = new Uint8Array(16);
+  for (var i = 0; i < 16; i++) b[i] = parseInt(hex.substr(i*2, 2), 16);
+  return b;
+}
+function decryptRPGMV(bytes, keyBytes){
+  var content = bytes.subarray(16);   // 16바이트 가짜 헤더 제거
+  var out = content.slice();
+  var n = Math.min(16, out.length);
+  for (var i = 0; i < n; i++) out[i] ^= keyBytes[i];
+  return out;
+}
+var MV_MAP = { rpgmvp:'png', png_:'png', rpgmvo:'ogg', ogg_:'ogg', rpgmvm:'m4a', m4a_:'m4a' };
+
+/* ═══════════ 매직바이트 유효성 ═══════════ */
+function detectKind(data){
+  if (data.length >= 8 && data[0]===0x89&&data[1]===0x50&&data[2]===0x4E&&data[3]===0x47) return 'png';
+  if (data.length >= 4 && data[0]===0x4F&&data[1]===0x67&&data[2]===0x67&&data[3]===0x53) return 'ogg';
+  if (data.length >= 12 && data[4]===0x66&&data[5]===0x74&&data[6]===0x79&&data[7]===0x70) return 'm4a';
+  return null;
+}
+
+/* ═══════════ store-only ZIP + CRC32 ═══════════ */
+var CRC = (function(){ var t=[]; for(var n=0;n<256;n++){ var c=n; for(var k=0;k<8;k++) c=c&1?(0xEDB88320^(c>>>1)):(c>>>1); t[n]=c>>>0; } return t; })();
+function crc32(b){ var c=0xFFFFFFFF; for(var i=0;i<b.length;i++) c=CRC[(c^b[i])&0xff]^(c>>>8); return (c^0xFFFFFFFF)>>>0; }
+function makeZip(files){
+  var enc = new TextEncoder(), chunks = [], central = [], offset = 0;
+  for (var f=0; f<files.length; f++){
+    var nameBytes = enc.encode(files[f].name), data = files[f].data, crc = crc32(data), size = data.length;
+    var lh = new DataView(new ArrayBuffer(30));
+    lh.setUint32(0,0x04034b50,true); lh.setUint16(4,20,true); lh.setUint16(6,0x0800,true); lh.setUint16(8,0,true);
+    lh.setUint16(10,0,true); lh.setUint16(12,0,true); lh.setUint32(14,crc,true); lh.setUint32(18,size,true);
+    lh.setUint32(22,size,true); lh.setUint16(26,nameBytes.length,true); lh.setUint16(28,0,true);
+    chunks.push(new Uint8Array(lh.buffer), nameBytes, data);
+    var ch = new DataView(new ArrayBuffer(46));
+    ch.setUint32(0,0x02014b50,true); ch.setUint16(4,20,true); ch.setUint16(6,20,true); ch.setUint16(8,0x0800,true);
+    ch.setUint16(10,0,true); ch.setUint32(16,crc,true); ch.setUint32(20,size,true); ch.setUint32(24,size,true);
+    ch.setUint16(28,nameBytes.length,true); ch.setUint32(42,offset,true);
+    central.push(new Uint8Array(ch.buffer), nameBytes);
+    offset += 30 + nameBytes.length + size;
+  }
+  var cdStart = offset, cdSize = 0;
+  for (var c=0; c<central.length; c++){ chunks.push(central[c]); cdSize += central[c].length; }
+  var eo = new DataView(new ArrayBuffer(22));
+  eo.setUint32(0,0x06054b50,true); eo.setUint16(8,files.length,true); eo.setUint16(10,files.length,true);
+  eo.setUint32(12,cdSize,true); eo.setUint32(16,cdStart,true);
+  chunks.push(new Uint8Array(eo.buffer));
+  return new Blob(chunks, { type:'application/zip' });
+}
+function dl(blob, name){
+  var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+}
+
+/* ═══════════ 상태 ═══════════ */
+var ITEMS = [];   // {group, name, outName, kind, data(Uint8Array), valid:'ok'|'bad'|null}
+var keyBytes = null;
+
+function extLower(name){ var m = /\.([^.]+)$/.exec(name||''); return m ? m[1].toLowerCase() : ''; }
+function baseName(name){ return String(name||'').split(/[\/\\]/).pop(); }
+
+function readFile(file){
+  return new Promise(function(res){ var r = new FileReader(); r.onload = function(){ res(new Uint8Array(r.result)); }; r.readAsArrayBuffer(file); });
+}
+
+/* System.json → 키 */
+function tryKeyFromSystem(text){
+  try{ var j = JSON.parse(text); if (j && j.encryptionKey) return j.encryptionKey; }catch(e){}
+  var m = /"encryptionKey"\s*:\s*"([0-9a-fA-F]{32})"/.exec(text||'');
+  return m ? m[1] : null;
+}
+function setKey(hex){
+  var kb = hexToBytes(hex);
+  keyBytes = kb;
+  document.getElementById('key').value = kb ? hex.replace(/[^0-9a-fA-F]/g,'').slice(0,32) : (hex||'');
+  var st = document.getElementById('keyst');
+  st.className = 'st ' + (kb ? 'on' : 'off');
+  st.textContent = kb ? '키 인식됨' : '키 없음';
+  if (kb) redecryptMV();
+}
+
+/* MV 항목 재복호 (키가 나중에 들어온 경우) */
+function redecryptMV(){
+  if (!keyBytes) return;
+  for (var i = 0; i < ITEMS.length; i++){
+    var it = ITEMS[i];
+    if (it._mvRaw){
+      it.data = decryptRPGMV(it._mvRaw, keyBytes);
+      var k = detectKind(it.data);
+      it.valid = k ? 'ok' : 'bad';
+    }
+  }
+  render();
+}
+
+/* ═══════════ 파일 처리 ═══════════ */
+async function handleFiles(fileList){
+  var arr = Array.prototype.slice.call(fileList);
+  // System.json 우선 처리 (키 먼저 확보)
+  for (var i = 0; i < arr.length; i++){
+    if (/system\.json$/i.test(arr[i].name)){
+      var txt = await arr[i].text();
+      var k = tryKeyFromSystem(txt);
+      if (k) setKey(k);
+    }
+  }
+  for (var f = 0; f < arr.length; f++){
+    var file = arr[f];
+    var name = file.name, ext = extLower(name);
+    if (/system\.json$/i.test(name)) continue;
+    var bytes = await readFile(file);
+
+    if (ext === 'rgssad' || ext === 'rgss2a' || ext === 'rgss3a'){
+      try{
+        var entries = parseRGSSAD(bytes);
+        var grp = baseName(name);
+        for (var e = 0; e < entries.length; e++){
+          var en = entries[e];
+          var raw = bytes.subarray(en.offset, en.offset + en.size);
+          var data = decryptFileData(raw, en.fileKey);
+          var k = detectKind(data);
+          ITEMS.push({ group: grp, name: en.name, outName: en.name, kind: kindOf(en.name),
+            data: data, valid: k ? 'ok' : null, src: 'RGSSAD v'+en.ver });
+        }
+      }catch(err){
+        ITEMS.push({ group: baseName(name), name: name, outName: name, kind: 'dat', data: bytes, valid: 'bad', src: '해석 실패: '+err.message });
+      }
+    } else if (MV_MAP[ext]){
+      var outExt = MV_MAP[ext];
+      var outName = name.replace(/\.[^.]+$/, '.' + outExt);
+      var it = { group: 'MV/MZ 복호', name: name, outName: outName, kind: outExt,
+        data: null, valid: null, src: 'RPG Maker MV/MZ', _mvRaw: bytes };
+      if (keyBytes){ it.data = decryptRPGMV(bytes, keyBytes); var kk = detectKind(it.data); it.valid = kk ? 'ok' : 'bad'; }
+      ITEMS.push(it);
+    } else {
+      ITEMS.push({ group: '기타 (그대로)', name: name, outName: name, kind: kindOf(name), data: bytes, valid: null, src: '암호화 아님 — 원본' });
+    }
+  }
+  render();
+}
+function kindOf(name){
+  var e = extLower(name);
+  if (e === 'png') return 'png';
+  if (e === 'ogg') return 'ogg';
+  if (e === 'm4a') return 'm4a';
+  if (e === 'rgssad' || e === 'rgss2a' || e === 'rgss3a') return 'arc';
+  return 'dat';
+}
+
+/* ═══════════ 렌더 ═══════════ */
+function render(){
+  var list = document.getElementById('list');
+  if (!ITEMS.length){ list.innerHTML = '<div class="empty">아직 파일이 없어. 위에 RPG Maker 파일을 넣어줘.</div>'; }
+  else{
+    var groups = {}, order = [];
+    for (var i = 0; i < ITEMS.length; i++){ var g = ITEMS[i].group; if (!groups[g]){ groups[g] = []; order.push(g); } groups[g].push(i); }
+    var h = '';
+    for (var o = 0; o < order.length; o++){
+      var g = order[o];
+      h += '<div class="grp">▸ ' + esc(g) + ' <span style="color:var(--faint)">(' + groups[g].length + ')</span></div>';
+      for (var x = 0; x < groups[g].length; x++){
+        var idx = groups[g][x], it = ITEMS[idx];
+        var rc = (it.kind === 'png'||it.kind === 'ogg'||it.kind === 'm4a') ? it.kind : (it.kind === 'arc' ? 'arc' : 'dat');
+        var vd = it.valid === 'ok' ? '<span class="vd ok">✓ 유효</span>'
+               : it.valid === 'bad' ? '<span class="vd bad">✗ 확인필요</span>'
+               : (it._mvRaw && !keyBytes) ? '<span class="vd wait">키 대기</span>' : '';
+        var canDl = !!it.data;
+        h += '<div class="row">'
+          + '<div class="rc ' + rc + '">' + esc((it.kind||'').toUpperCase().slice(0,3) || 'BIN') + '</div>'
+          + '<div class="meta"><div class="nm">' + esc(it.outName) + '</div><div class="sub">' + esc(it.src) + (it.data ? ' · ' + fmtSize(it.data.length) : '') + '</div></div>'
+          + vd
+          + (canDl ? '<button class="dl" title="다운로드" onclick="dlOne(' + idx + ')"><svg viewBox="0 0 24 24"><path d="M12 3v12M7 11l5 5 5-5"/><path d="M5 21h14"/></svg></button>' : '<span style="width:30px"></span>')
+          + '</div>';
+      }
+    }
+    list.innerHTML = h;
+  }
+  // 요약 + 버튼
+  var total = ITEMS.length, ready = ITEMS.filter(function(i){ return i.data; }).length;
+  var ok = ITEMS.filter(function(i){ return i.valid === 'ok'; }).length;
+  var waitKey = ITEMS.filter(function(i){ return i._mvRaw && !keyBytes; }).length;
+  var s = document.getElementById('summ');
+  s.innerHTML = total ? ('총 <b>' + total + '</b>개 · 복호완료 <b>' + ready + '</b> · 유효 <b>' + ok + '</b>'
+    + (waitKey ? ' · <span class="warn">키 대기 ' + waitKey + '</span>' : '')) : '';
+  document.getElementById('zipAll').disabled = ready === 0;
+  document.getElementById('clear').disabled = total === 0;
+}
+function fmtSize(n){ if (n < 1024) return n + 'B'; if (n < 1048576) return (n/1024).toFixed(1) + 'KB'; return (n/1048576).toFixed(1) + 'MB'; }
+
+function dlOne(idx){ var it = ITEMS[idx]; if (!it.data) return; dl(new Blob([it.data]), baseName(it.outName)); }
+function zipAll(){
+  var files = [];
+  for (var i = 0; i < ITEMS.length; i++){ var it = ITEMS[i]; if (!it.data) continue; files.push({ name: (it.group + '/' + it.outName).replace(/\/+/g,'/').replace(/[:*?"<>|]/g,'_'), data: it.data }); }
+  if (!files.length) return;
+  dl(makeZip(files), 'rpg-unpacked.zip');
+}
+function clearAll(){ ITEMS = []; render(); }
+
+/* ═══════════ 이벤트 ═══════════ */
+var drop = document.getElementById('drop'), fileInput = document.getElementById('file');
+drop.addEventListener('click', function(){ fileInput.click(); });
+fileInput.addEventListener('change', function(){ handleFiles(this.files); this.value = ''; });
+drop.addEventListener('dragover', function(e){ e.preventDefault(); drop.classList.add('over'); });
+drop.addEventListener('dragleave', function(){ drop.classList.remove('over'); });
+drop.addEventListener('drop', function(e){
+  e.preventDefault(); drop.classList.remove('over');
+  var items = e.dataTransfer.items, files = [];
+  if (items && items.length && items[0].webkitGetAsEntry){
+    var pending = 0, done = false;
+    function walk(entry, path){
+      if (entry.isFile){ pending++; entry.file(function(f){ try{ Object.defineProperty(f,'name',{value:(path+f.name)}); }catch(_){} files.push(f); if (--pending===0 && done) handleFiles(files); }); }
+      else if (entry.isDirectory){ var rd = entry.createReader(); rd.readEntries(function(ents){ for (var i=0;i<ents.length;i++) walk(ents[i], path+entry.name+'/'); }); }
+    }
+    for (var i = 0; i < items.length; i++){ var en = items[i].webkitGetAsEntry(); if (en) walk(en, ''); }
+    done = true; setTimeout(function(){ if (pending===0) handleFiles(files); }, 300);
+  } else { handleFiles(e.dataTransfer.files); }
+});
+document.getElementById('key').addEventListener('input', function(){ setKey(this.value); });
+document.getElementById('zipAll').addEventListener('click', zipAll);
+document.getElementById('clear').addEventListener('click', clearAll);
+</script>
+</body>
+</html>
