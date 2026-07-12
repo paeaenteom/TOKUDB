@@ -3010,7 +3010,8 @@ function openHero(key,eIdx,wi,hi){
   setModalHash(w,h);
   const rail=h.color?`<span class="crail" style="background:linear-gradient(180deg,${h.color},transparent 85%)"></span>`:`<span class="crail" style="background:var(--acc)"></span>`;
   if(h.person){
-    const pimg=h.img?`<img src="${iu(h.img)}" alt="${esc(h.name)}">`:`<span class="ph">${esc((h.name||'?')[0])}</span>`;
+    const pSrc=h.imgModal||h.img; /* 모달 전용 사진(선택) — 없으면 카드 사진 */
+    const pimg=pSrc?`<img src="${iu(pSrc)}" alt="${esc(h.name)}">`:`<span class="ph">${esc((h.name||'?')[0])}</span>`;
     openModal(`<button class="x" onclick="closeModal()">×</button>
       <div class="m-hero entity"${itemModalAttr(h)}>${rail}${pimg}</div>
       <div class="m-body">
@@ -3024,8 +3025,9 @@ function openHero(key,eIdx,wi,hi){
     return;
   }
   const hasAlt=!!h.imgAlt;
-  const img=h.img
-    ?`<img class="hImg-base" src="${iu(h.img)}" alt="${esc(h.name)}">`+(hasAlt?`<img class="hImg-alt" src="${iu(h.imgAlt)}" alt="" style="display:none">`:'')
+  const mSrc=h.imgModal||h.img; /* 모달 전용 사진(선택) — 없으면 카드 사진 */
+  const img=mSrc
+    ?`<img class="hImg-base" src="${iu(mSrc)}" alt="${esc(h.name)}">`+(hasAlt?`<img class="hImg-alt" src="${iu(h.imgAlt)}" alt="" style="display:none">`:'')
     :`<span class="ph">${esc((h.name||'?')[0])}</span>`;
   const cloak=hasAlt?`<button class="cloak-btn" onclick="toggleHeroImg(this)" title="${esc(h.imgAltLabel||'다른 모습')}"><img src="${CLOAK_ICON}" alt=""></button>`:'';
   const chips=[h.sub?`<span class="m-chip acc">변신체 · ${esc(h.sub)}</span>`:'',
@@ -3059,8 +3061,9 @@ function openEntity(key,eIdx,wi,type,idx){
   const list=map[type]||[];const it=list[idx];if(!it||it._divider)return;
   setModalHash(w,it);
   const kicker={people:'🧑 인물 · 관계자',arsenal:'⚔️ 무장 · 무기',machines:'🤖 장비 · 메카',kaiju:'👾 괴수 · 우주인',org:'🛡️ 조직 · 집단'}[type];
+  const eSrc=it.imgModal||it.photo||it.img; /* 모달 전용 사진(선택) — 없으면 카드 사진 */
   const vis=(it.media&&it.media.src)?mediaInner(it.media)
-    :(it.photo||it.img)?`<img src="${iu(it.photo||it.img)}" alt="${esc(it.name)}">`
+    :eSrc?`<img src="${iu(eSrc)}" alt="${esc(it.name)}">`
     :`<span class="ph">${esc((it.name||'?')[0])}</span>`;
   const rail=it.color?`<span class="crail" style="background:linear-gradient(180deg,${it.color},transparent 85%)"></span>`:`<span class="crail" style="background:var(--acc)"></span>`;
   const chips=[it.cat?`<span class="m-chip">${esc(it.cat)}</span>`:'',it.ep?`<span class="m-chip acc">${esc(it.ep)}</span>`:''].filter(Boolean).join('');
@@ -3087,7 +3090,8 @@ function openForm(key,eIdx,wi,fi){
   const f=(w.forms||[])[fi];if(!f||f._divider)return;
   setModalHash(w,f);
   const rail=f.color?`<span class="crail" style="background:linear-gradient(180deg,${f.color},transparent 85%)"></span>`:`<span class="crail" style="background:var(--acc)"></span>`;
-  const img=f.img?`<img src="${iu(f.img)}" alt="${esc(f.name)}">`:`<span class="ph">${esc((f.name||'?')[0])}</span>`;
+  const fSrc=f.imgModal||f.img; /* 모달 전용 사진(선택) — 없으면 카드 사진 */
+  const img=fSrc?`<img src="${iu(fSrc)}" alt="${esc(f.name)}">`:`<span class="ph">${esc((f.name||'?')[0])}</span>`;
   const chips=f.sub?`<span class="m-chip acc">${esc(f.sub)}</span>`:'';
   const specRows=[
     (f.item&&f.item!=='—')?`<div class="m-row"><span class="k">🔧 변신 아이템</span><span class="v">${esc(f.item)}</span></div>`:'',
