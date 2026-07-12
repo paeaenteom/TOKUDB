@@ -189,8 +189,11 @@ body{background:var(--bg);color:var(--txt);font-family:'Noto Sans KR',sans-serif
           <a href="https://console.anthropic.com/settings/keys" target="_blank" class="cmd-btn" style="flex:1;justify-content:center;font-size:10px;padding:6px;text-decoration:none;color:var(--sky)">발급받기 ↗</a>
         </div>
         <div style="margin-top:9px">
-          <div class="cmd-group-label" style="margin-bottom:5px">모델 선택</div>
-          <select id="modelSel" class="sel" onchange="onModelChange()"></select>
+          <div class="cmd-group-label" style="margin-bottom:5px">모델 선택 · 버전</div>
+          <div style="display:flex;gap:6px">
+            <select id="familySel" class="sel" style="flex:1.25;min-width:0" onchange="onFamilyChange()"></select>
+            <select id="verSel" class="sel" style="flex:1;min-width:0" onchange="onVerChange()"></select>
+          </div>
         </div>
         <div id="keyStatus" style="font-family:var(--mono);font-size:9px;color:var(--mute);margin-top:6px;text-align:center">키 미설정</div>
       </div>
@@ -278,13 +281,30 @@ body{background:var(--bg);color:var(--txt);font-family:'Noto Sans KR',sans-serif
 </div>
 
 <script>
-/* ════ Claude API (모델 선택 · 브라우저 직통) ════ */
-const CLAUDE_MODELS=[
-  {id:'claude-opus-4-8',label:'Opus 4.8 · 최고 성능'},
-  {id:'claude-sonnet-5',label:'Sonnet 5 · 균형'},
-  {id:'claude-haiku-4-5',label:'Haiku 4.5 · 빠름·저렴'},
-  {id:'claude-fable-5',label:'Fable 5 · 창작 특화'},
+/* ════ Claude API (모델 계열 → 버전 2단 선택 · 브라우저 직통) ════ */
+const CLAUDE_FAMILIES=[
+  {key:'opus', name:'Opus', label:'Opus · 최고 성능', versions:[
+    {id:'claude-opus-4-8', v:'4.8', note:'최신'},
+    {id:'claude-opus-4-7', v:'4.7'},
+    {id:'claude-opus-4-6', v:'4.6'},
+    {id:'claude-opus-4-5', v:'4.5'},
+    {id:'claude-opus-4-1', v:'4.1', note:'종료 예정'},
+    {id:'claude-opus-4-0', v:'4.0', note:'종료 예정'},
+  ]},
+  {key:'sonnet', name:'Sonnet', label:'Sonnet · 균형', versions:[
+    {id:'claude-sonnet-5', v:'5', note:'최신'},
+    {id:'claude-sonnet-4-6', v:'4.6'},
+    {id:'claude-sonnet-4-5', v:'4.5'},
+    {id:'claude-sonnet-4-0', v:'4.0', note:'종료 예정'},
+  ]},
+  {key:'haiku', name:'Haiku', label:'Haiku · 빠름·저렴', versions:[
+    {id:'claude-haiku-4-5', v:'4.5', note:'최신'},
+  ]},
+  {key:'fable', name:'Fable', label:'Fable · 창작 특화', versions:[
+    {id:'claude-fable-5', v:'5', note:'최신'},
+  ]},
 ];
+const CLAUDE_MODELS=CLAUDE_FAMILIES.flatMap(f=>f.versions.map(v=>({id:v.id,label:f.name+' '+v.v+(v.note?' · '+v.note:'')})));
 function getApiKey(){ return localStorage.getItem('claude_api_key')||''; }
 function getModel(){ const m=localStorage.getItem('claude_model'); return CLAUDE_MODELS.some(x=>x.id===m)?m:'claude-opus-4-8'; }
 function setModel(m){ localStorage.setItem('claude_model',m); }
@@ -305,12 +325,28 @@ function updateKeyStatus(){
   if(k){el.innerHTML='✓ 키 설정됨 ('+k.slice(0,10)+'...)<br>모델: '+ml;el.style.color='var(--green)';}
   else{el.innerHTML='⚠ 키 미설정 (연출·전투에 필요)';el.style.color='var(--pink)';}
 }
-function initModelSel(){
-  const sel=document.getElementById('modelSel');if(!sel)return;
-  sel.innerHTML=CLAUDE_MODELS.map(m=>`<option value="${m.id}">${m.label}</option>`).join('');
-  sel.value=getModel();
+function familyOf(id){ return CLAUDE_FAMILIES.find(f=>f.versions.some(v=>v.id===id)); }
+function fillVerSel(fam){
+  const vs=document.getElementById('verSel');if(!vs)return;
+  vs.innerHTML=fam.versions.map(v=>`<option value="${v.id}">${v.v}${v.note?' · '+v.note:''}</option>`).join('');
 }
-function onModelChange(){ setModel(document.getElementById('modelSel').value); updateKeyStatus(); toast('모델: '+((CLAUDE_MODELS.find(x=>x.id===getModel())||{}).label||getModel())); }
+function initModelSel(){
+  const fs=document.getElementById('familySel');if(!fs)return;
+  fs.innerHTML=CLAUDE_FAMILIES.map(f=>`<option value="${f.key}">${f.label}</option>`).join('');
+  const fam=familyOf(getModel())||CLAUDE_FAMILIES[0];
+  fs.value=fam.key;
+  fillVerSel(fam);
+  document.getElementById('verSel').value=getModel();
+}
+function onFamilyChange(){
+  const fam=CLAUDE_FAMILIES.find(f=>f.key===document.getElementById('familySel').value)||CLAUDE_FAMILIES[0];
+  fillVerSel(fam);
+  const vs=document.getElementById('verSel');
+  vs.value=fam.versions[0].id; /* 계열 변경 시 최신 버전 기본 */
+  setModel(vs.value); updateKeyStatus(); toastModel();
+}
+function onVerChange(){ setModel(document.getElementById('verSel').value); updateKeyStatus(); toastModel(); }
+function toastModel(){ toast('모델: '+((CLAUDE_MODELS.find(x=>x.id===getModel())||{}).label||getModel())); }
 function toast(msg){
   const t=document.createElement('div');t.textContent=msg;
   t.style.cssText='position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--card);border:1px solid var(--sky);border-radius:5px;padding:10px 18px;font-family:var(--mono);font-size:12px;color:var(--sky);z-index:999';
