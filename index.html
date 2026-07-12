@@ -72,7 +72,8 @@ body{background:var(--bg);color:var(--txt);font-family:'Noto Sans KR',sans-serif
 .dots{display:flex;gap:7px;justify-content:center;margin-top:14px}
 .dots b{width:7px;height:7px;border-radius:50%;background:var(--line2);cursor:pointer;transition:.2s}
 .dots b.on{background:var(--orange);width:20px;border-radius:4px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+@media(max-width:640px){.grid{grid-template-columns:repeat(2,1fr)}}
 .entry{position:relative;display:flex;flex-direction:column;align-items:center;gap:10px;padding:22px 14px;background:var(--card);border:1px solid var(--line);border-radius:5px;text-decoration:none;color:var(--txt);transition:.2s;overflow:hidden}
 .entry::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent,rgba(0,0,0,.2));opacity:0;transition:.2s}
 .entry:hover{transform:translateY(-3px);border-color:var(--ac,var(--orange));box-shadow:0 12px 30px -16px var(--ac,var(--orange))}
@@ -84,6 +85,9 @@ body{background:var(--bg);color:var(--txt);font-family:'Noto Sans KR',sans-serif
 .entry .soon{position:absolute;top:8px;right:8px;font-family:var(--mono);font-size:8px;letter-spacing:1px;color:var(--dim);border:1px solid var(--line2);border-radius:2px;padding:2px 5px}
 .entry.dis{opacity:.55;cursor:default}
 .entry.dis:hover{transform:none;border-color:var(--line);box-shadow:none}
+/* 잠금 코너: 아이콘 위에 회색 밴드 + 자물쇠 배지 (클릭 시 암호 게이트) */
+.entry.locked .ic{width:calc(100% + 28px);height:auto;margin:4px -14px;padding:15px 0;background:rgba(151,161,183,.28)}
+.entry.locked .soon{color:#cdd5e4;border-color:#3a465e;font-size:11px;padding:2px 6px;background:rgba(0,0,0,.35)}
 .broadcast{border:1px solid var(--line);border-left:2px solid var(--orange);border-radius:5px;background:linear-gradient(180deg,rgba(13,16,20,.9),rgba(10,13,17,.7));padding:18px 22px}
 .broadcast .bh{font-family:var(--mono);font-size:11px;letter-spacing:1.5px;color:var(--dim);margin-bottom:12px}
 .broadcast .bh b{color:var(--orange)}
@@ -150,29 +154,29 @@ footer .f1 b{color:var(--dim)}
         <span class="ic"><svg viewBox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v14l-8-4-8 4z"/></svg></span>
         <span class="nm">DEX</span><span class="en">Database</span>
       </a>
-      <a class="entry" style="--ac:var(--magenta)" href="/rpgedit" data-lock>
-        <span class="soon">🔒</span>
-        <span class="ic"><svg viewBox="0 0 24 24"><path d="M14 2l6 6-9 9-6 1 1-6z"/><path d="M12 8l4 4"/></svg></span>
-        <span class="nm">RPG 세이브 에디터</span><span class="en">RPG Editor</span>
-      </a>
       <a class="entry" style="--ac:var(--amber)" href="/sim">
         <span class="ic"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg></span>
         <span class="nm">현현 시뮬레이터</span><span class="en">Manifest SIM</span>
-      </a>
-      <a class="entry" style="--ac:var(--yellow)" href="/WAPON/" data-lock>
-        <span class="soon">🔒</span>
-        <span class="ic"><svg viewBox="0 0 24 24"><path d="M19 3 6.5 15.5M4.5 13.5l6 6M3 19l2 2"/><path d="M5 3l6.2 6.2M19.5 13.5 13.3 19.7M21 19l-2 2M17.5 15.5l2 2"/></svg></span>
-        <span class="nm">WAPON 무기고</span><span class="en">Weapon Archive</span>
-      </a>
-      <a class="entry" style="--ac:var(--green)" href="/UNPACK/" data-lock>
-        <span class="soon">🔒</span>
-        <span class="ic"><svg viewBox="0 0 24 24"><path d="M21 8v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8"/><path d="M2 4h20v4H2z"/><path d="M12 12v5M9.5 14.5 12 17l2.5-2.5"/></svg></span>
-        <span class="nm">RPG 언팩커</span><span class="en">Unpacker</span>
       </a>
       <a class="entry dis" style="--ac:var(--yellow)">
         <span class="soon">SOON</span>
         <span class="ic"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/><circle cx="20" cy="18" r="1.5"/></svg></span>
         <span class="nm">방영 타임라인</span><span class="en">Timeline</span>
+      </a>
+      <a class="entry locked" style="--ac:var(--magenta)" href="/rpgedit" data-lock>
+        <span class="soon">🔒</span>
+        <span class="ic"><svg viewBox="0 0 24 24"><path d="M14 2l6 6-9 9-6 1 1-6z"/><path d="M12 8l4 4"/></svg></span>
+        <span class="nm">RPG 세이브 에디터</span><span class="en">RPG Editor</span>
+      </a>
+      <a class="entry locked" style="--ac:var(--yellow)" href="/WAPON/" data-lock>
+        <span class="soon">🔒</span>
+        <span class="ic"><svg viewBox="0 0 24 24"><path d="M19 3 6.5 15.5M4.5 13.5l6 6M3 19l2 2"/><path d="M5 3l6.2 6.2M19.5 13.5 13.3 19.7M21 19l-2 2M17.5 15.5l2 2"/></svg></span>
+        <span class="nm">WAPON 무기고</span><span class="en">Weapon Archive</span>
+      </a>
+      <a class="entry locked" style="--ac:var(--green)" href="/UNPACK/" data-lock>
+        <span class="soon">🔒</span>
+        <span class="ic"><svg viewBox="0 0 24 24"><path d="M21 8v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8"/><path d="M2 4h20v4H2z"/><path d="M12 12v5M9.5 14.5 12 17l2.5-2.5"/></svg></span>
+        <span class="nm">RPG 언팩커</span><span class="en">Unpacker</span>
       </a>
     </div>
   </section>
