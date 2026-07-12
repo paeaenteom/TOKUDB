@@ -150,7 +150,8 @@ footer .f1 b{color:var(--dim)}
         <span class="ic"><svg viewBox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v14l-8-4-8 4z"/></svg></span>
         <span class="nm">DEX</span><span class="en">Database</span>
       </a>
-      <a class="entry" style="--ac:var(--magenta)" href="/rpgedit">
+      <a class="entry" style="--ac:var(--magenta)" href="/rpgedit" data-lock>
+        <span class="soon">🔒</span>
         <span class="ic"><svg viewBox="0 0 24 24"><path d="M14 2l6 6-9 9-6 1 1-6z"/><path d="M12 8l4 4"/></svg></span>
         <span class="nm">RPG 세이브 에디터</span><span class="en">RPG Editor</span>
       </a>
@@ -158,11 +159,13 @@ footer .f1 b{color:var(--dim)}
         <span class="ic"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg></span>
         <span class="nm">현현 시뮬레이터</span><span class="en">Manifest SIM</span>
       </a>
-      <a class="entry" style="--ac:var(--yellow)" href="/WAPON/">
+      <a class="entry" style="--ac:var(--yellow)" href="/WAPON/" data-lock>
+        <span class="soon">🔒</span>
         <span class="ic"><svg viewBox="0 0 24 24"><path d="M19 3 6.5 15.5M4.5 13.5l6 6M3 19l2 2"/><path d="M5 3l6.2 6.2M19.5 13.5 13.3 19.7M21 19l-2 2M17.5 15.5l2 2"/></svg></span>
         <span class="nm">WAPON 무기고</span><span class="en">Weapon Archive</span>
       </a>
-      <a class="entry" style="--ac:var(--green)" href="/UNPACK/">
+      <a class="entry" style="--ac:var(--green)" href="/UNPACK/" data-lock>
+        <span class="soon">🔒</span>
         <span class="ic"><svg viewBox="0 0 24 24"><path d="M21 8v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8"/><path d="M2 4h20v4H2z"/><path d="M12 12v5M9.5 14.5 12 17l2.5-2.5"/></svg></span>
         <span class="nm">RPG 언팩커</span><span class="en">Unpacker</span>
       </a>
@@ -231,6 +234,40 @@ io.observe(document.getElementById('stats'));
 var navLinks=document.querySelectorAll('.nav-menu a[href^="#"]');
 var secs=[].map.call(navLinks,function(a){return document.querySelector(a.getAttribute('href'))});
 window.addEventListener('scroll',function(){var y=window.scrollY+120,act=-1;secs.forEach(function(s,i){if(s&&s.offsetTop<=y)act=i});navLinks.forEach(function(a,i){a.classList.toggle('on',i===act)});});
+</script>
+<script>
+/* ── 잠금 코너 클릭 게이트 (암호 1회 입력 → 잠금 페이지들과 localStorage 공유) ── */
+(function(){
+  var KEY='pae_gate_v1',PW='1120';
+  function overlay(ac,onOk){
+    var ov=document.createElement('div');
+    ov.style.cssText='position:fixed;inset:0;z-index:2147483000;background:rgba(4,6,10,.92);display:flex;align-items:center;justify-content:center;font-family:var(--mono,ui-monospace),Consolas,monospace';
+    ov.innerHTML='<div style="text-align:center;width:280px;padding:26px 28px;border:1px solid #222c3f;border-radius:14px;background:#0b0e14">'
+      +'<div style="font-size:10px;letter-spacing:3px;color:#5b6b82;margin-bottom:6px">// RESTRICTED CORNER</div>'
+      +'<div style="font-size:16px;font-weight:700;color:#e8eef7;margin-bottom:14px;font-family:\'Noto Sans KR\',sans-serif">특수 암호 입력</div>'
+      +'<input type="password" inputmode="numeric" autocomplete="off" maxlength="12" style="width:100%;box-sizing:border-box;padding:10px 12px;font-size:16px;text-align:center;letter-spacing:6px;background:#07090d;border:1px solid #2a3550;border-radius:8px;color:#e8eef7;outline:none">'
+      +'<div data-m style="height:15px;font-size:11px;color:#ff5470;margin-top:8px;font-family:\'Noto Sans KR\',sans-serif"></div>'
+      +'<button style="margin-top:4px;width:100%;padding:10px;font-size:12px;font-weight:700;letter-spacing:2px;background:'+ac+';color:#10131a;border:0;border-radius:8px;cursor:pointer">ENTER</button></div>';
+    document.body.appendChild(ov);
+    var inp=ov.querySelector('input'),msg=ov.querySelector('[data-m]');
+    function go(){
+      if(inp.value===PW){localStorage.setItem(KEY,'ok');ov.remove();onOk();}
+      else{msg.textContent='암호가 틀렸습니다';inp.value='';inp.focus();}
+    }
+    ov.querySelector('button').addEventListener('click',go);
+    inp.addEventListener('keydown',function(e){if(e.key==='Enter')go();});
+    ov.addEventListener('click',function(e){if(e.target===ov)ov.remove();});
+    setTimeout(function(){inp.focus();},50);
+  }
+  document.querySelectorAll('a[data-lock]').forEach(function(a){
+    a.addEventListener('click',function(e){
+      if(localStorage.getItem(KEY)==='ok')return;
+      e.preventDefault();
+      var ac=(getComputedStyle(a).getPropertyValue('--ac')||'').trim()||'#ffc233';
+      overlay(ac,function(){location.href=a.getAttribute('href');});
+    });
+  });
+})();
 </script>
 </body>
 </html>
