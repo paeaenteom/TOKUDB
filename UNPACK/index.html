@@ -109,6 +109,36 @@ footer{position:relative;z-index:1;border-top:1px solid var(--line);padding:26px
 </style>
 </head>
 <body>
+<script>
+/* ── 특수 암호 게이트 (잠금 코너 공용 · localStorage 공유 · 메인 카드 게이트와 동일 키) ── */
+(function(){
+  var KEY='pae_gate_v1',PW='1120',AC='#23d98a';
+  if(localStorage.getItem(KEY)==='ok')return;
+  document.documentElement.style.visibility='hidden';
+  function show(){
+    document.documentElement.style.visibility='';
+    var ov=document.createElement('div');
+    ov.style.cssText='position:fixed;inset:0;z-index:2147483000;background:#07090d;display:flex;align-items:center;justify-content:center;font-family:ui-monospace,Consolas,monospace';
+    ov.innerHTML='<div style="text-align:center;width:280px;padding:26px 28px;border:1px solid #222c3f;border-radius:14px;background:#0b0e14">'
+      +'<div style="font-size:10px;letter-spacing:3px;color:#5b6b82;margin-bottom:6px">// RESTRICTED CORNER</div>'
+      +'<div style="font-size:16px;font-weight:700;color:#e8eef7;margin-bottom:14px;font-family:sans-serif">특수 암호 입력</div>'
+      +'<input type="password" inputmode="numeric" autocomplete="off" maxlength="12" style="width:100%;box-sizing:border-box;padding:10px 12px;font-size:16px;text-align:center;letter-spacing:6px;background:#07090d;border:1px solid #2a3550;border-radius:8px;color:#e8eef7;outline:none">'
+      +'<div data-m style="height:15px;font-size:11px;color:#ff5470;margin-top:8px;font-family:sans-serif"></div>'
+      +'<button style="margin-top:4px;width:100%;padding:10px;font-size:12px;font-weight:700;letter-spacing:2px;background:'+AC+';color:#10131a;border:0;border-radius:8px;cursor:pointer">ENTER</button></div>';
+    document.body.appendChild(ov);
+    var inp=ov.querySelector('input'),msg=ov.querySelector('[data-m]');
+    function go(){
+      if(inp.value===PW){localStorage.setItem(KEY,'ok');ov.remove();}
+      else{msg.textContent='암호가 틀렸습니다';inp.value='';inp.focus();}
+    }
+    ov.querySelector('button').addEventListener('click',go);
+    inp.addEventListener('keydown',function(e){if(e.key==='Enter')go();});
+    setTimeout(function(){inp.focus();},50);
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',show);
+  else show();
+})();
+</script>
 <div class="bg grad"></div><div class="bg grid"></div><div class="bg scan"></div>
 
 <nav class="nav"><div class="nav-in">
