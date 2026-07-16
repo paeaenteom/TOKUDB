@@ -95,6 +95,7 @@ body{background:var(--bg);color:var(--txt);font-family:'Noto Sans KR',sans-serif
 .broadcast li{font-family:'Noto Sans KR';font-size:13.5px;color:var(--txt2);line-height:1.5;padding-left:18px;position:relative}
 .broadcast li::before{content:"›";position:absolute;left:2px;color:var(--orange);font-family:var(--mono)}
 .broadcast li b{color:var(--amber)}
+.broadcast li .d{font-family:var(--mono);font-size:10.5px;color:var(--dim);margin-right:8px;letter-spacing:.5px}
 .broadcast li.warn::before{content:"⚠";font-size:11px;left:0}
 .broadcast li.warn{color:var(--txt)}
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
@@ -231,10 +232,17 @@ footer .f1 b{color:var(--dim)}
   <section id="broadcast">
     <div class="sec-h"><span class="t">시스템 <span class="ac">공지</span></span><span class="line"></span><span class="jp">// BROADCAST</span></div>
     <div class="broadcast">
-      <div class="bh">// <b>ARCHIVE NETWORK BROADCAST</b> // 2026.06 // 우선순위: 일반</div>
+      <div class="bh">// <b>ARCHIVE NETWORK BROADCAST</b> // 2026.07 // 업데이트 기록</div>
       <ul>
-        <li>도감에 <b>URL 라우팅</b> 적용 — 작품별 주소(<b>/DB/시리즈/작품/</b>)로 바로 진입·공유 가능.</li>
-        <li><b>RPG 세이브 에디터</b> 가동 — RPG Maker MV/MZ/XP/VX/VXAce · 한글 인코딩 지원.</li>
+        <li><span class="d">06월</span><b>RPG 세이브 에디터</b> 가동 — RPG Maker MV/MZ/XP/VX/VXAce · 한글 인코딩 지원.</li>
+        <li><span class="d">07.05</span>도감 <b>URL 라우팅</b> — 작품별 주소(<b>/DB/시리즈/작품/</b>) 진입·공유 + 카드 팝업 <b>해시 딥링크</b>.</li>
+        <li><span class="d">07.06</span>도감 <b>인물 탭</b> · <b>기능(기믹)·변신 사운드</b> 섹션 · 카드 배지 커스텀 · 외부 임베드용 <b>/i/ 이미지 직통주소</b>.</li>
+        <li><span class="d">07.07</span><b>/summ/이름</b> 캐릭터 데이터 API — RPG 봇·외부 연동용 JSON.</li>
+        <li><span class="d">07.11</span><b>WAPON 무기고</b> 개장(/wapon) · <b>RPG UNPACKER</b> 가동(/unpack, RGSSAD·MV/MZ 복호).</li>
+        <li><span class="d">07.12</span><b>현현 시뮬레이터</b> 개편 — Claude AI+도감 연동·모델/버전 선택 · /i/ <b>삼박자 정확 일치</b> · 모달 전용 사진.</li>
+        <li><span class="d">07.13</span>스킬·변신 기믹 영상 <b>클릭→팝업 재생</b>.</li>
+        <li><span class="d">07.16</span><b>신작 알림</b> 가동 — TTFC·TSUBURAYA IMAGINATION 신착 감시(벨+소리+배너) · 작품 이미지 <b>카드/배너/스포트라이트 3분리</b>.</li>
+        <li><span class="d">07.17</span>IMAG <b>실신착 페이지</b> 직결 · TTFC <b>에피소드 단위 알림</b>(New 배지).</li>
         <li class="warn">현재 메인 콘텐츠는 <b>도감 아카이브</b>입니다. 타임라인·용어 코너는 순차 개방.</li>
       </ul>
     </div>
