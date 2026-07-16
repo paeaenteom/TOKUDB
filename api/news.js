@@ -70,7 +70,10 @@ async function ttfcNew() {
     } catch (e) { /* 개별 작품 실패는 무시 */ }
   }));
   eps.sort((a, b) => parseInt(b.id.slice(6), 10) - parseInt(a.id.slice(6), 10)); /* 최신 등록(id 큰 것) 먼저 */
-  return out.slice(0, 12).concat(eps.slice(0, 15));
+  /* 작품 카드(ttfc-m)는 목록에 띄우지 않는다 — 에피소드 "New"만 (유빈 요청 2026-07-17).
+     에피소드 스캔이 전부 실패했을 때만 작품 카드로 대체(홈 뉴스 폴백보다 낫다). */
+  if (eps.length) return eps.slice(0, 15);
+  return out.slice(0, 12);
 }
 
 /* ── TTFC 폴백: 공개 홈 뉴스 하이라이트 ── */
