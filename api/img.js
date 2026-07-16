@@ -60,6 +60,7 @@ function paren(s) {
 /* DB 구조에서 이미지별 '정식 삼박자'를 유도 (경로 → {name[],form[],action[]}) */
 function buildDerived(DATA) {
   const d = {};
+  const later = []; /* 전용 이미지(배너/카드/스포트라이트) 지연 등록 — 기존 주소 우선 */
   const put = (img, name, form, action) => {
     if (!img || d[img]) return; /* 먼저 만난 정의가 정식 */
     d[img] = {
@@ -73,7 +74,15 @@ function buildDerived(DATA) {
     for (const s of Object.values(g.series)) {
       if (!s || !Array.isArray(s.eras)) continue;
       for (const era of s.eras) for (const w of (era.works || [])) {
-        if (w.img) put(w.img, [w.ko, w.jp], [], ['배너']);
+        /* 배너 삼박자 = 실제 배너에 쓰이는 이미지 (imgBanner 전용 사진 우선, 없으면 카드).
+           전용 사진(imgBanner/imgSpot)이 기존 사진(영웅 등)을 재사용해도 기존 /i/ 주소를
+           선점해 깨뜨리지 않도록, 전용 계열 등록은 전체 순회 후(later)로 미룬다. */
+        if (!w.imgBanner) { if (w.img) put(w.img, [w.ko, w.jp], [], ['배너']); }
+        else {
+          later.push([w.imgBanner, [w.ko, w.jp], [], ['배너']]);
+          if (w.img) later.push([w.img, [w.ko, w.jp], [], ['카드']]);
+        }
+        if (w.imgSpot) later.push([w.imgSpot, [w.ko, w.jp], [], ['스포트라이트']]);
         for (const h of (w.members || [])) {
           if (!h || h._divider) continue;
           const sub = paren(h.sub), lbl = paren(h.imgAltLabel);
@@ -107,6 +116,7 @@ function buildDerived(DATA) {
       }
     }
   }
+  for (const a of later) put(a[0], a[1], a[2], a[3]); /* 재사용 경로면 기존 정의가 이미 선점 → 무시됨 */
   return d;
 }
 
