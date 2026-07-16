@@ -66,17 +66,31 @@ async function ttfcNewsFallback() {
   return out.slice(0, 10);
 }
 
-/* ── IMAG 1순위: imagination.m-78.jp/list/slider_new (신착 카드) ── */
+/* ── IMAG 1순위: imagination.m-78.jp/list/slider_new?type=1 (신착) ──
+   이 페이지는 React SSR — 아이템이 <a> 마크업이 아니라 이스케이프된 JSON 페이로드로 들어있다:
+   \"is_series\":false,\"code\":\"Video_00281\",\"name\":\"...\",...\"display_start_datetime\":\"2026/07/11 09:30:00\"
+   (도쿄 hnd1에선 지오 통과 확인됨 — 예전 폴백 전환의 원인은 지오가 아니라 이 마크업 차이였음.
+    Video_* 코드는 /video/, 그 외(Yomi_* 등)는 /contents/ 상세 경로.) */
 async function imagNew() {
-  const r = await fetch('https://imagination.m-78.jp/list/slider_new', { headers: HDRS });
+  const r = await fetch('https://imagination.m-78.jp/list/slider_new?type=1', { headers: HDRS });
   if (!r.ok) return [];
   const t = await r.text();
   /* 지역 차단 에러 페이지 감지 */
-  if (/ご指定のページにアクセスできません/.test(t)) return [];
+  if (/ご指定のページにアクセスできません|GEO_BLOCKED/.test(t)) return [];
   const out = [], seen = new Set();
-  const re = /<a[^>]+href="(\/contents\/[A-Za-z0-9_-]+)"[\s\S]{0,900}?alt="([^"]{2,})"/g;
+  const re = /\\"is_series\\":(?:true|false),\\"code\\":\\"([A-Za-z0-9_]+)\\",\\"name\\":\\"((?:[^"\\]|\\.)*?)\\",\\"content_type\\":\d+[\s\S]{0,200}?\\"display_start_datetime\\":\\"([^"\\]*)\\"/g;
   let m;
   while ((m = re.exec(t))) {
+    const code = m[1]; if (seen.has(code)) continue; seen.add(code);
+    let name = m[2];
+    try { name = JSON.parse('"' + name.replace(/\\\\/g, '\\') + '"'); } catch (e) { name = name.replace(/\\(.)/g, '$1'); }
+    const path = (code.indexOf('Video_') === 0 ? '/video/' : '/contents/') + code;
+    out.push({ src: 'IMAG', id: 'imag-c-' + code, title: dec(name), date: String(m[3]).slice(0, 10).replace(/\//g, '-'), url: 'https://imagination.m-78.jp' + path, release: true, via: 'new' });
+  }
+  if (out.length) return out.slice(0, 12);
+  /* 페이로드 구조가 바뀌면 렌더 마크업(구버전) 방식도 시도 */
+  const re2 = /<a[^>]+href="(\/(?:contents|video)\/[A-Za-z0-9_-]+)"[\s\S]{0,900}?alt="([^"]{2,})"/g;
+  while ((m = re2.exec(t))) {
     const path = m[1]; if (seen.has(path)) continue; seen.add(path);
     out.push({ src: 'IMAG', id: 'imag-c-' + path.split('/').pop(), title: dec(m[2]), date: '', url: 'https://imagination.m-78.jp' + path, release: true, via: 'new' });
   }
