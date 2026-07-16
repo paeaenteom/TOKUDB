@@ -116,6 +116,40 @@ footer{margin:50px 0 0;padding:24px 0 40px;border-top:1px solid var(--line);text
 footer .f1{font-family:var(--mono);font-size:11px;letter-spacing:2px;color:var(--mute)}
 footer .f1 b{color:var(--dim)}
 @media(max-width:560px){.slide h2{font-size:24px}.slide{padding:20px}}
+/* ── 신작 알림 ── */
+.bell{width:34px;height:34px;flex:0 0 auto;border:1px solid var(--line2);border-radius:4px;background:rgba(15,19,24,.7);color:var(--dim);font-size:15px;line-height:1;cursor:pointer;position:relative;transition:.18s;display:flex;align-items:center;justify-content:center}
+.bell:hover{border-color:var(--orange);color:var(--txt)}
+.bell.on{color:var(--orange);border-color:var(--orange-d);background:rgba(135,206,255,.08)}
+.bell .cnt{position:absolute;top:-7px;right:-7px;min-width:16px;height:16px;padding:0 4px;border-radius:8px;background:var(--magenta);color:#10131a;font-family:var(--mono);font-size:9px;font-weight:700;line-height:16px;text-align:center;display:none;box-shadow:0 0 0 2px var(--bg)}
+.bell .cnt.show{display:block}
+.newsbox{border:1px solid var(--line);border-radius:5px;background:var(--card);overflow:hidden}
+.news-head{display:flex;align-items:center;gap:10px;padding:11px 16px;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:11px;letter-spacing:1px;color:var(--dim)}
+.news-head .grow{flex:1;min-width:0}
+.news-head .st b{color:var(--orange)}
+.news-head button{font-family:var(--mono);font-size:10px;letter-spacing:1px;color:var(--txt2);background:transparent;border:1px solid var(--line2);border-radius:3px;padding:5px 10px;cursor:pointer;transition:.15s;white-space:nowrap}
+.news-head button:hover{border-color:var(--orange);color:var(--txt)}
+.news-list{list-style:none;max-height:380px;overflow-y:auto}
+.news-list li{display:flex;align-items:flex-start;gap:11px;padding:12px 16px;border-bottom:1px solid var(--line);transition:.15s}
+.news-list li:last-child{border-bottom:0}
+.news-list li:hover{background:var(--card2)}
+.news-list .src{font-family:var(--mono);font-size:9px;letter-spacing:1px;padding:3px 7px;border-radius:3px;white-space:nowrap;margin-top:1px}
+.news-list .src.ttfc{color:var(--green);border:1px solid rgba(58,209,122,.4);background:rgba(58,209,122,.06)}
+.news-list .src.imag{color:var(--cyan);border:1px solid rgba(144,232,255,.4);background:rgba(144,232,255,.06)}
+.news-list a{color:var(--txt);text-decoration:none;flex:1;min-width:0;display:block}
+.news-list .ti{font-size:13.5px;line-height:1.5;color:var(--txt)}
+.news-list a:hover .ti{color:var(--orange)}
+.news-list .dt{font-family:var(--mono);font-size:10px;color:var(--mute);letter-spacing:.5px;margin-top:4px}
+.news-list .newb{display:inline-block;font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:1px;color:#10131a;background:var(--magenta);border-radius:2px;padding:2px 5px;margin-left:7px;vertical-align:middle}
+.news-empty{padding:26px 16px;text-align:center;font-family:var(--mono);font-size:11px;color:var(--mute)}
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(24px);z-index:2147483200;background:linear-gradient(180deg,#0e1219,#0b0e14);border:1px solid var(--orange-d);border-radius:11px;box-shadow:0 18px 55px rgba(0,0,0,.65);padding:14px 18px;max-width:410px;width:calc(100% - 40px);opacity:0;pointer-events:none;transition:.32s cubic-bezier(.2,.8,.3,1)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:auto}
+.toast .th{display:flex;align-items:center;gap:7px;font-family:var(--mono);font-size:11px;letter-spacing:1px;color:var(--orange);margin-bottom:8px}
+.toast .th .x{margin-left:auto;cursor:pointer;color:var(--dim);font-size:15px;line-height:1;padding:0 2px}
+.toast .th .x:hover{color:var(--txt)}
+.toast .tb{font-size:13px;color:var(--txt2);line-height:1.55}
+.toast .tb b{color:var(--txt)}
+.toast .tb .go{display:inline-block;margin-top:8px;color:var(--cyan);text-decoration:none;font-family:var(--mono);font-size:11px;letter-spacing:.5px}
+.toast .tb .go:hover{text-decoration:underline}
 </style>
 </head>
 <body>
@@ -130,12 +164,13 @@ footer .f1 b{color:var(--dim)}
     <a href="/DB/">ARCHIVE</a>
     <a href="#entries">CORNERS</a>
     <a href="/sim">SIM</a>
+    <a href="#news">NEWS</a>
     <a href="#broadcast">UPDATE</a>
     <a href="#stats">STATS</a>
   </div>
   <div class="nav-stat">
     <span class="stat-chip">作品 <b>160</b></span>
-    <span class="stat-chip">STUDIO <b>02</b></span>
+    <button class="bell" id="bellBtn" title="신작 알림 켜기/끄기 (TTFC · 이매지네이션)" aria-label="신작 알림"><span id="bellIco">🔕</span><span class="cnt" id="bellCnt">0</span></button>
     <span class="rec"><span class="dot"></span>ONLINE</span>
   </div>
 </div></nav>
@@ -178,6 +213,18 @@ footer .f1 b{color:var(--dim)}
         <span class="ic"><svg viewBox="0 0 24 24"><path d="M21 8v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8"/><path d="M2 4h20v4H2z"/><path d="M12 12v5M9.5 14.5 12 17l2.5-2.5"/></svg></span>
         <span class="nm">RPG 언팩커</span><span class="en">Unpacker</span>
       </a>
+    </div>
+  </section>
+
+  <section id="news">
+    <div class="sec-h"><span class="t">신작 <span class="ac">알림</span></span><span class="line"></span><span class="jp">// NEW RELEASES · TTFC · IMAGINATION</span></div>
+    <div class="newsbox">
+      <div class="news-head">
+        <span class="grow st">// <b>東映特撮ファンクラブ</b> + <b>TSUBURAYA IMAGINATION</b> 배신·신작</span>
+        <button id="newsRead" type="button">모두 읽음</button>
+        <button id="newsRefresh" type="button">새로고침</button>
+      </div>
+      <ul class="news-list" id="newsList"><li class="news-empty">소식을 불러오는 중…</li></ul>
     </div>
   </section>
 
@@ -271,6 +318,117 @@ window.addEventListener('scroll',function(){var y=window.scrollY+120,act=-1;secs
       overlay(ac,function(){location.href=a.getAttribute('href');});
     });
   });
+})();
+</script>
+
+<div class="toast" id="newsToast">
+  <div class="th">🔔 <span id="toastTtl">신작 소식</span><span class="x" id="toastX">✕</span></div>
+  <div class="tb" id="toastBody"></div>
+</div>
+
+<script>
+/* ── 신작 알림 (TTFC 東映特撮ファンクラブ + 츠부라야 이매지네이션 m-78 動画配信) ──
+   /api/news 를 주기 폴링 → 마지막으로 본 것보다 새 '배신/신작' 있으면 소리+배너+브라우저 알림.
+   상태: localStorage. 소리·알림 권한은 🔔 버튼(사용자 제스처)으로 잠금 해제. */
+(function(){
+  var API='/api/news';
+  var LS_ON='pae_notify_v1', LS_KNOWN='pae_news_known_v1', LS_UNREAD='pae_news_unread_v1';
+  var bell=document.getElementById('bellBtn'), bellIco=document.getElementById('bellIco'), bellCnt=document.getElementById('bellCnt');
+  var listEl=document.getElementById('newsList');
+  var toast=document.getElementById('newsToast'), toastTtl=document.getElementById('toastTtl'), toastBody=document.getElementById('toastBody'), toastX=document.getElementById('toastX');
+  if(!bell||!listEl) return;
+  var ITEMS=[], actx=null, toastTimer=null;
+
+  function getSet(k){try{return new Set(JSON.parse(localStorage.getItem(k)||'[]'));}catch(e){return new Set();}}
+  function saveSet(k,s){try{localStorage.setItem(k,JSON.stringify([].slice.call([...s]).slice(-400)));}catch(e){}}
+  function isOn(){return localStorage.getItem(LS_ON)==='1';}
+  function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+  function ensureAudio(){ if(!actx){ try{ actx=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} } if(actx&&actx.state==='suspended'){ try{actx.resume();}catch(e){} } return actx; }
+  function chime(){ var c=ensureAudio(); if(!c)return; var t=c.currentTime; [[880,0],[1174.66,0.12],[1567.98,0.24]].forEach(function(f){ var o=c.createOscillator(),g=c.createGain(); o.type='sine'; o.frequency.value=f[0]; o.connect(g); g.connect(c.destination); var s=t+f[1]; g.gain.setValueAtTime(0.0001,s); g.gain.exponentialRampToValueAtTime(0.2,s+0.02); g.gain.exponentialRampToValueAtTime(0.0001,s+0.24); o.start(s); o.stop(s+0.26); }); }
+  /* 첫 사용자 제스처에 오디오 잠금 해제(벨을 안 눌러도 이후 알림음이 나도록) */
+  window.addEventListener('pointerdown',function once(){ if(isOn())ensureAudio(); window.removeEventListener('pointerdown',once); },{once:true});
+
+  function updateBell(){
+    var unread=getSet(LS_UNREAD);
+    bell.classList.toggle('on', isOn());
+    bellIco.textContent=isOn()?'🔔':'🔕';
+    if(unread.size){ bellCnt.textContent=unread.size>99?'99+':String(unread.size); bellCnt.classList.add('show'); }
+    else bellCnt.classList.remove('show');
+  }
+
+  function render(){
+    var unread=getSet(LS_UNREAD);
+    if(!ITEMS.length){ listEl.innerHTML='<li class="news-empty">소식을 불러오지 못했어요. 잠시 후 자동 재시도.</li>'; updateBell(); return; }
+    listEl.innerHTML=ITEMS.map(function(it){
+      var cls=it.src==='TTFC'?'ttfc':'imag';
+      var isNew=unread.has(it.id);
+      return '<li data-id="'+esc(it.id)+'"><span class="src '+cls+'">'+esc(it.src)+'</span>'
+        +'<a href="'+esc(it.url)+'" target="_blank" rel="noopener">'
+        +'<div class="ti">'+esc(it.title)+(isNew?'<span class="newb">NEW</span>':'')+'</div>'
+        +'<div class="dt">'+esc(it.date||'')+(it.release?' · 배신/신작':'')+'</div></a></li>';
+    }).join('');
+    updateBell();
+  }
+  /* 항목 클릭 → 읽음 처리 */
+  listEl.addEventListener('click',function(e){
+    var li=e.target.closest&&e.target.closest('li[data-id]'); if(!li)return;
+    var unread=getSet(LS_UNREAD); if(unread.delete(li.dataset.id)){ saveSet(LS_UNREAD,unread); li.querySelector('.newb')&&li.querySelector('.newb').remove(); updateBell(); }
+  });
+
+  function showToast(title, body, url){
+    toastTtl.textContent=title;
+    toastBody.innerHTML=body+(url?'<br><a class="go" href="'+esc(url)+'" target="_blank" rel="noopener">바로 보기 ↗</a>':'');
+    toast.classList.add('show');
+    clearTimeout(toastTimer); toastTimer=setTimeout(function(){toast.classList.remove('show');}, 9000);
+  }
+  toastX.addEventListener('click',function(){toast.classList.remove('show');});
+
+  function alertNew(list){
+    chime();
+    var top=list[0];
+    var body=(list.length>1?'<b>'+list.length+'건</b>의 새 소식 · 최신: ':'')+'['+top.src+'] <b>'+esc(top.title.slice(0,60))+'</b>';
+    showToast('신작 소식 '+list.length+'건', body, top.url);
+    if('Notification' in window && Notification.permission==='granted'){
+      try{
+        var n=new Notification('🔔 신작 소식 '+list.length+'건', {body:'['+top.src+'] '+top.title, icon:'/android-chrome-192x192.png', tag:'pae-news', renotify:true});
+        n.onclick=function(){ try{window.focus();}catch(e){} window.open(top.url,'_blank'); n.close(); };
+      }catch(e){}
+    }
+  }
+
+  function poll(){
+    fetch(API,{cache:'no-store'}).then(function(r){return r.json();}).then(function(d){
+      ITEMS=(d&&d.items)||[];
+      var known=getSet(LS_KNOWN), unread=getSet(LS_UNREAD);
+      var firstEver=localStorage.getItem(LS_KNOWN)===null;
+      var fresh=ITEMS.filter(function(it){return !known.has(it.id);});
+      ITEMS.forEach(function(it){known.add(it.id);}); saveSet(LS_KNOWN,known);
+      if(!firstEver){
+        fresh.forEach(function(it){unread.add(it.id);}); saveSet(LS_UNREAD,unread);
+        var rel=fresh.filter(function(it){return it.release;});
+        if(rel.length && isOn()) alertNew(rel);
+      }
+      render();
+    }).catch(function(){ render(); });
+  }
+
+  bell.addEventListener('click',function(){
+    if(isOn()){ localStorage.setItem(LS_ON,'0'); updateBell(); showToast('알림 꺼짐','신작이 나와도 소리·알림이 울리지 않아요.',''); }
+    else{
+      ensureAudio(); chime();
+      localStorage.setItem(LS_ON,'1'); updateBell();
+      if('Notification' in window && Notification.permission==='default'){ try{ Notification.requestPermission().then(updateBell); }catch(e){} }
+      showToast('신작 알림 켜짐 🔔','TTFC · 이매지네이션 신작이 나오면 이 탭에서 소리와 배너로 알려드려요.','');
+    }
+  });
+  document.getElementById('newsRead').addEventListener('click',function(){ localStorage.setItem(LS_UNREAD,'[]'); render(); });
+  document.getElementById('newsRefresh').addEventListener('click',poll);
+
+  updateBell();
+  poll();
+  setInterval(poll, 5*60*1000);
+  document.addEventListener('visibilitychange',function(){ if(!document.hidden) poll(); });
 })();
 </script>
 </body>
