@@ -100,6 +100,10 @@ button{font-family:inherit}
 .spot-foot .bar i{display:block;height:100%;width:60%;background:linear-gradient(90deg,var(--cyan),var(--pink))}
 .spot{cursor:pointer;transition:.18s}
 .spot:hover{border-color:color-mix(in srgb,var(--c) 50%,transparent)}
+/* UPDATE 스포트라이트 전용 이미지(w.imgSpot, 선택) — 배너처럼 우측에서 좌측 페이드 */
+.spot .simg{position:absolute;inset:0;z-index:0;pointer-events:none}
+.spot .simg img{width:100%;height:100%;object-fit:cover;opacity:.36;mask-image:linear-gradient(90deg,transparent 8%,#000 62%);-webkit-mask-image:linear-gradient(90deg,transparent 8%,#000 62%)}
+.spot .spot-h,.spot .spot-badge,.spot .spot-name,.spot .spot-sub,.spot .spot-desc,.spot .spot-foot{position:relative;z-index:1}
 
 /* ===== 그룹/시리즈 (홈) ===== */
 .group{padding:30px 0 8px}
@@ -2781,8 +2785,9 @@ function renderSpotlight(){
   const {k,s,g,works}=cands[0];
   const lead=works.slice().sort((a,b)=>(parseInt(b.year)||0)-(parseInt(a.year)||0))[0];
   const entries=s.eras.reduce((a,e)=>a+e.works.filter(w=>!w._todo).reduce((x,w)=>x+1+realList(w.members).length+realList(w.kaiju).length,0),0);
+  const simg=(lead&&lead.imgSpot)?`<div class="simg"><img src="${iu(lead.imgSpot)}" alt=""></div>`:''; /* 스포트라이트 전용(선택) — 없으면 기존 그라디언트 */
   box.innerHTML=`
-    <div class="spot" style="--c:${seriesColor(s)}" onclick="showSeries('${k}')">
+    <div class="spot" style="--c:${seriesColor(s)}" onclick="showSeries('${k}')">${simg}
       <div class="spot-h"><span class="tag">// UPDATE</span><span class="ln"></span></div>
       <div class="spot-meta">${esc(g.jp)} ${esc(g.ko)}<br>${esc(s.jp)}</div>
       <div class="spot-badge">★ ${esc(s.en)}</div>
@@ -2872,8 +2877,9 @@ function openWork(key,eIdx,wi,fromRoute){
   // 폼 = 영웅들의 imgAlt/skills를 폼으로 집계
   const forms=collectForms(w);
 
-  // 배너
-  const bimg=w.img?`<div class="bimg"><img src="${iu(w.img)}" alt=""></div>`:'';
+  // 배너 — 배너 전용 사진(imgBanner, 선택) 우선, 없으면 카드 이미지(img)
+  const bsrc=w.imgBanner||w.img;
+  const bimg=bsrc?`<div class="bimg"><img src="${iu(bsrc)}" alt=""></div>`:'';
   const btag=w.tag?`<span class="btag ${w.tag}">${tagLabel(w.tag)}</span>`:'';
   document.getElementById('w-banner').innerHTML=`${bimg}${btag}
     <div class="cap"><div class="no">${esc(s.ko)} · ${esc(w.no||'')} · ${esc(w.year||'')}</div>
