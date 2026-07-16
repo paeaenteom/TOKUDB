@@ -1,5 +1,6 @@
 {
   "cleanUrls": true,
+  "regions": ["hnd1"],
   "rewrites": [
     { "source": "/i/(.*)", "destination": "/api/img?p=$1" },
     { "source": "/summ/(.*)", "destination": "/api/char?p=$1" },
