@@ -28,12 +28,12 @@ function dec(s) {
 }
 function strip(s) { return dec(String(s == null ? '' : s).replace(/<[^>]*>/g, '').replace(/\s+/g, ' ')).trim(); }
 
-/* ── TTFC 1순위: pc.tokusatsu-fc.jp/new (신착 카드) ── */
+/* ── TTFC 1순위: pc.tokusatsu-fc.jp/new (신착 카드) + 각 작품의 "New" 배지 에피소드 ── */
 async function ttfcNew() {
   const r = await fetch('https://pc.tokusatsu-fc.jp/new', { headers: HDRS });
   if (!r.ok) return [];
   const t = await r.text();
-  const out = [], seen = new Set();
+  const out = [], seen = new Set(), works = [];
   /* 카드 블록: <a href="https://pc.tokusatsu-fc.jp/movies/{id}/..."> … [배지 img alt="">카테고리</p>] … <img alt="제목"> … </a> */
   const blocks = t.split(/<a [^>]*href="https:\/\/pc\.tokusatsu-fc\.jp\/movies\//).slice(1);
   for (const b of blocks) {
@@ -45,9 +45,32 @@ async function ttfcNew() {
     seen.add(id);
     const catm = chunk.match(/alt=""[^>]*>\s*([^<]{2,14})\s*<\/p>/);
     const cat = catm ? strip(catm[1]) : '';
-    out.push({ src: 'TTFC', id: 'ttfc-m' + id, title: dec(altm[1]) + (cat ? ' 〔' + cat + '〕' : ''), date: '', url: 'https://pc.tokusatsu-fc.jp/movies/' + id + '/movie-stories', release: true, via: 'new' });
+    const title = dec(altm[1]);
+    works.push({ id, title });
+    out.push({ src: 'TTFC', id: 'ttfc-m' + id, title: title + (cat ? ' 〔' + cat + '〕' : ''), date: '', url: 'https://pc.tokusatsu-fc.jp/movies/' + id + '/movie-stories', release: true, via: 'new' });
   }
-  return out.slice(0, 12);
+  /* 신착 작품마다 에피소드 목록(/movies/{id}/movie-stories)을 훑어 "New" 배지 달린
+     에피소드를 개별 알림 항목으로 추가 — 예: ゼッツ Case43, ギャバン 第22話.
+     배지는 원본 HTML에 <p class="…uppercase">New</p>로 존재(비로그인·서버에서도 보임). */
+  const eps = [], sSeen = new Set();
+  await Promise.all(works.slice(0, 10).map(async (w) => {
+    try {
+      const pr = await fetch('https://pc.tokusatsu-fc.jp/movies/' + w.id + '/movie-stories', { headers: HDRS });
+      if (!pr.ok) return;
+      const p = await pr.text();
+      const ebs = p.split(/<a[^>]+href="https:\/\/pc\.tokusatsu-fc\.jp\/movies\/\d+\/movie-stories\//).slice(1);
+      for (const b of ebs) {
+        const sm = b.match(/^(\d+)"/); if (!sm) continue;
+        const sid = sm[1]; if (sSeen.has(sid)) continue; sSeen.add(sid);
+        const chunk = b.slice(0, 2200);
+        if (!/>\s*New\s*<\/p>/.test(chunk)) continue; /* New 배지 에피소드만 */
+        const am = chunk.match(/alt="([^"]{2,})"/); if (!am) continue;
+        eps.push({ src: 'TTFC', id: 'ttfc-s' + sid, title: w.title + ' · ' + dec(am[1]), date: '', url: 'https://pc.tokusatsu-fc.jp/movies/' + w.id + '/movie-stories/' + sid, release: true, via: 'new' });
+      }
+    } catch (e) { /* 개별 작품 실패는 무시 */ }
+  }));
+  eps.sort((a, b) => parseInt(b.id.slice(6), 10) - parseInt(a.id.slice(6), 10)); /* 최신 등록(id 큰 것) 먼저 */
+  return out.slice(0, 12).concat(eps.slice(0, 15));
 }
 
 /* ── TTFC 폴백: 공개 홈 뉴스 하이라이트 ── */
