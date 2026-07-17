@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#06080f">
+<title>DATE A LIVE DB — 데이트 어 라이브 아카이브</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Teko:wght@400;500;600;700&family=Share+Tech+Mono&family=Noto+Sans+KR:wght@400;500;700;900&family=Noto+Sans+JP:wght@400;500;700&display=swap');
+:root{
+  --bg:#07060f; --bg2:#0a0816; --panel:#0e0c1a; --panel2:#131020;
+  --line:#1e1a31; --line2:#2c2650;
+  --ink:#f0edff; --dim:#968fb8; --faint:#5c5580; --mute:#403a60;
+  --vio:#c98aff; --vio-d:#a05fe0; --pink:#ff8ad4; --pink-d:#e06bb5;
+  --cyan:#87CEFF; --acc:var(--vio);
+  --disp:'Teko',sans-serif; --mono:'Share Tech Mono',monospace;
+  --jp:'Noto Sans JP',sans-serif; --kr:'Noto Sans KR',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:var(--kr);background:var(--bg);color:var(--ink);min-height:100vh;overflow-x:hidden}
+::selection{background:rgba(201,138,255,.3)}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit}
+.bg{position:fixed;inset:0;z-index:0;pointer-events:none}
+.bg.grad{background:
+  radial-gradient(900px 520px at 14% -6%,rgba(201,138,255,.11),transparent 60%),
+  radial-gradient(820px 520px at 88% 2%,rgba(255,138,212,.08),transparent 58%),
+  linear-gradient(180deg,#06050e,#0a0816 55%,#06050e)}
+.bg.grid{background-image:linear-gradient(rgba(255,255,255,.022) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.022) 1px,transparent 1px);background-size:52px 52px;mask-image:radial-gradient(ellipse 90% 70% at 50% 12%,#000 35%,transparent 100%)}
+.bg.scan{background:repeating-linear-gradient(0deg,rgba(255,255,255,.014) 0 1px,transparent 1px 4px);opacity:.5}
+
+.nav{position:sticky;top:0;z-index:60;background:linear-gradient(180deg,rgba(7,6,15,.96),rgba(7,6,15,.84));backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.nav-in{max-width:1240px;margin:0 auto;padding:0 22px;height:60px;display:flex;align-items:center;gap:16px}
+.brand{display:flex;align-items:baseline;gap:9px;cursor:pointer;white-space:nowrap}
+.brand .mk{font-family:var(--disp);font-weight:700;font-size:27px;letter-spacing:1.5px;line-height:1;background:linear-gradient(110deg,#fff,var(--vio) 55%,var(--pink));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.brand .jp{font-family:var(--jp);font-weight:700;font-size:13px;color:var(--faint);letter-spacing:2px}
+.home-btn{display:inline-flex;align-items:center;gap:7px;height:34px;padding:0 15px;border:1px solid var(--line2);border-radius:8px;background:var(--panel);color:var(--dim);font-family:var(--mono);font-size:12px;letter-spacing:1px;cursor:pointer;transition:.18s;text-decoration:none}
+.home-btn:hover{color:var(--ink);border-color:var(--vio-d);background:rgba(201,138,255,.07)}
+.crumb{flex:1;font-family:var(--mono);font-size:12px;color:var(--faint);letter-spacing:.4px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+
+.hero{max-width:1240px;margin:0 auto;padding:52px 22px 10px;position:relative;z-index:1}
+.hero h1{font-family:var(--disp);font-weight:700;font-size:64px;letter-spacing:2px;line-height:.95}
+.hero h1 span{background:linear-gradient(110deg,var(--vio),var(--pink));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{margin-top:10px;color:var(--dim);font-size:14px}
+.hero .cnt{font-family:var(--mono);font-size:12px;color:var(--faint);margin-top:4px;letter-spacing:1px}
+
+.wrap{max-width:1240px;margin:0 auto;padding:18px 22px 80px;position:relative;z-index:1}
+.toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:14px 0 22px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;flex:1}
+.chip{height:32px;padding:0 14px;border:1px solid var(--line2);border-radius:20px;background:var(--panel);color:var(--dim);font-size:12.5px;cursor:pointer;transition:.15s;display:inline-flex;align-items:center;gap:6px}
+.chip:hover{color:var(--ink);border-color:var(--vio-d)}
+.chip.on{color:#07060f;background:var(--vio);border-color:var(--vio);font-weight:700}
+.chip .n{font-family:var(--mono);font-size:10.5px;opacity:.7}
+#q{height:36px;width:220px;padding:0 14px;border:1px solid var(--line2);border-radius:8px;background:var(--panel);color:var(--ink);font-family:var(--kr);font-size:13px;outline:none}
+#q:focus{border-color:var(--vio-d)}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}
+.card{border:1px solid var(--line);border-radius:12px;background:linear-gradient(180deg,var(--panel),var(--panel2));overflow:hidden;cursor:pointer;transition:.16s;position:relative}
+.card:hover{transform:translateY(-3px);border-color:color-mix(in srgb,var(--cl,#c98aff) 55%,transparent);box-shadow:0 10px 26px rgba(0,0,0,.45)}
+.card .ph{aspect-ratio:3/4;background:#0a0913;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.card .ph img{width:100%;height:100%;object-fit:cover}
+.card .ph .ico{width:56px;height:56px;opacity:.28}
+.card .cd{position:absolute;top:8px;left:8px;font-family:var(--mono);font-size:9.5px;letter-spacing:.8px;padding:3px 8px;border-radius:5px;background:rgba(7,6,15,.78);border:1px solid color-mix(in srgb,var(--cl,#c98aff) 45%,transparent);color:var(--cl,#c98aff);text-transform:uppercase}
+.card .meta{padding:11px 13px 13px;border-top:1px solid var(--line)}
+.card .nm{font-weight:700;font-size:14.5px;line-height:1.25}
+.card .jp{font-family:var(--jp);font-size:11px;color:var(--faint);margin-top:3px}
+.card .sub{font-size:11px;color:var(--dim);margin-top:5px;display:flex;gap:6px;flex-wrap:wrap}
+.card .sub b{color:var(--cl,#c98aff);font-weight:500}
+.empty{padding:60px 0;text-align:center;color:var(--faint);font-size:14px}
+
+.mbk{position:fixed;inset:0;z-index:100;background:rgba(4,3,10,.78);backdrop-filter:blur(6px);display:none;align-items:flex-start;justify-content:center;padding:44px 18px;overflow-y:auto}
+.mbk.on{display:flex}
+.modal{width:min(760px,100%);border:1px solid var(--line2);border-radius:16px;background:linear-gradient(180deg,#120f22,#0c0a18);overflow:hidden;position:relative;
+  scrollbar-width:none;-ms-overflow-style:none}
+.modal::-webkit-scrollbar{width:0;height:0;display:none}
+.m-head{padding:24px 26px 18px;border-bottom:1px solid var(--line);position:relative;
+  background:radial-gradient(560px 200px at 88% -30%,color-mix(in srgb,var(--cl,#c98aff) 20%,transparent),transparent 65%)}
+.m-cd{display:inline-block;font-family:var(--mono);font-size:10.5px;letter-spacing:1px;padding:4px 10px;border-radius:6px;border:1px solid color-mix(in srgb,var(--cl,#c98aff) 45%,transparent);color:var(--cl,#c98aff);margin-bottom:10px;text-transform:uppercase}
+.m-nm{font-weight:900;font-size:28px;line-height:1.1}
+.m-jp{font-family:var(--jp);font-size:13.5px;color:var(--dim);margin-top:5px}
+.m-x{position:absolute;top:16px;right:16px;width:34px;height:34px;border-radius:8px;border:1px solid var(--line2);background:var(--panel);color:var(--dim);font-size:15px;cursor:pointer}
+.m-x:hover{color:var(--ink);border-color:var(--vio-d)}
+.m-body{padding:20px 26px 26px;display:flex;flex-direction:column;gap:18px}
+.m-top{display:flex;gap:20px;flex-wrap:wrap}
+.m-img{width:210px;flex:0 0 auto;aspect-ratio:3/4;border:1px solid var(--line2);border-radius:12px;background:#0a0913;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.m-img img{width:100%;height:100%;object-fit:cover}
+.m-img .ico{width:64px;height:64px;opacity:.25}
+.prof{flex:1;min-width:230px;display:grid;grid-template-columns:auto 1fr;gap:7px 14px;align-content:start;font-size:13px}
+.prof dt{font-family:var(--mono);font-size:10.5px;letter-spacing:1px;color:var(--faint);padding-top:2px;white-space:nowrap}
+.prof dd{color:var(--ink)}
+.prof dd.dim{color:var(--dim)}
+.sec{border:1px solid var(--line);border-radius:12px;padding:15px 17px;background:rgba(255,255,255,.012)}
+.sec .sh{font-family:var(--mono);font-size:10.5px;letter-spacing:1.6px;color:var(--cl,#c98aff);margin-bottom:9px}
+.sec .row{display:flex;gap:10px;padding:6px 0;border-top:1px dashed var(--line);font-size:13.5px;flex-wrap:wrap}
+.sec .row:first-of-type{border-top:0}
+.sec .row .k{font-family:var(--mono);font-size:10.5px;color:var(--faint);letter-spacing:1px;width:74px;flex:0 0 auto;padding-top:3px}
+.sec .row .v{flex:1;line-height:1.55}
+.sec .row .v b{color:var(--ink);font-weight:700}
+.sec .row .v .jx{font-family:var(--jp);color:var(--dim);font-size:12px;margin-left:6px}
+.m-desc{font-size:13.5px;line-height:1.75;color:var(--dim)}
+footer{border-top:1px solid var(--line);padding:26px 22px 60px;text-align:center;color:var(--mute);font-family:var(--mono);font-size:11px;letter-spacing:1px;position:relative;z-index:1}
+@media (max-width:560px){.hero h1{font-size:46px}.m-top{flex-direction:column}.m-img{width:100%}}
+</style>
+</head>
+<body>
+<div class="bg grad"></div><div class="bg grid"></div><div class="bg scan"></div>
+
+<nav class="nav"><div class="nav-in">
+  <div class="brand" onclick="closeModal();window.scrollTo({top:0,behavior:'smooth'})"><span class="mk">DATE A LIVE DB</span><span class="jp">デート・ア・ライブ</span></div>
+  <div class="crumb" id="crumb">CHARACTER ARCHIVE</div>
+  <a class="home-btn" href="/">🏠 HOME</a>
+</div></nav>
+
+<header class="hero">
+  <h1>DATE A <span>LIVE</span></h1>
+  <p>데이트 어 라이브 캐릭터 아카이브 — 정령·라타토스크·AST·DEM. 카드를 누르면 상세 프로필이 열립니다.</p>
+  <div class="cnt" id="cnt"></div>
+</header>
+
+<main class="wrap">
+  <div class="toolbar">
+    <div class="chips" id="chips"></div>
+    <input id="q" type="search" placeholder="이름·코드네임·천사 검색…">
+  </div>
+  <div class="grid" id="grid"></div>
+  <div class="empty" id="empty" style="display:none">검색 결과가 없습니다.</div>
+</main>
+
+<div class="mbk" id="mbk"><div class="modal" id="modal"></div></div>
+
+<footer>PAEAENTEOM ARCHIVE · DATE A LIVE CHARACTER DB · DATA BASED ON DATE-A-LIVE.FANDOM.COM</footer>
+
+<script>
+/* ─── DATA (dal-editor.html 로 편집) ─── */
+const DATA = {
+ "meta": {
+  "title": "DATE A LIVE DB",
+  "updated": "2026-07-17"
+ },
+ "chars": [
+  {
+   "name": "야토가미 토카",
+   "jp": "夜刀神 十香",
+   "romaji": "Yatogami Tōka",
+   "cat": "정령",
+   "codename": "프린세스 (Princess)",
+   "angel": "산달폰 (鏖殺公)",
+   "dress": "아도나이 멜렉 (神威霊装十番)",
+   "weapon": "옥좌 · 대검",
+   "species": "정령",
+   "gender": "여성",
+   "birthday": "4월 10일",
+   "height": "155cm",
+   "cv": "이노우에 마리나",
+   "affil": "사이토 대학 / 라이젠 고교 (전)",
+   "img": "",
+   "desc": "시도가 처음으로 구해 힘을 봉인한 정령으로, AST 코드네임은 '프린세스'다. 옥좌와 대검 형태의 천사 산달폰을 다루며, 봉인 후에는 세상 모든 것이 새로운 듯 밝고 순수한 성격과 왕성한 식욕(특히 콩가루빵 사랑)을 보여준다."
+  },
+  {
+   "name": "요시노 (히메카와 요시노)",
+   "jp": "氷芽川 四糸乃",
+   "romaji": "Himekawa Yoshino",
+   "cat": "정령",
+   "codename": "허밋 (Hermit)",
+   "angel": "자드키엘 (氷結傀儡)",
+   "dress": "엘 (神威霊装四番)",
+   "weapon": "퍼펫(인형)",
+   "species": "인간 (전 정령)",
+   "gender": "여성",
+   "birthday": "3월 20일",
+   "height": "144cm",
+   "cv": "노미즈 이오리",
+   "affil": "라타토스크 / 라이젠 고교",
+   "img": "",
+   "desc": "시도가 두 번째로 구한 정령으로, AST 코드네임은 '허밋'이다. 수줍음 많지만 상냥한 성격으로 늘 왼손에 토끼 퍼펫 '요시농'을 끼고 다니며, 물과 얼음을 다루는 천사 자드키엘을 사용한다."
+  },
+  {
+   "name": "토키사키 쿠루미",
+   "jp": "時崎 狂三",
+   "romaji": "Tokisaki Kurumi",
+   "cat": "정령",
+   "codename": "나이트메어 (Nightmare)",
+   "angel": "자프키엘 (刻々帝)",
+   "dress": "엘로힘 (神威霊装三番)",
+   "weapon": "시계 · 고식 권총과 머스킷",
+   "species": "인간 (전 정령)",
+   "gender": "여성",
+   "birthday": "6월 10일",
+   "height": "157cm",
+   "cv": "사나다 아사미",
+   "affil": "쿄오 학원 (전) / 라이젠 고교 (전)",
+   "img": "",
+   "desc": "작품에 세 번째로 등장한 정령이자 시리즈 최초로 적대자로 나타난 정령으로, 잔혹한 행보 탓에 '최악의 정령'이라 불리며 AST 코드네임은 '나이트메어'다. 시간을 조종하는 천사 자프키엘과 자신의 분신들을 다루며, 우아하고 정중한 겉모습 뒤에 광기와 뒤틀린 정의감을 함께 지녔다."
+  },
+  {
+   "name": "이츠카 코토리",
+   "jp": "五河 琴里",
+   "romaji": "Itsuka Kotori",
+   "cat": "정령",
+   "codename": "이프리트 (Efreet)",
+   "angel": "카마엘 (灼爛殲鬼)",
+   "dress": "엘로힘 기보르 (神威霊装五番)",
+   "weapon": "할버드",
+   "species": "인간 (전 정령)",
+   "gender": "여성",
+   "birthday": "8월 3일",
+   "height": "145cm",
+   "cv": "타케타츠 아야나",
+   "affil": "케이세이 중학교 (전) / 라타토스크",
+   "img": "",
+   "desc": "시도의 의붓 여동생이자 비밀 조직 라타토스크의 공중함 프락시너스 사령관으로, 네 번째 정령으로 꼽히며 AST 코드네임은 '이프리트'다. 리본 색에 따라 응석받이 여동생 모드와 카리스마 넘치는 사령관 모드를 오가며, 불꽃을 다루는 할버드 형태의 천사 카마엘을 지녔다."
+  },
+  {
+   "name": "야마이 카구야",
+   "jp": "八舞 耶倶矢",
+   "romaji": "Yamai Kaguya",
+   "cat": "정령",
+   "codename": "버서크 (Berserk)",
+   "angel": "라파엘 (颶風騎士)",
+   "dress": "엘로힘 차바오트 (神威霊装八番)",
+   "weapon": "랜스 (합체 시 활과 화살)",
+   "species": "인간 (전 정령)",
+   "gender": "여성",
+   "birthday": "10월 18일",
+   "height": "157cm",
+   "cv": "우치다 마아야",
+   "affil": "라이젠 고교 (전) / 라타토스크",
+   "img": "",
+   "desc": "원래 하나의 정령 '야마이'가 둘로 나뉘어 태어난 야마이 자매 중 한 명으로, AST 코드네임은 '버서크'다. 쌍둥이 유즈루와 함께 바람을 다루는 천사 라파엘을 공유하는 최속의 정령으로, '진짜 야마이' 자리를 걸고 유즈루와 오랫동안 승부를 거듭해 왔다."
+  },
+  {
+   "name": "야마이 유즈루",
+   "jp": "八舞 夕弦",
+   "romaji": "Yamai Yuzuru",
+   "cat": "정령",
+   "codename": "버서크 (Berserk)",
+   "angel": "라파엘 (颶風騎士)",
+   "dress": "엘로힘 차바오트 (神威霊装・八番)",
+   "weapon": "펜듈럼(진자)",
+   "species": "정령 (전 인간)",
+   "gender": "여성",
+   "birthday": "10월 18일",
+   "height": "158cm",
+   "cv": "브리드컷 세라 에미",
+   "affil": "라이젠 고교 (전) / 라타토스크",
+   "img": "",
+   "desc": "본래 하나의 정령 '야마이'가 둘로 갈라져 태어난 쌍둥이 정령 중 한 명으로, 코드네임 '버서크'로 불리며 카구야와 함께 바람을 다루는 천사 라파엘을 나눠 지닌 최속의 정령이다. '확인.'처럼 말 첫머리에 요점 단어를 붙이는 독특한 말버릇을 지닌 침착하고 어른스러운 성격으로, 자매의 100번째 승부 끝에 시도에게 힘을 봉인당해 라타토스크와 함께하게 되었다."
+  },
+  {
+   "name": "이자요이 미쿠",
+   "jp": "誘宵 美九",
+   "romaji": "Izayoi Miku",
+   "cat": "정령",
+   "codename": "디바 (Diva)",
+   "angel": "가브리엘 (破軍歌姫)",
+   "dress": "샤다이 엘 카이 (神威霊装・九番)",
+   "weapon": "오르간",
+   "species": "인간 (전 정령)",
+   "gender": "여성",
+   "birthday": "1월 19일",
+   "height": "165cm",
+   "cv": "치하라 미노리",
+   "affil": "린도지 여학원 / 라타토스크",
+   "img": "",
+   "desc": "여섯 번째로 등장한 정령이자 인기 아이돌로, 코드네임 '디바'답게 목소리로 사람의 마음을 조종하는 천사 가브리엘을 지닌다. 한때 남성을 극도로 싫어해 시도가 여장까지 해야 했지만, 마음을 연 뒤로는 힘을 봉인받고 그를 '달링'이라 부르며 아낌없이 애정을 표현한다."
+  },
+  {
+   "name": "쿄노 나츠미",
+   "jp": "鏡野 七罪",
+   "romaji": "Kyouno Natsumi",
+   "cat": "정령",
+   "codename": "위치 (Witch)",
+   "angel": "하니엘 (贋造魔女)",
+   "dress": "아도나이 차바오트 (神威霊装・七番)",
+   "weapon": "빗자루",
+   "species": "인간 (전 정령)",
+   "gender": "여성",
+   "birthday": "7월 23일",
+   "height": "144cm (어른 모습 170cm)",
+   "cv": "마노 아유미",
+   "affil": "라타토스크 / 라이젠 고교",
+   "img": "",
+   "desc": "무엇이든 다른 모습으로 바꿔 버리는 변신의 천사 하니엘을 지닌 일곱 번째 등장 정령으로, 코드네임은 '위치'다. 본모습에 강한 콤플렉스가 있어 이상적인 어른 여성의 모습으로 변신하곤 했으나, 시도에게 힘을 봉인당한 뒤 친구들의 격려 속에 조금씩 자신을 받아들여 가고 있다."
+  },
+  {
+   "name": "토비이치 오리가미",
+   "jp": "鳶一 折紙",
+   "romaji": "Tobiichi Origami",
+   "cat": "정령",
+   "codename": "엔젤 (Angel)",
+   "angel": "메타트론 (絶滅天使)",
+   "dress": "에헤이에 (神威霊装・一番)",
+   "weapon": "왕관",
+   "species": "인간 (전 정령)",
+   "gender": "여성",
+   "birthday": "11월 11일",
+   "height": "152cm",
+   "cv": "토가시 미스즈",
+   "affil": "사이토 대학 / 라이젠 고교 (전)",
+   "img": "",
+   "desc": "성적·운동·미모 모두 완벽한 시도의 동급생으로, 정령에게 부모를 잃은 뒤 AST의 위저드로서 정령과 싸워 온 소녀다. 훗날 스스로 여덟 번째 정령이 되어 코드네임 '엔젤'로 불리며, 시도를 향한 직진적이다 못해 과감한 애정 표현으로도 유명하다."
+  },
+  {
+   "name": "혼조 니아",
+   "jp": "本条 二亜",
+   "romaji": "Honjō Nia",
+   "cat": "정령",
+   "codename": "마테리얼 A (Material A)",
+   "angel": "라지엘 (囁告篇帙)",
+   "dress": "요드 (神威霊装・二番)",
+   "weapon": "책",
+   "species": "인간 (전 정령)",
+   "gender": "여성",
+   "birthday": "2월 29일",
+   "height": "168cm",
+   "cv": "나바타메 히토미",
+   "affil": "라타토스크",
+   "img": "",
+   "desc": "'두 번째 정령'으로 불리며 DEM에 '마테리얼 A'라는 명칭으로 붙잡혀 있던 아홉 번째 등장 정령으로, 세상의 모든 정보를 알려 주는 천사 라지엘을 지닌다. 펜네임 '혼조 소지'로 활동하는 프로 만화가이자 '2차원에만 사랑에 빠져 봤다'고 공언하는 오타쿠 기질의 소유자다."
+  },
+  {
+   "name": "호시미야 무쿠로",
+   "jp": "星宮 六喰",
+   "romaji": "Hoshimiya Mukuro",
+   "cat": "정령",
+   "codename": "조디악 (Zodiac)",
+   "angel": "미카엘 (封解主)",
+   "dress": "엘로아 (神威霊装六番)",
+   "weapon": "열쇠",
+   "species": "인간 (전 정령)",
+   "gender": "여성",
+   "birthday": "9월 12일",
+   "height": "148cm",
+   "cv": "카게야마 아카리",
+   "affil": "라타토스크 / 라이젠 고교",
+   "img": "",
+   "desc": "우주 공간에서 홀로 지내다 DEM의 함대 공격을 천사 미카엘 하나로 막아낸 정령으로, AST 코드네임은 '조디악'이다. 모든 것을 잠그고 여는 '봉해(封解)'의 열쇠 형태 천사 미카엘을 다룬다."
+  },
+  {
+   "name": "타카미야 미오",
+   "jp": "崇宮 澪",
+   "romaji": "Takamiya Mio",
+   "cat": "정령",
+   "codename": "데우스 (Deus)",
+   "angel": "",
+   "dress": "",
+   "weapon": "",
+   "species": "정령",
+   "gender": "여성",
+   "birthday": "12월 25일",
+   "height": "160cm",
+   "cv": "엔도 아야",
+   "affil": "",
+   "img": "",
+   "desc": "본편 시작 30년 전, 웨스트코트·엘렌·우드먼이 '정령 술식'으로 세계의 마나를 한 점에 모아 소환한 최초의 정령(시원의 정령). 그녀의 탄생이 사상 최초의 공간진을 일으켰다."
+  },
+  {
+   "name": "마유리",
+   "jp": "万由里",
+   "romaji": "Mayuri",
+   "cat": "정령",
+   "codename": "",
+   "angel": "",
+   "dress": "",
+   "weapon": "",
+   "species": "정령",
+   "gender": "여성",
+   "birthday": "",
+   "height": "154cm",
+   "cv": "아마미야 소라",
+   "affil": "",
+   "img": "",
+   "desc": "토카·요시노·코토리·야마이 자매·미쿠가 무의식적으로 흘린 영력에서 태어난 극장판의 정령. 영력으로 만들어진 존재라 언젠가 사라질 운명을 안고 있다."
+  },
+  {
+   "name": "이츠카 시도",
+   "jp": "五河 士道",
+   "romaji": "Itsuka Shidō",
+   "cat": "라타토스크",
+   "codename": "",
+   "angel": "산달폰 (鏖殺公)",
+   "dress": "",
+   "weapon": "대검 (산달폰 차용)",
+   "species": "인간",
+   "gender": "남성",
+   "birthday": "5월 27일",
+   "height": "170cm",
+   "cv": "시마자키 노부나가",
+   "affil": "사이토 대학 / 라이젠 고교 (전)",
+   "img": "",
+   "desc": "어린 시절 이츠카 가에 입양돼 평범하게 살다가, 공간진과 정령의 진실을 알게 되며 정령을 구하는 일에 뛰어든 주인공. 미쿠 공략 때 여장한 '이츠카 시오리'라는 별개의 정체(?)로도 유명하다."
+  },
+  {
+   "name": "무라사메 레이네",
+   "jp": "村雨 令音",
+   "romaji": "Murasame Reine",
+   "cat": "라타토스크",
+   "codename": "",
+   "angel": "",
+   "dress": "",
+   "weapon": "",
+   "species": "정령",
+   "gender": "여성",
+   "birthday": "",
+   "height": "164cm",
+   "cv": "엔도 아야",
+   "affil": "라타토스크 (전) / 라이젠 고교 (전)",
+   "img": "",
+   "desc": "공중함 프락시너스의 해석관이자 시도네 반의 부담임으로, 별난 승무원들 중 유일하게 \"정상\"으로 통하는 명석하고 이성적인 여성. 사령관 코토리의 비공식 보좌 역할도 맡고 있다."
+  },
+  {
+   "name": "칸나즈키 쿄헤이",
+   "jp": "神無月 恭平",
+   "romaji": "Kannazuki Kyōhei",
+   "cat": "라타토스크",
+   "codename": "",
+   "angel": "",
+   "dress": "",
+   "weapon": "",
+   "species": "인간",
+   "gender": "남성",
+   "birthday": "",
+   "height": "",
+   "cv": "코야스 타케히토",
+   "affil": "라타토스크 / AST (전)",
+   "img": "",
+   "desc": "프락시너스의 부사령관으로, 시도의 데이트를 관제하는 승무원들의 일원. 유능한 전직 위저드지만 사령관 코토리에게는 늘 무시당하는 처지다."
+  },
+  {
+   "name": "엘리엇 볼드윈 우드먼",
+   "jp": "",
+   "romaji": "Eriotto Bōrudowin Uddoman",
+   "cat": "라타토스크",
+   "codename": "",
+   "angel": "",
+   "dress": "",
+   "weapon": "",
+   "species": "인간",
+   "gender": "남성",
+   "birthday": "",
+   "height": "",
+   "cv": "나카타 조지",
+   "affil": "라타토스크 / 아스가르드 일렉트로닉스",
+   "img": "",
+   "desc": "라타토스크의 창설자이자 코토리의 후원자. 한때 웨스트코트와 함께했으나 최초의 정령에게 마음을 빼앗겨 DEM을 떠났고, 정령들을 구하기 위해 라타토스크를 세웠다."
+  },
+  {
+   "name": "카렌 노라 메이저스",
+   "jp": "",
+   "romaji": "Karen Nōra Meizāsu",
+   "cat": "라타토스크",
+   "codename": "",
+   "angel": "",
+   "dress": "",
+   "weapon": "",
+   "species": "인간",
+   "gender": "여성",
+   "birthday": "",
+   "height": "",
+   "cv": "니시다 노조미",
+   "affil": "라타토스크 / 아스가르드 일렉트로닉스",
+   "img": "",
+   "desc": "우드먼의 비서로, 휠체어를 미는 모습으로 늘 그의 곁을 지킨다. DEM의 최강 위저드이자 웨스트코트의 비서인 엘렌 미라 메이저스의 친여동생이다."
+  },
+  {
+   "name": "쿠사카베 료코",
+   "jp": "日下部 燎子",
+   "romaji": "Kusakabe Ryōko",
+   "cat": "AST",
+   "codename": "",
+   "angel": "",
+   "dress": "",
+   "weapon": "",
+   "species": "인간",
+   "gender": "여성",
+   "birthday": "",
+   "height": "",
+   "cv": "타카하시 아오",
+   "affil": "AST / 육상자위대",
+   "img": "",
+   "desc": "정령 토벌 부대 AST의 대장. 임무 수행보다 대원들의 안전을 우선하는 상관으로, 정령 격추에 목숨을 거는 오리가미와 자주 부딪친다."
+  },
+  {
+   "name": "타카미야 마나",
+   "jp": "崇宮 真那",
+   "romaji": "Takamiya Mana",
+   "cat": "AST",
+   "codename": "",
+   "angel": "",
+   "dress": "",
+   "weapon": "",
+   "species": "인간",
+   "gender": "여성",
+   "birthday": "",
+   "height": "147cm",
+   "cv": "미사토",
+   "affil": "DEM (전) / AST (임시)",
+   "img": "",
+   "desc": "과거의 기억을 잃은 채 '오빠'라 부르는 소년의 사진이 든 펜던트만 간직해 온 전 DEM 위저드(콜사인 아뎁터스 2). 나이트메어 관련 임무로 텐구 시에 배치됐다가 오빠 시도와 우연히 재회한다."
+  },
+  {
+   "name": "오카미네 미키에",
+   "jp": "岡峰 美紀恵",
+   "romaji": "Okamine Mikie",
+   "cat": "AST",
+   "codename": "",
+   "angel": "",
+   "dress": "",
+   "weapon": "",
+   "species": "인간",
+   "gender": "여성",
+   "birthday": "",
+   "height": "",
+   "cv": "사토 카나미",
+   "affil": "AST / 라이젠 고교",
+   "img": "",
+   "desc": "AST 소속의 일본인 위저드이자 스핀오프 만화 '데이트 AST 라이크'의 주인공으로, 오카미네 타마에의 사촌 동생이다. 오리가미에게 구해진 일을 계기로 그녀를 동경해 AST에 입대한, 순진하고 덜렁대지만 우정을 무엇보다 소중히 여기는 노력파 소녀다."
+  },
+  {
+   "name": "아이작 레이 펠럼 웨스트코트",
+   "jp": "",
+   "romaji": "Aizakku Rei Peramu Wesutokotto",
+   "cat": "DEM",
+   "codename": "",
+   "angel": "",
+   "dress": "",
+   "weapon": "책",
+   "species": "반전 정령 (전 인간)",
+   "gender": "남성",
+   "birthday": "",
+   "height": "",
+   "cv": "오키아유 료타로",
+   "affil": "DEM 인더스트리",
+   "img": "",
+   "desc": "DEM 인더스트리의 창설자이자 디렉터로, 5권에서 처음 등장한 시리즈의 메인 안타고니스트. 순수한 마술사(메이거스) 출신으로 우드먼·엘렌과 함께 '정령 술식'으로 최초의 정령을 만들어낸 장본인이며, 정령을 반전시켜 마왕의 힘을 손에 넣으려 한다."
+  },
+  {
+   "name": "엘렌 미라 메이저스",
+   "jp": "",
+   "romaji": "Eren Mira Meizāsu",
+   "cat": "DEM",
+   "codename": "",
+   "angel": "",
+   "dress": "",
+   "weapon": "",
+   "species": "인간",
+   "gender": "여성",
+   "birthday": "",
+   "height": "160cm",
+   "cv": "이토 시즈카",
+   "affil": "DEM 인더스트리 (전) / 라타토스크",
+   "img": "",
+   "desc": "'세계 최강의 위저드'로 불리는 DEM 인더스트리 디렉터 웨스트코트의 비서이자 회사 간부로, 5권에서 처음 등장한 시리즈의 2차 안타고니스트. 평소에는 냉정하고 분석적이지만 전투에서는 호전적인 본성을 드러내며, 최강이라는 칭호에 강한 자부심을 갖고 어떤 상대에게도 지지 않겠다고 맹세했다."
+  },
+  {
+   "name": "아르테미시아 벨 애쉬크로프트",
+   "jp": "",
+   "romaji": "Artemisia Bell Ashcroft",
+   "cat": "DEM",
+   "codename": "",
+   "angel": "",
+   "dress": "",
+   "weapon": "",
+   "species": "인간",
+   "gender": "여성",
+   "birthday": "",
+   "height": "162cm",
+   "cv": "마츠이 에리코",
+   "affil": "SSS (전) / DEM 인더스트리 (전)",
+   "img": "",
+   "desc": "영국판 AST에 해당하는 SSS의 톱 위저드로, 친절하고 쾌활한 성격으로 알려진 세계 최정상급(톱 5) 위저드다. 새로운 시간축에서는 DEM에 세뇌되어 마나를 대신하는 새로운 아뎁터스 2가 되었으며, 특수한 수호(테리토리)로 정령의 세피라 결정을 뽑아내는 능력을 보였다."
+  },
+  {
+   "name": "제시카 베일리",
+   "jp": "",
+   "romaji": "Jeshika Beirī",
+   "cat": "DEM",
+   "codename": "",
+   "angel": "",
+   "dress": "",
+   "weapon": "",
+   "species": "인간",
+   "gender": "여성",
+   "birthday": "",
+   "height": "",
+   "cv": "카이다 유코",
+   "affil": "DEM 인더스트리 / AST (임시)",
+   "img": "",
+   "desc": "DEM 인더스트리 소속 위저드로 콜사인 '아뎁터스 3'을 지닌, 6권에서 처음 등장하는 마이너 안타고니스트. 정령 프린세스와 시도 포획이라는 비밀 임무를 띠고 AST에 임시 전속되었으며, 웨스트코트의 인정을 갈구해 마나에게 일방적인 라이벌 의식을 불태운다."
+  },
+  {
+   "name": "토노마치 히로토",
+   "jp": "殿町 宏人",
+   "romaji": "Tonomachi Hiroto",
+   "cat": "학교·기타",
+   "codename": "",
+   "angel": "",
+   "dress": "",
+   "weapon": "",
+   "species": "인간",
+   "gender": "남성",
+   "birthday": "",
+   "height": "175cm",
+   "cv": "카츠 안리",
+   "affil": "라이젠 고교 (전)",
+   "img": "",
+   "desc": "이츠카 시도의 클래스메이트이자 절친한 친구로, 시도의 학교 생활에 자주 등장해 주변인 시점을 담당한다. 이성에게도 스스럼없이 감정을 표현하는 직설적인 성격에 어떤 상황에서도 침착한 편이지만, 휴대폰 연애 시뮬레이션 게임을 즐기다 방해받으면 냉정함이 무너지곤 한다."
+  },
+  {
+   "name": "오카미네 타마에",
+   "jp": "岡峰 珠恵",
+   "romaji": "Okamine Tamae",
+   "cat": "학교·기타",
+   "codename": "",
+   "angel": "",
+   "dress": "",
+   "weapon": "",
+   "species": "인간",
+   "gender": "여성",
+   "birthday": "",
+   "height": "150cm",
+   "cv": "사도하라 카오리",
+   "affil": "라이젠 고교 (교사)",
+   "img": "",
+   "desc": "라이젠 고교 2학년 4반의 담임이자 사회 과목 교사로, 동안 외모 덕분에 학생들에게 '타마짱'이라는 애칭으로 불리는 인기 교사다. 서른을 앞두고 결혼에 조바심을 내어 '프러포즈'나 '결혼'이라는 단어에 과민하게 반응하는 등 예상 밖의 상황에서는 감정 조절이 서툴다."
+  },
+  {
+   "name": "야마부키 아이",
+   "jp": "山吹 亜衣",
+   "romaji": "Yamabuki Ai",
+   "cat": "학교·기타",
+   "codename": "",
+   "angel": "",
+   "dress": "",
+   "weapon": "",
+   "species": "인간",
+   "gender": "여성",
+   "birthday": "",
+   "height": "165cm",
+   "cv": "무라이 리사코",
+   "affil": "라이젠 고교 (전)",
+   "img": "",
+   "desc": "라이젠 고교 학생으로, 토카가 반에서 자주 어울리는 여학생 3인방의 리더 격 인물이며 마이·미이와 단짝이다. 외향적이고 친화력 좋은 성격으로 우울해하는 토카를 격려하고 시도와의 관계를 응원해 주지만, 정작 자신의 연애 앞에서는 수줍음이 많다."
+  },
+  {
+   "name": "하자쿠라 마이",
+   "jp": "葉桜 麻衣",
+   "romaji": "Hazakura Mai",
+   "cat": "학교·기타",
+   "codename": "",
+   "angel": "",
+   "dress": "",
+   "weapon": "",
+   "species": "인간",
+   "gender": "여성",
+   "birthday": "",
+   "height": "160cm",
+   "cv": "츠미타 카요코",
+   "affil": "라이젠 고교 (전)",
+   "img": "",
+   "desc": "시도의 여학생 클래스메이트로, 미이·아이와 함께 토카와 친해진 3인방의 한 명이며 셋이서 반의 학교 활동을 주도하곤 한다. 친절하고 상냥하며 공감 능력이 좋아, 밸런타인데이에 초콜릿을 받지 못한 남학생들에게 의리 초콜릿을 건넬 만큼 배려심이 있다."
+  },
+  {
+   "name": "후지바카마 미이",
+   "jp": "藤袴 美衣",
+   "romaji": "Fujibakama Mii",
+   "cat": "학교·기타",
+   "codename": "",
+   "angel": "",
+   "dress": "",
+   "weapon": "",
+   "species": "인간",
+   "gender": "여성",
+   "birthday": "",
+   "height": "155cm",
+   "cv": "츠키미야 미도리",
+   "affil": "라이젠 고교 (전)",
+   "img": "",
+   "desc": "토카와 친구가 된 여학생 3인방의 한 명으로, 얇은 테의 둥근 안경을 쓴 보라색 긴 머리 소녀이며 아이·마이와 늘 붙어 다닌다. 우울해하는 토카를 다정하게 격려하는 한편 시도에게는 곧잘 으름장을 놓는 드센 면도 있고, 애니메이션에서는 '마지 히쿠와(진짜 별로야)'가 입버릇이다."
+  }
+ ]
+};
+/* ─── /DATA ─── */
+
+var CATS=['정령','라타토스크','AST','DEM','학교·기타'];
+var CAT_CL={'정령':'#ff8ad4','라타토스크':'#c98aff','AST':'#87CEFF','DEM':'#ff9a8a','학교·기타':'#9ff0c0'};
+var CAT_IC={'정령':'M12 2l2.4 6.2L21 9l-5 4.4 1.6 6.6L12 16.6 6.4 20l1.6-6.6L3 9l6.6-.8z',
+ '라타토스크':'M12 3a9 9 0 1 0 9 9h-9z','AST':'M12 2l9 5v6c0 5-4 8-9 9-5-1-9-4-9-9V7z',
+ 'DEM':'M12 2l3 7h7l-6 5 3 8-7-5-7 5 3-8-6-5h7z','학교·기타':'M3 10l9-6 9 6-9 6zM7 13v5l5 3 5-3v-5'};
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function C(){return (DATA.chars||[]).filter(function(c){return c&&c.name;});}
+function cl(c){return CAT_CL[c.cat]||'#c98aff';}
+function ico(cat){return '<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="'+(CAT_CL[cat]||'#c98aff')+'" stroke-width="1.3"><path d="'+(CAT_IC[cat]||CAT_IC['정령'])+'"/></svg>';}
+var curCat='전체', curQ='';
+
+function renderChips(){
+  var counts={'전체':C().length};
+  CATS.forEach(function(k){counts[k]=C().filter(function(c){return c.cat===k;}).length;});
+  var html=['전체'].concat(CATS).map(function(k){
+    if(k!=='전체'&&!counts[k])return '';
+    return '<button class="chip'+(curCat===k?' on':'')+'" onclick="setCat(\''+k+'\')">'+k+' <span class="n">'+counts[k]+'</span></button>';
+  }).join('');
+  document.getElementById('chips').innerHTML=html;
+  document.getElementById('cnt').textContent='// '+C().length+' CHARACTERS LOGGED';
+}
+function setCat(c){curCat=c;renderChips();renderGrid();}
+
+function match(c,q){
+  if(!q)return true;
+  var hay=[c.name,c.jp,c.romaji,c.codename,c.angel,c.dress,c.cv,c.affil].join('¦').toLowerCase();
+  return hay.indexOf(q.toLowerCase())!==-1;
+}
+function renderGrid(){
+  var list=C().filter(function(c){return (curCat==='전체'||c.cat===curCat)&&match(c,curQ);});
+  var g=document.getElementById('grid');
+  g.innerHTML=list.map(function(c){
+    var i=C().indexOf(c);
+    var ph=c.img?'<img src="'+esc(c.img)+'" alt="'+esc(c.name)+'" loading="lazy" onerror="this.remove()">':ico(c.cat);
+    var cd=c.codename?'<span class="cd">'+esc(c.codename.replace(/\s*\(.*\)$/,''))+'</span>':'';
+    var subs=[];
+    if(c.angel)subs.push('<b>천사</b> '+esc(c.angel.replace(/\s*\(.*\)$/,'')));
+    else if(c.species)subs.push(esc(c.species));
+    return '<div class="card" style="--cl:'+cl(c)+'" onclick="openC('+i+')">'+
+      '<div class="ph">'+cd+ph+'</div>'+
+      '<div class="meta"><div class="nm">'+esc(c.name)+'</div><div class="jp">'+esc(c.jp||c.romaji||'')+'</div>'+
+      (subs.length?'<div class="sub">'+subs.join(' · ')+'</div>':'')+'</div></div>';
+  }).join('');
+  document.getElementById('empty').style.display=list.length?'none':'block';
+}
+
+var HASH_LOCK=false;
+function setHash(c){HASH_LOCK=true;try{history.replaceState(null,'','#'+encodeURIComponent(c.name));}catch(e){}setTimeout(function(){HASH_LOCK=false;},0);}
+function clearHash(){HASH_LOCK=true;try{history.replaceState(null,'',location.pathname+location.search);}catch(e){}setTimeout(function(){HASH_LOCK=false;},0);}
+
+function openC(i){
+  var c=C()[i];if(!c)return;
+  var ph=c.img?'<img src="'+esc(c.img)+'" alt="">':ico(c.cat);
+  var prof=[];
+  function pf(k,v,dim){if(v)prof.push('<dt>'+k+'</dt><dd'+(dim?' class="dim"':'')+'>'+esc(v)+'</dd>');}
+  pf('CATEGORY',c.cat);pf('SPECIES',c.species);pf('GENDER',c.gender);
+  pf('BIRTHDAY',c.birthday);pf('HEIGHT',c.height);pf('CV',c.cv);pf('AFFIL',c.affil,true);
+  var spirit='';
+  if(c.codename||c.angel||c.dress||c.weapon){
+    var rows='';
+    if(c.codename)rows+='<div class="row"><span class="k">CODENAME</span><span class="v"><b>'+esc(c.codename)+'</b></span></div>';
+    if(c.angel)rows+='<div class="row"><span class="k">ANGEL</span><span class="v"><b>'+esc(c.angel.replace(/\s*\(.*\)$/,''))+'</b>'+(/\(/.test(c.angel)?'<span class="jx">'+esc((c.angel.match(/\(([^)]*)\)/)||['',''])[1])+'</span>':'')+'</span></div>';
+    if(c.dress)rows+='<div class="row"><span class="k">DRESS</span><span class="v"><b>'+esc(c.dress.replace(/\s*\(.*\)$/,''))+'</b>'+(/\(/.test(c.dress)?'<span class="jx">'+esc((c.dress.match(/\(([^)]*)\)/)||['',''])[1])+'</span>':'')+'</span></div>';
+    if(c.weapon)rows+='<div class="row"><span class="k">WEAPON</span><span class="v">'+esc(c.weapon)+'</span></div>';
+    spirit='<div class="sec" style="--cl:'+cl(c)+'"><div class="sh">// SPIRIT DATA</div>'+rows+'</div>';
+  }
+  document.getElementById('modal').innerHTML=
+    '<div class="m-head" style="--cl:'+cl(c)+'">'+
+    (c.codename?'<span class="m-cd">'+esc(c.codename)+'</span>':'<span class="m-cd">'+esc(c.cat)+'</span>')+
+    '<div class="m-nm">'+esc(c.name)+'</div>'+
+    '<div class="m-jp">'+esc(c.jp||'')+(c.romaji?' · '+esc(c.romaji):'')+'</div>'+
+    '<button class="m-x" onclick="closeModal()">✕</button></div>'+
+    '<div class="m-body"><div class="m-top">'+
+    '<div class="m-img">'+ph+'</div>'+
+    '<dl class="prof">'+prof.join('')+'</dl></div>'+
+    spirit+
+    (c.desc?'<div class="m-desc">'+esc(c.desc)+'</div>':'')+
+    '</div>';
+  document.getElementById('mbk').classList.add('on');
+  document.body.style.overflow='hidden';
+  setHash(c);
+  document.getElementById('crumb').textContent='CHARACTER // '+c.name;
+}
+function closeModal(){
+  document.getElementById('mbk').classList.remove('on');
+  document.body.style.overflow='';
+  clearHash();
+  document.getElementById('crumb').textContent='CHARACTER ARCHIVE';
+}
+function applyHash(){
+  if(HASH_LOCK)return;
+  var h=decodeURIComponent((location.hash||'').slice(1));
+  if(!h){closeModalSilent();return;}
+  var i=C().findIndex(function(c){return c.name===h||c.jp===h;});
+  if(i>=0)openC(i);
+}
+function closeModalSilent(){
+  document.getElementById('mbk').classList.remove('on');
+  document.body.style.overflow='';
+}
+document.getElementById('mbk').addEventListener('click',function(e){if(e.target===this)closeModal();});
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeModal();});
+document.getElementById('q').addEventListener('input',function(){curQ=this.value.trim();renderGrid();});
+window.addEventListener('hashchange',applyHash);
+
+renderChips();renderGrid();applyHash();
+</script>
+</body>
+</html>
