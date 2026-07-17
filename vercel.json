@@ -11,6 +11,8 @@
     { "source": "/wapon/(.*)", "destination": "/WAPON" },
     { "source": "/unpack", "destination": "/UNPACK" },
     { "source": "/unpack/(.*)", "destination": "/UNPACK" },
+    { "source": "/dal", "destination": "/DAL" },
+    { "source": "/dal/(.*)", "destination": "/DAL" },
     { "source": "/sim/(.*)", "destination": "/sim" }
   ]
 }
