@@ -150,7 +150,14 @@ module.exports = async (req, res) => {
         tryOr(ttfcNew, ttfcNewsFallback),
         tryOr(imagNew, imagNewsFallback)
       ]);
-      CACHE = { updatedAt: now, items: [...ttfc, ...imag] };
+      /* 새로 나온 순서(최신순)로 노출 — 소스별로 뭉치지 않게 번갈아 섞는다.
+         IMAG은 배신 날짜(date)가 있어 날짜 내림차순 정렬, TTFC는 사이트가 비로그인
+         상태에 날짜를 안 줘서 신착순(에피소드 id 내림차순, ttfcNew가 이미 정렬)만 안다.
+         → 두 소스를 각자 최신순으로 둔 뒤 지퍼병합(IMAG 먼저)해서 최신끼리 위로 오게. */
+      const imS = imag.slice().sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')));
+      const items = [], mx = Math.max(ttfc.length, imS.length);
+      for (let i = 0; i < mx; i++) { if (imS[i]) items.push(imS[i]); if (ttfc[i]) items.push(ttfc[i]); }
+      CACHE = { updatedAt: now, items };
       CACHE_AT = now;
     }
     res.setHeader('cache-control', 'public, s-maxage=300, stale-while-revalidate=600');
