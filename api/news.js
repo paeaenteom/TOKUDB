@@ -46,7 +46,7 @@ async function ttfcNew() {
     const catm = chunk.match(/alt=""[^>]*>\s*([^<]{2,14})\s*<\/p>/);
     const cat = catm ? strip(catm[1]) : '';
     const title = dec(altm[1]);
-    works.push({ id, title });
+    works.push({ id, title, idx: works.length });
     out.push({ src: 'TTFC', id: 'ttfc-m' + id, title: title + (cat ? ' 〔' + cat + '〕' : ''), date: '', url: 'https://pc.tokusatsu-fc.jp/movies/' + id + '/movie-stories', release: true, via: 'new' });
   }
   /* 신착 작품마다 에피소드 목록(/movies/{id}/movie-stories)을 훑어 "New" 배지 달린
@@ -65,11 +65,15 @@ async function ttfcNew() {
         const chunk = b.slice(0, 2200);
         if (!/>\s*New\s*<\/p>/.test(chunk)) continue; /* New 배지 에피소드만 */
         const am = chunk.match(/alt="([^"]{2,})"/); if (!am) continue;
-        eps.push({ src: 'TTFC', id: 'ttfc-s' + sid, title: w.title + ' · ' + dec(am[1]), date: '', url: 'https://pc.tokusatsu-fc.jp/movies/' + w.id + '/movie-stories/' + sid, release: true, via: 'new' });
+        eps.push({ src: 'TTFC', id: 'ttfc-s' + sid, title: w.title + ' · ' + dec(am[1]), date: '', url: 'https://pc.tokusatsu-fc.jp/movies/' + w.id + '/movie-stories/' + sid, release: true, via: 'new', _w: w.idx });
       }
     } catch (e) { /* 개별 작품 실패는 무시 */ }
   }));
-  eps.sort((a, b) => parseInt(b.id.slice(6), 10) - parseInt(a.id.slice(6), 10)); /* 최신 등록(id 큰 것) 먼저 */
+  /* 정렬 = /new 카드(작품) 순서 우선, 같은 작품 안에서만 sid 내림차순.
+     sid 전체 내림차순은 함정: 토크쇼처럼 여러 편을 나중에 일괄 등록하면 sid가 커서
+     실제 신착(ゼッツ 신 에피소드 등)을 제치고 최상단을 독점한다 — TTFC 신착 화면과 어긋남. */
+  eps.sort((a, b) => a._w - b._w || parseInt(b.id.slice(6), 10) - parseInt(a.id.slice(6), 10));
+  eps.forEach(e => { delete e._w; });
   /* 작품 카드(ttfc-m)는 목록에 띄우지 않는다 — 에피소드 "New"만 (유빈 요청 2026-07-17).
      에피소드 스캔이 전부 실패했을 때만 작품 카드로 대체(홈 뉴스 폴백보다 낫다). */
   if (eps.length) return eps.slice(0, 15);
@@ -145,7 +149,9 @@ module.exports = async (req, res) => {
   res.setHeader('content-type', 'application/json; charset=utf-8');
   try {
     const now = Date.now();
-    if (!CACHE || now - CACHE_AT > TTL) {
+    /* ?fresh=1 (홈 "새로고침" 버튼) = 캐시 무시하고 소스를 즉시 다시 긁는다 */
+    const fresh = /[?&]fresh=1/.test(String(req.url || ''));
+    if (fresh || !CACHE || now - CACHE_AT > TTL) {
       const [ttfc, imag] = await Promise.all([
         tryOr(ttfcNew, ttfcNewsFallback),
         tryOr(imagNew, imagNewsFallback)
@@ -160,7 +166,7 @@ module.exports = async (req, res) => {
       CACHE = { updatedAt: now, items };
       CACHE_AT = now;
     }
-    res.setHeader('cache-control', 'public, s-maxage=300, stale-while-revalidate=600');
+    res.setHeader('cache-control', fresh ? 'no-store' : 'public, s-maxage=300, stale-while-revalidate=600');
     res.end(JSON.stringify(CACHE));
   } catch (e) {
     res.statusCode = 500;
