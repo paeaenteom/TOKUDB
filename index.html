@@ -361,8 +361,10 @@ window.addEventListener('scroll',function(){var y=window.scrollY+120,act=-1;secs
     }
   }
 
-  function poll(){
-    fetch(API,{cache:'no-store'}).then(function(r){return r.json();}).then(function(d){
+  function poll(manual){
+    /* manual(새로고침 버튼)=서버 캐시까지 무시(fresh=1), 자동 폴=?t= 캐시버스터로 엣지 캐시만 우회
+       — cache:'no-store'만으론 Vercel 엣지(s-maxage)를 못 뚫어서 최대 10분 묵은 응답이 왔었음 */
+    fetch(API+(manual===true?'?fresh=1&t=':'?t=')+Date.now(),{cache:'no-store'}).then(function(r){return r.json();}).then(function(d){
       ITEMS=(d&&d.items)||[];
       var known=getSet(LS_KNOWN), unread=getSet(LS_UNREAD);
       var firstEver=localStorage.getItem(LS_KNOWN)===null;
@@ -387,7 +389,7 @@ window.addEventListener('scroll',function(){var y=window.scrollY+120,act=-1;secs
     }
   });
   document.getElementById('newsRead').addEventListener('click',function(){ localStorage.setItem(LS_UNREAD,'[]'); render(); });
-  document.getElementById('newsRefresh').addEventListener('click',poll);
+  document.getElementById('newsRefresh').addEventListener('click',function(){ poll(true); });
 
   updateBell();
   poll();
