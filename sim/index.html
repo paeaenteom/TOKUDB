@@ -96,10 +96,6 @@ body{background:var(--bg);color:var(--txt);font-family:'Noto Sans KR',sans-serif
 .msg.user .bubble{background:rgba(255,179,200,.08);border:1px solid rgba(255,179,200,.2);color:var(--txt);font-family:'Noto Sans KR';font-size:14px;text-align:right}
 .msg.ai .bubble{background:rgba(13,16,20,.85);border:1px solid var(--line2);color:var(--txt);font-family:var(--mono);font-size:12.5px;white-space:pre-wrap;line-height:1.75;letter-spacing:.3px;max-width:96%;border-left:2px solid var(--sky);word-break:break-word;overflow-wrap:break-word}
 /* AI 메시지 내 색 강조 */
-.msg.ai .bubble .hl-sky{color:var(--sky)}
-.msg.ai .bubble .hl-pink{color:var(--pink)}
-.msg.ai .bubble .hl-green{color:var(--green)}
-.msg.ai .bubble .hl-amber{color:var(--amber)}
 
 /* 로딩 */
 .loading-msg{align-items:flex-start}
@@ -128,8 +124,6 @@ body{background:var(--bg);color:var(--txt);font-family:'Noto Sans KR',sans-serif
   .sidebar{display:none}
   .msg.ai .bubble{max-width:98%;font-size:12px}
 }
-.sb-toggle{display:none;position:fixed;bottom:80px;right:16px;z-index:20;background:var(--card);border:1px solid var(--sky);border-radius:50%;width:44px;height:44px;align-items:center;justify-content:center;cursor:pointer;font-size:18px}
-@media(max-width:720px){.sb-toggle{display:flex}}
 </style>
 </head>
 <body>
