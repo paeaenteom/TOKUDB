@@ -222,7 +222,7 @@ var curCat = '전체', curQ = '';
 
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
 function W(){return (DATA.weapons||[]).filter(function(w){return w&&w.name;});}
-function imgSrc(p){ if(!p) return ''; if(/^https?:\/\//.test(p)||p.charAt(0)==='/') return p; return p; }
+function imgSrc(p){ return p||''; }
 
 function renderChips(){
   var el=document.getElementById('catChips'); var h='';
