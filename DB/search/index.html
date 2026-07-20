@@ -242,7 +242,6 @@ let INDEX=[];            // 검색 인덱스 (이미지 1장 = 1항목)
 let activeCat='all';
 /* ── 3분류 태그 (편집기 '이미지 관리'와 동일한 DATA._imgmeta 사용) ── */
 const TAG_CATS=['name','form','action'];
-const TAG_LABEL={name:'이름',form:'폼',action:'행동'};
 let META={pool:{},tags:{},gallery:[]};
 let tagSel={name:new Set(),form:new Set(),action:new Set()};
 function tagsOf(p){
@@ -547,8 +546,7 @@ function closeLB(){$('#lb').classList.remove('open');if(!$('#fsv').classList.con
 /* ── 원본 전체화면 ── */
 let lbCur=null;
 function fsFromLB(){if(lbCur)openFS(lbCur);}
-function openFS(e,opt){
-  opt=opt||{};
+function openFS(e){
   $('#fsvImg').src=iu(e.img);
   $('#fsvImg').alt=e.name||'';
   $('#fsvCap').innerHTML=`${e.name?`<div class="fn">${esc(e.name)}</div>`:''}${e.jp?`<div class="fj">${esc(e.jp)}</div>`:''}${(e.work||e.cat)?`<div class="fh">${esc([e.cat,e.work].filter(Boolean).join(' · '))}</div>`:''}`;
@@ -567,7 +565,7 @@ function closeFS(){
   const fe=document.fullscreenElement||document.webkitFullscreenElement;
   if(fe){const ex=document.exitFullscreen||document.webkitExitFullscreen;if(ex)try{ex.call(document);}catch(_){}}
 }
-$('#fsv').addEventListener('click',e=>{if(e.target!==$('#fsvImg')||true)closeFS();});
+$('#fsv').addEventListener('click',()=>closeFS());
 document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement&&$('#fsv').classList.contains('open'))closeFS();});
 document.addEventListener('webkitfullscreenchange',()=>{if(!document.webkitFullscreenElement&&$('#fsv').classList.contains('open'))closeFS();});
 document.addEventListener('keydown',e=>{
@@ -625,7 +623,7 @@ function resolveDeepLink(){
   if(!parsed||!parsed.req.length)return false;
   applyTagFilterFromSegs(parsed.req);
   const hit=findByTags(parsed.req);
-  if(hit){ openFS(hit,{fromLink:true}); linkResolved=true; return true; }
+  if(hit){ openFS(hit); linkResolved=true; return true; }
   // 못 찾음: 그리드만 보여주고 알림
   toast(`"${parsed.req.join(' / ')}" 에 맞는 이미지를 못 찾았어`);
   return false;
