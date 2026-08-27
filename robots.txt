@@ -1,15 +1,6 @@
 User-agent: *
 Allow: /
 
-# 암호 게이트가 걸린 코너 — 홈에서 숨긴 것과 같은 방침으로 검색에도 싣지 않는다
-Disallow: /WAPON
-Disallow: /wapon
-Disallow: /UNPACK
-Disallow: /unpack
-Disallow: /rpgedit
-Disallow: /DAL
-Disallow: /dal
-
 # 리졸버·프록시 엔드포인트 (사람이 볼 페이지가 아님)
 Disallow: /api/
 Disallow: /i/
