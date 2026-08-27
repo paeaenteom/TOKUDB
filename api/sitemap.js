@@ -3,8 +3,7 @@
    손으로 관리하는 파일이 아니라 배포된 /DB/ 를 읽어 만들기 때문에, 에디터로 작품을
    추가하고 배포하면 사이트맵에 자동으로 실린다.
 
-   싣는 것: 홈 · 도감 루트 · 시리즈(수록작 있는 것만) · 작품(_todo 제외) · 이미지 검색 · 시뮬레이터
-   빼는 것: 암호 게이트가 걸린 코너(WAPON·UNPACK·rpgedit·DAL) — 홈에서 숨긴 것과 같은 방침 */
+   싣는 것: 홈 · 도감 루트 · 시리즈(수록작 있는 것만) · 작품(_todo 제외) · 이미지 검색 */
 
 let CACHE = null, CACHE_AT = 0;
 const TTL = 5 * 60 * 1000;
@@ -63,7 +62,6 @@ module.exports = async (req, res) => {
     { loc: base + '/', pri: '1.0', freq: 'weekly' },
     { loc: base + '/DB', pri: '0.9', freq: 'weekly' },
     { loc: base + '/DB/search', pri: '0.6', freq: 'monthly' },
-    { loc: base + '/sim', pri: '0.5', freq: 'monthly' },
   ];
   try {
     const DATA = await getData(host);
