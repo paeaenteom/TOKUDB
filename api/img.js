@@ -6,7 +6,6 @@
    - 비어 있는 칸은 URL에 x 를 쓴다. 예: /i/흑십자군/무사가면/x
    - 뒤쪽 칸을 생략하면 x 로 간주한다. (/i/아카레인저 = /i/아카레인저/x/x)
    - 세 칸이 모두 맞는 이미지가 없으면 404.
-   - WAPON 무기는 /i/무기명/스타일명/x (기본형은 스타일=기본).
 
    삼박자 결정 방법 (슬롯 병합):
    1) 에디터에서 태깅한 DATA._imgmeta.tags 가 1순위 — 값이 있는 칸은 그대로 쓴다.
@@ -140,37 +139,6 @@ function buildMap(DATA) {
   return out;
 }
 
-/* /WAPON/ 무기고 → 삼박자: 무기명/스타일/x (기본형은 스타일=기본). 경로는 /WAPON/ 기준 절대화 */
-function buildWaponMap(DATA) {
-  const out = [];
-  const abs = (p) => {
-    if (!p) return '';
-    if (/^https?:\/\//.test(p) || p.startsWith('/')) return p;
-    return '/WAPON/' + p;
-  };
-  for (const w of (DATA.weapons || [])) {
-    if (!w || !w.name) continue;
-    if (w.img) out.push({
-      img: abs(String(w.img)),
-      name: [w.name, w.jp].filter(Boolean).map(norm),
-      form: [norm('기본')],
-      action: []
-    });
-    for (const s of (w.styles || [])) {
-      if (!s || !s.name) continue;
-      const im = s.img || w.img;
-      if (!im) continue;
-      out.push({
-        img: abs(String(im)),
-        name: [w.name, w.jp].filter(Boolean).map(norm),
-        form: [norm(s.name)],
-        action: []
-      });
-    }
-  }
-  return out;
-}
-
 async function getMap(host) {
   const now = Date.now();
   if (CACHE && now - CACHE_AT < TTL) return CACHE;
@@ -179,15 +147,7 @@ async function getMap(host) {
   const html = await r.text();
   const block = findDataBlock(html);
   if (!block) throw new Error('DATA block not found');
-  let map = buildMap(JSON.parse(block));
-  /* WAPON 무기고 병합 — 페이지가 없거나 실패해도 DB 리졸빙은 유지 */
-  try {
-    const rw = await fetch(`${proto}://${host}/WAPON/`, { headers: { 'user-agent': 'toku-img-resolver' } });
-    if (rw.ok) {
-      const wblock = findDataBlock(await rw.text());
-      if (wblock) map = map.concat(buildWaponMap(JSON.parse(wblock)));
-    }
-  } catch (e) { /* 무기고 없음 — 무시 */ }
+  const map = buildMap(JSON.parse(block));
   CACHE = map;
   CACHE_AT = now;
   return CACHE;
