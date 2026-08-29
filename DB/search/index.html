@@ -348,6 +348,7 @@ function buildIndex(DATA){
         if(wBanner)pushEntry(out,{...base,src:w,img:wBanner,name:w.ko,jp:w.jp,cat:'배너',kind:'작품 배너',color:'',kw:['배너','메인','포스터']});
         if(w.imgBanner&&w.img)pushEntry(out,{...base,src:w,img:w.img,name:w.ko,jp:w.jp,cat:'배너',kind:'작품 카드',color:'',kw:['카드','포스터']});
         if(w.imgSpot)pushEntry(out,{...base,src:w,img:w.imgSpot,name:w.ko,jp:w.jp,cat:'배너',kind:'스포트라이트',color:'',kw:['스포트라이트','업데이트','홈']});
+        if(w.imgLogo)pushEntry(out,{...base,src:w,img:w.imgLogo,name:w.ko,jp:w.jp,cat:'배너',kind:'로고',color:'',kw:['로고','타이틀','제목','엠블넌']});
         (w.members||[]).forEach(h=>{
           if(!h||h._divider)return;
           const ckw=colorName(h.color);
