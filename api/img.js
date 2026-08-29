@@ -15,6 +15,7 @@
       · 폼(거대전사 등)     → (폼명, sub|기본, x)
       · 카이주·인물·조직 등 → (badge, 개체명, x)        예: 흑십자군/무사가면/x  (badge 없으면 개체명/x/x)
       · 작품 배너           → (작품명, x, 배너)
+      · 작품 로고           → (작품명, x, 로고)
       · 스킬/기능 미디어    → (소유자, 스킬명, 스킬|기능)
    덕분에 태그가 덜 된 이미지도 항상 하나의 예측 가능한 정확 주소를 가진다.
 
@@ -82,6 +83,7 @@ function buildDerived(DATA) {
           if (w.img) later.push([w.img, [w.ko, w.jp], [], ['카드']]);
         }
         if (w.imgSpot) later.push([w.imgSpot, [w.ko, w.jp], [], ['스포트라이트']]);
+        if (w.imgLogo) later.push([w.imgLogo, [w.ko, w.jp], [], ['로고']]);
         for (const h of (w.members || [])) {
           if (!h || h._divider) continue;
           const sub = paren(h.sub), lbl = paren(h.imgAltLabel);
