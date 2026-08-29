@@ -108,7 +108,7 @@ function buildChars(DATA, host) {
           };
           push(rec, [f.name, f.jp]);
         });
-        const flat = [['people', '인물'], ['kaiju', '괴수'], ['arsenal', '무장'], ['machines', '장비'], ['orgs', '조직']];
+        const flat = [['cast', '주연'], ['people', '인물'], ['kaiju', '괴수'], ['arsenal', '무장'], ['machines', '장비'], ['orgs', '조직']];
         for (const [k, kind] of flat) (w[k] || []).forEach(it => {
           if (!it || it._divider) return;
           const rec = {
