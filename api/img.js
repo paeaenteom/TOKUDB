@@ -101,7 +101,7 @@ function buildDerived(DATA) {
           for (const fx of (f.funcs || [])) if (fx && fx.media && fx.media.type === 'image' && fx.media.src)
             put(fx.media.src, [f.name], [fx.name, fx.jp], ['기능']);
         }
-        for (const k of ['people', 'kaiju', 'arsenal', 'machines', 'orgs']) for (const it of (w[k] || [])) {
+        for (const k of ['cast', 'people', 'kaiju', 'arsenal', 'machines', 'orgs']) for (const it of (w[k] || [])) {
           if (!it || it._divider) continue;
           const img = it.img || it.photo || (it.media && it.media.type === 'image' && it.media.src);
           /* badge(소속)가 있으면 (badge, 개체명, x), 없으면 (개체명, x, x) */
