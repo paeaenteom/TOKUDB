@@ -263,6 +263,8 @@ button{font-family:inherit}
 .info-grid .k{font-family:var(--mono);font-size:11px;letter-spacing:.5px;color:var(--faint);text-transform:uppercase;margin-bottom:5px}
 .info-grid .v{font-size:14px;line-height:1.55}
 .info-grid .v.sum{color:var(--dim);font-size:13.5px;line-height:1.75}
+.info-grid .wlogo{display:block;width:100%;max-height:170px;object-fit:contain;margin:4px 0 2px}
+.info-grid .cell.logo{background:linear-gradient(180deg,var(--panel),var(--panel2,var(--panel)))}
 
 /* ===== 모달 (도시에 카드) ===== */
 .modal-bd{position:fixed;inset:0;z-index:100;background:rgba(4,5,11,.78);backdrop-filter:blur(7px);display:none;align-items:center;justify-content:center;padding:24px}
@@ -4639,7 +4641,10 @@ function paneForms(forms,key,eIdx,wi){
 function paneInfo(w){
   const cell=(k,v,full)=>(v&&v!=='—')?`<div class="cell${full?' full':''}"><div class="k">${k}</div><div class="v${full?' sum':''}">${esc(v)}</div></div>`:'';
   const heroesTxt=(typeof w.heroes==='string')?w.heroes:'';
+  /* 시리즈 타이틀 로고 (w.imgLogo, 선택) — 있을 때만 정보 탭 맨 위에 */
+  const logo=w.imgLogo?`<div class="cell full logo"><div class="k">로고</div><div class="v"><img class="wlogo" src="${iu(w.imgLogo)}" alt="${esc(w.ko||'')}" loading="lazy"></div></div>`:'';
   return `<div class="info-grid">
+    ${logo}
     ${cell('방영기간',w.year)}
     ${cell('포맷',w.format)}
     ${cell('주역',heroesTxt)}
