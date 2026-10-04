@@ -90,10 +90,10 @@
 
   /* character album */
   .album-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:16px; }
-  .album-card { overflow:hidden; border:1px solid var(--border); border-radius:18px; background:rgba(20,18,30,.84); transition:.2s ease; }
+  .album-card { overflow:hidden; align-self:start; border:1px solid var(--border); border-radius:18px; background:rgba(20,18,30,.84); transition:.2s ease; }
   .album-card:hover { transform:translateY(-2px); border-color:color-mix(in srgb, var(--accent) 65%, var(--border)); }
   .album-cover { position:relative; cursor:pointer; }
-  .album-cover img { display:block; width:100%; aspect-ratio:4/5; object-fit:cover; background:rgba(255,255,255,.04); }
+  .album-cover img { display:block; width:100%; height:auto; aspect-ratio:auto; object-fit:contain; background:rgba(255,255,255,.04); }
   .album-cover img.broken { object-fit:contain; padding:30px; opacity:.45; }
   .album-count { position:absolute; right:10px; top:10px; padding:6px 9px; border-radius:10px; border:1px solid rgba(255,255,255,.16); background:rgba(0,0,0,.62); font-size:11px; }
   .album-name { padding:11px 12px 13px; }
@@ -106,7 +106,7 @@
   .album-close { padding:6px 9px; font-size:11px; }
   .album-scenes { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:9px; }
   .scene-tile { overflow:hidden; border:1px solid var(--border); border-radius:12px; background:rgba(0,0,0,.15); }
-  .scene-tile img { display:block; width:100%; aspect-ratio:1/1.1; object-fit:cover; background:rgba(255,255,255,.03); }
+  .scene-tile img { display:block; width:100%; height:auto; aspect-ratio:auto; object-fit:contain; background:rgba(255,255,255,.03); }
   .scene-info { padding:7px 8px 8px; }
   .scene-title { font-size:11px; font-weight:800; overflow-wrap:anywhere; }
   .scene-code { margin-top:3px; font-size:10px; color:var(--muted); }
@@ -126,9 +126,9 @@
   .viewer-sub { margin-top:5px; color:var(--muted); font-size:12px; }
   .viewer-close { flex:0 0 auto; }
   .viewer-body { padding:18px 20px 20px; overflow:auto; }
-  .viewer-grid { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:12px; }
+  .viewer-grid { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:12px; align-items:start; }
   .viewer-item { overflow:hidden; border:1px solid var(--border); border-radius:14px; background:rgba(255,255,255,.04); }
-  .viewer-item img { display:block; width:100%; aspect-ratio:3/4; object-fit:cover; background:rgba(255,255,255,.03); }
+  .viewer-item img { display:block; width:100%; height:auto; aspect-ratio:auto; object-fit:contain; background:rgba(255,255,255,.03); }
   .viewer-info { padding:9px 10px 10px; }
   .viewer-scene { font-size:12px; font-weight:800; }
   .viewer-code { margin-top:4px; color:var(--muted); font-size:10px; }
@@ -170,6 +170,13 @@
   .empty-icon .ubw-star {
     width:58px;
     height:58px;
+  }
+
+
+  .viewer-item.wide { grid-column:span 2; }
+  .viewer-item.wide img { width:100%; height:auto; }
+  @media(max-width:560px) {
+    .viewer-item.wide { grid-column:span 2; }
   }
 
 </style>
@@ -623,6 +630,10 @@
       img.loading = 'lazy';
       img.alt = `${item.personLabel} / ${item.sceneLabel}`;
       img.src = item.url;
+      img.addEventListener('load', () => {
+        // 가로로 긴 원본 이미지는 두 칸을 사용해 원본 비율이 잘 보이도록 표시
+        if (img.naturalWidth > img.naturalHeight * 1.25) card.classList.add('wide');
+      }, {once:true});
       img.addEventListener('error', () => {
         img.src = makeBrokenThumb('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 300"><rect width="220" height="300" fill="#292637"/><text x="110" y="145" fill="#a39bb8" font-size="14" text-anchor="middle">이미지 없음</text></svg>');
       }, {once:true});
