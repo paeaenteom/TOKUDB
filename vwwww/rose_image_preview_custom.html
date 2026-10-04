@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>픽셀 테마 · 이미지 미리보기</title>
+<link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAABU0lEQVR42u2bSRKEIAxFxeL+V05vu61WpkwWL1sVkp+BH8DjQJCtpURNLCLyo0gpIbqcRECQx5uKOUVE8TL226A7MFrvWICyfQpUC69reOrfGNpzqAEgIuKRs9cU0ZiTVSBy7Y9eAYgAAAAAAACA3uo9yuVXegGNuXrHqD2DRbWqq4SpR3d6gWxt8PU76+grlgqs5rIGM2zZQQpkCvuIdDizG289Nu2wxtpv6XWt4nhnU80S3popMQIMKfAGT1umTNnB8CcgaIcBgCK4dxGsIy+/BZgR3ekGNajnG6jwUA1YaUGtwZjVhw0Rr2XQcg/PYuxqqWiGPUGI0GwRbG0keBXF1blb35ufC8ymg9dpFESoxxNepzRaMqIvd4QgQgAAAAAAAI7V/anCt55btN0QIS26a3GV/cnrqa7LXxXS+NuDP0aytMPeNNibDvPf4IEgyM7yAY0q5InOtzKzAAAAAElFTkSuQmCC">
+<style>
+  @font-face {
+    font-family: "DungGeunMo";
+    src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2107@1.1/DungGeunMo.woff") format("woff");
+    font-display: swap;
+  }
+  :root {
+    --accent: #c9a7ff;
+    --accent-2: #8b72d9;
+    --panel: rgba(24, 23, 35, .78);
+    --text: #f6f3ff;
+    --muted: #b9b4ca;
+    --border: rgba(255,255,255,.13);
+    --radius: 20px;
+    --blur: 16px;
+    --bg-overlay: .55;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; color: var(--text);
+    font-family: "DungGeunMo", "Courier New", monospace;
+    font-weight: 700;
+    letter-spacing: .02em;
+    text-shadow: .35px 0 currentColor, -.35px 0 currentColor;
+    background: #171522; background-image: linear-gradient(rgba(10,9,18,var(--bg-overlay)),rgba(10,9,18,var(--bg-overlay))), var(--user-bg);
+    background-size: cover; background-position: center; background-attachment: fixed;
+  }
+  body::before { content:""; position:fixed; inset:0; pointer-events:none; background:radial-gradient(ellipse at top, rgba(160,126,255,.12), transparent 55%); }
+  .app { position:relative; width:min(1180px, calc(100% - 28px)); margin:0 auto; padding:36px 0 56px; }
+  header { display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:22px; }
+  .brand { display:flex; align-items:center; gap:12px; }
+  .logo { display:grid; place-items:center; width:50px; height:50px; border-radius:15px; color:#20162f; background:var(--accent); font-size:23px; box-shadow:0 8px 28px color-mix(in srgb, var(--accent) 28%, transparent); }
+  h1 { font-size:clamp(24px,4vw,34px); margin:0; letter-spacing:-.04em; }
+  .subtitle { color:var(--muted); margin:5px 0 0; font-size:14px; }
+  button, input, select, textarea { font:inherit; }
+  button { border:1px solid var(--border); border-radius:12px; color:var(--text); background:rgba(255,255,255,.07); padding:10px 14px; cursor:pointer; transition:.18s ease; }
+  button:hover { border-color:var(--accent); transform:translateY(-1px); background:rgba(255,255,255,.11); }
+  button.primary { background:var(--accent); border-color:transparent; color:#241a33; font-weight:750; }
+  button.primary:hover { filter:brightness(1.07); }
+  .panel { background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); backdrop-filter:blur(var(--blur)); -webkit-backdrop-filter:blur(var(--blur)); box-shadow:0 18px 55px rgba(0,0,0,.16); }
+  .form-panel { padding:22px; }
+  .section-title { font-size:15px; font-weight:750; margin:0 0 14px; }
+  .fields { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
+  .field { min-width:0; }
+  .field.full { grid-column:1/-1; }
+  label { display:block; color:var(--muted); font-size:12px; font-weight:650; margin:0 0 7px; }
+  input[type="text"], input[type="url"], textarea, select {
+    width:100%; border:1px solid var(--border); border-radius:12px; padding:12px 13px; color:var(--text); background:rgba(0,0,0,.22); outline:none;
+  }
+  input:focus, textarea:focus, select:focus { border-color:var(--accent); box-shadow:0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent); }
+  input::placeholder, textarea::placeholder { color:#827d95; }
+  .hint { color:var(--muted); font-size:12px; margin-top:6px; line-height:1.5; }
+  .actions { display:flex; flex-wrap:wrap; gap:9px; margin-top:17px; }
+  details { margin-top:16px; border-top:1px solid var(--border); padding-top:14px; }
+  summary { cursor:pointer; color:var(--accent); font-size:14px; font-weight:700; }
+  .theme-fields { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; padding-top:16px; }
+  .color-control { display:flex; align-items:center; gap:10px; }
+  input[type="color"] { width:38px; height:36px; border:0; padding:0; border-radius:8px; background:transparent; cursor:pointer; }
+  input[type="range"] { width:100%; accent-color:var(--accent); }
+  .file-label { display:inline-flex; align-items:center; gap:8px; border:1px solid var(--border); border-radius:12px; padding:9px 12px; cursor:pointer; font-size:13px; }
+  .file-label input { display:none; }
+  .results-head { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; margin:24px 2px 14px; }
+  .count { color:var(--muted); font-size:13px; }
+  .count strong { color:var(--text); }
+  .gallery { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:14px; }
+  .tile { overflow:hidden; border-radius:16px; border:1px solid var(--border); background:rgba(20,18,30,.82); min-width:0; }
+  .tile img { display:block; width:100%; aspect-ratio:3/4; object-fit:cover; background:rgba(255,255,255,.04); }
+  .tile img.broken { object-fit:contain; padding:24px; opacity:.45; }
+  .tile-info { padding:10px 12px 12px; }
+  .tile-name { font-size:13px; font-weight:700; overflow-wrap:anywhere; }
+  .tile-sub { color:var(--muted); font-size:11px; margin-top:4px; overflow-wrap:anywhere; }
+  .tile-actions { display:flex; gap:6px; margin-top:9px; }
+  .tile-actions button { flex:1; padding:7px 8px; font-size:11px; }
+  .empty { grid-column:1/-1; text-align:center; padding:54px 20px; background:transparent; border:1px dashed rgba(255,255,255,.16); backdrop-filter:none; -webkit-backdrop-filter:none; box-shadow:none; }
+  .empty-icon { font-size:36px; margin-bottom:10px; }
+  .empty h2 { font-size:18px; margin:0 0 7px; }
+  .empty p { color:var(--muted); font-size:13px; margin:0; }
+  .more-row { text-align:center; margin-top:18px; }
+  .status { color:var(--muted); font-size:12px; min-height:18px; margin-top:12px; }
+  footer { text-align:center; color:var(--muted); font-size:11px; margin-top:28px; }
+  @media(max-width:850px) { .gallery { grid-template-columns:repeat(3,minmax(0,1fr)); } .theme-fields { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+  @media(max-width:560px) { .app { width:calc(100% - 20px); padding-top:22px; } header { align-items:flex-start; } header > button { padding:8px 10px; font-size:12px; } .form-panel { padding:15px; } .fields { grid-template-columns:1fr; } .field.full { grid-column:auto; } .gallery { grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px; } .theme-fields { grid-template-columns:1fr 1fr; } }
+
+  /* character album */
+  .album-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:16px; }
+  .album-card { overflow:hidden; border:1px solid var(--border); border-radius:18px; background:rgba(20,18,30,.84); transition:.2s ease; }
+  .album-card:hover { transform:translateY(-2px); border-color:color-mix(in srgb, var(--accent) 65%, var(--border)); }
+  .album-cover { position:relative; cursor:pointer; }
+  .album-cover img { display:block; width:100%; aspect-ratio:4/5; object-fit:cover; background:rgba(255,255,255,.04); }
+  .album-cover img.broken { object-fit:contain; padding:30px; opacity:.45; }
+  .album-count { position:absolute; right:10px; top:10px; padding:6px 9px; border-radius:10px; border:1px solid rgba(255,255,255,.16); background:rgba(0,0,0,.62); font-size:11px; }
+  .album-name { padding:11px 12px 13px; }
+  .album-title { font-size:15px; font-weight:800; overflow-wrap:anywhere; }
+  .album-sub { margin-top:4px; color:var(--muted); font-size:11px; }
+  .album-body { display:none; border-top:1px solid var(--border); padding:12px; background:rgba(0,0,0,.10); }
+  .album-card.open .album-body { display:block; }
+  .album-head { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px; }
+  .album-head span { color:var(--muted); font-size:11px; }
+  .album-close { padding:6px 9px; font-size:11px; }
+  .album-scenes { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:9px; }
+  .scene-tile { overflow:hidden; border:1px solid var(--border); border-radius:12px; background:rgba(0,0,0,.15); }
+  .scene-tile img { display:block; width:100%; aspect-ratio:1/1.1; object-fit:cover; background:rgba(255,255,255,.03); }
+  .scene-info { padding:7px 8px 8px; }
+  .scene-title { font-size:11px; font-weight:800; overflow-wrap:anywhere; }
+  .scene-code { margin-top:3px; font-size:10px; color:var(--muted); }
+  .scene-actions { display:flex; gap:5px; margin-top:6px; }
+  .scene-actions button { flex:1; padding:5px 6px; font-size:10px; }
+  .album-mode-note { color:var(--muted); font-size:12px; margin:-4px 0 14px; }
+  @media(max-width:850px) { .album-grid { grid-template-columns:repeat(3,minmax(0,1fr)); } }
+  @media(max-width:560px) { .album-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px; } .album-scenes { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+
+
+  .viewer-backdrop { position:fixed; inset:0; background:rgba(6,7,12,.78); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); z-index:1000; display:none; padding:20px; }
+  .viewer-backdrop.open { display:block; }
+  .viewer { width:min(1320px, 100%); height:min(92vh, 100%); margin:0 auto; border:1px solid var(--border); border-radius:24px; background:rgba(13,14,20,.84); display:flex; flex-direction:column; overflow:hidden; box-shadow:0 20px 80px rgba(0,0,0,.35); }
+  .viewer-top { display:flex; align-items:center; justify-content:space-between; gap:14px; padding:18px 20px; border-bottom:1px solid var(--border); }
+  .viewer-title-wrap { min-width:0; }
+  .viewer-title { font-size:22px; margin:0; }
+  .viewer-sub { margin-top:5px; color:var(--muted); font-size:12px; }
+  .viewer-close { flex:0 0 auto; }
+  .viewer-body { padding:18px 20px 20px; overflow:auto; }
+  .viewer-grid { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:12px; }
+  .viewer-item { overflow:hidden; border:1px solid var(--border); border-radius:14px; background:rgba(255,255,255,.04); }
+  .viewer-item img { display:block; width:100%; aspect-ratio:3/4; object-fit:cover; background:rgba(255,255,255,.03); }
+  .viewer-info { padding:9px 10px 10px; }
+  .viewer-scene { font-size:12px; font-weight:800; }
+  .viewer-code { margin-top:4px; color:var(--muted); font-size:10px; }
+  .viewer-actions { display:flex; gap:6px; margin-top:8px; }
+  .viewer-actions button { flex:1; padding:6px 7px; font-size:10px; }
+  @media(max-width:1100px){ .viewer-grid { grid-template-columns:repeat(4,minmax(0,1fr)); } }
+  @media(max-width:850px){ .viewer-grid { grid-template-columns:repeat(3,minmax(0,1fr)); } }
+  @media(max-width:560px){ .viewer-backdrop { padding:10px; } .viewer { height:94vh; border-radius:18px; } .viewer-top { padding:14px; } .viewer-body { padding:12px; } .viewer-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px; } .viewer-title { font-size:18px; } }
+
+
+  /* 스크롤은 가능하지만 드래그/스크롤 바는 표시하지 않음 */
+  html, body, *, *::before, *::after {
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+  }
+  html::-webkit-scrollbar, body::-webkit-scrollbar, *::-webkit-scrollbar {
+    width: 0 !important;
+    height: 0 !important;
+    display: none !important;
+    background: transparent !important;
+  }
+
+
+  .ubw-star {
+    display:inline-block;
+    width:1.35em;
+    height:1.35em;
+    object-fit:contain;
+    image-rendering:pixelated;
+    image-rendering:crisp-edges;
+    vertical-align:-0.22em;
+    flex:0 0 auto;
+  }
+  .logo .ubw-star {
+    width:36px;
+    height:36px;
+    vertical-align:middle;
+  }
+  .empty-icon .ubw-star {
+    width:58px;
+    height:58px;
+  }
+
+</style>
+</head>
+<body style="--user-bg: none">
+<div class="app">
+  <header>
+    <div class="brand"><div class="logo"><img class="ubw-star" src="data:image/png;base64,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" alt=""></div><div><h1>이미지 미리보기</h1><p class="subtitle">한글 이름과 코드를 입력하면 이미지 주소에 자동으로 배치됩니다.</p></div></div>
+    <button id="themeToggle" type="button" title="테마 설정으로 이동">✧ 테마 설정</button>
+  </header>
+
+  <section class="panel form-panel">
+    <h2 class="section-title"><img class="ubw-star" src="data:image/png;base64,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" alt=""> 이미지 주소 및 코드</h2>
+    <div class="fields">
+      <div class="field full">
+        <label for="template">템플릿 URL</label>
+        <input id="template" type="url" placeholder="https://example.com/{캐릭터}/{의상}/{상황}.webp">
+        <div class="hint">
+          같은 위치에 아래 표기 중 아무거나 사용할 수 있습니다.<br>
+          한국어: <code>{캐릭터}</code> <code>{의상}</code> <code>{상황}</code> ·
+          English: <code>{person}</code> <code>{outfit}</code> <code>{scene}</code><br>
+          日本語: <code>{キャラクター}</code> <code>{衣装}</code> <code>{状況}</code> ·
+          中文: <code>{角色}</code> <code>{服装}</code> <code>{场景}</code>
+          <span style="opacity:.72">（繁體도 <code>{服裝}</code> <code>{場景}</code> 지원）</span>
+        </div>
+      </div>
+      <div class="field">
+        <label for="people">인물 코드 / 한글 이름</label>
+        <input id="people" type="text" value="" placeholder="AY=아야,SH=시호,HM=히메">
+
+        <div class="hint">쉼표로 구분하세요. <code>AY=아야</code>처럼 입력하면 URL에는 AY, 화면에는 아야로 표시됩니다. <code>AY,SH</code>, <code>AA..AQ</code>, <code>a1..3</code>도 지원합니다.</div>
+      </div>
+      <div class="field">
+        <label for="outfits">의상 코드 / 한글 이름</label>
+        <input id="outfits" type="text" value="" placeholder="3=기본 의상,4=전투복">
+
+      </div>
+      <div class="field">
+        <label for="scenes">상황 코드 / 한글 이름</label>
+        <input id="scenes" type="text" value="" placeholder="1=대기,2=걷기,3=공격 또는 1..74">
+        <div class="hint">예: <code>1=대기,2=걷기,3=공격</code> 또는 <code>1..74</code> · <code>1..102</code>는 1부터, <code>01..102</code>는 01부터 시작하며 입력한 0만 유지</div>
+      </div>
+      <div class="field">
+        <label for="mapping">인물 코드 매핑 (선택)</label>
+        <textarea id="mapping" rows="2" placeholder="a1=이름 | 설명&#10;b1=다른 이름"></textarea>
+      </div>
+    </div>
+    <div class="actions">
+      <button class="primary" id="loadBtn"><img class="ubw-star" src="data:image/png;base64,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" alt=""> 확인</button>
+      <button id="shareBtn">공유 링크 복사</button>
+      <button id="exampleBtn">예시 불러오기</button>
+      <button id="resetBtn">초기화</button>
+    </div>
+    <div class="status" id="status" role="status"></div>
+
+    <details id="themeSettings">
+      <summary>✧ 테마 및 배경 커스터마이즈</summary>
+      <div class="theme-fields">
+        <div class="field">
+          <label for="accent">포인트 색상</label>
+          <div class="color-control"><input type="color" id="accent" value="#c9a7ff"><span class="hint">버튼과 강조 색</span></div>
+        </div>
+        <div class="field">
+          <label for="panelColor">패널 색상</label>
+          <div class="color-control"><input type="color" id="panelColor" value="#181723"><span class="hint">카드/입력 영역</span></div>
+        </div>
+        <div class="field">
+          <label for="textColor">글자 색상</label>
+          <div class="color-control"><input type="color" id="textColor" value="#f6f3ff"><span class="hint">전체 글자</span></div>
+        </div>
+        <div class="field full">
+          <label for="bgUrl">배경 이미지 URL</label>
+          <input id="bgUrl" type="url" placeholder="https://example.com/background.jpg">
+          <div class="hint">이미지 주소를 넣으면 배경에 적용됩니다. 외부 이미지 호스팅의 직접 이미지 URL을 사용하세요.</div>
+        </div>
+        <div class="field">
+          <label>내 컴퓨터에서 배경 선택</label>
+          <label class="file-label">＋ 이미지 파일 선택<input id="bgFile" type="file" accept="image/*"></label>
+        </div>
+        <div class="field">
+          <label for="overlay">배경 어둡기 <span id="overlayValue">55%</span></label>
+          <input id="overlay" type="range" min="0" max="90" value="55">
+        </div>
+        <div class="field">
+          <label for="blur">유리 효과 <span id="blurValue">16px</span></label>
+          <input id="blur" type="range" min="0" max="28" value="16">
+        </div>
+        <div class="field">
+          <label for="roundness">모서리 둥글기 <span id="roundValue">20px</span></label>
+          <input id="roundness" type="range" min="0" max="32" value="20">
+        </div>
+        <div class="field">
+          <label for="columns">갤러리 열 수</label>
+          <select id="columns"><option value="2">2열</option><option value="3">3열</option><option value="4" selected>4열</option><option value="5">5열</option><option value="6">6열</option></select>
+        </div>
+        <div class="field">
+          <label>&nbsp;</label>
+          <button id="saveThemeBtn" type="button">테마 저장</button>
+          <button id="clearBgBtn" type="button">배경 지우기</button>
+        </div>
+      </div>
+    </details>
+  </section>
+
+  <div class="results-head">
+    <div class="count" id="count">총 <strong>0명 인물</strong> · 이미지 0장</div>
+    <div><label for="pageSize" style="display:inline-block;margin-right:8px">한 번에 보기</label><select id="pageSize" style="width:auto;padding:8px 10px"><option value="12">12장</option><option value="24" selected>24장</option><option value="48">48장</option><option value="96">96장</option></select></div>
+  </div>
+  <div class="album-mode-note">확인을 누르면 캐릭터별 앨범 표지가 먼저 표시됩니다. 없는 이미지는 자동으로 제외되고, 대표 이미지는 존재하는 코드 중 가장 앞 번호가 사용됩니다. 대표 이미지를 누르면 전체화면 앨범으로 열려서 상황 이미지 목록을 보기 편하게 확인할 수 있습니다.</div>
+  <section class="gallery" id="gallery">
+    <div class="panel empty"><div class="empty-icon"><img class="ubw-star" src="data:image/png;base64,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" alt=""></div><h2>아직 불러온 이미지가 없습니다.</h2><p>템플릿 URL과 코드를 입력한 뒤 확인을 눌러보세요.</p></div>
+  </section>
+  <div class="more-row"><button id="moreBtn" hidden>캐릭터 앨범 더 보기 ↓</button></div>
+  <footer>개인용 이미지 미리보기 · 설정과 테마는 이 브라우저에 저장할 수 있습니다.</footer>
+
+  <div class="viewer-backdrop" id="viewerBackdrop" aria-hidden="true">
+    <div class="viewer" role="dialog" aria-modal="true" aria-labelledby="viewerTitle">
+      <div class="viewer-top">
+        <div class="viewer-title-wrap">
+          <h2 class="viewer-title" id="viewerTitle">캐릭터 앨범</h2>
+          <div class="viewer-sub" id="viewerSub">상황 이미지</div>
+        </div>
+        <button class="viewer-close" id="viewerClose" type="button">닫기 ✕</button>
+      </div>
+      <div class="viewer-body">
+        <div class="viewer-grid" id="viewerGrid"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  let allItems = [], shown = 0, bgObjectUrl = null;
+  let albumPeople = [];
+
+  const defaults = {template:'', people:'', outfits:'', scenes:'', mapping:'', accent:'#c9a7ff', panelColor:'#181723', textColor:'#f6f3ff', bgUrl:'', overlay:55, blur:16, roundness:20, columns:4, pageSize:24};
+  function status(msg) { $('status').textContent = msg || ''; }
+
+  const BG_DB_NAME = 'RoseImagePreviewDB';
+  const BG_DB_STORE = 'themeAssets';
+  const BG_DB_KEY = 'backgroundImage';
+
+  function openThemeDB() {
+    return new Promise((resolve, reject) => {
+      const req = indexedDB.open(BG_DB_NAME, 1);
+      req.onupgradeneeded = () => {
+        const db = req.result;
+        if (!db.objectStoreNames.contains(BG_DB_STORE)) db.createObjectStore(BG_DB_STORE);
+      };
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+  }
+
+  async function saveBackgroundBlob(blob) {
+    const db = await openThemeDB();
+    await new Promise((resolve, reject) => {
+      const tx = db.transaction(BG_DB_STORE, 'readwrite');
+      tx.objectStore(BG_DB_STORE).put(blob, BG_DB_KEY);
+      tx.oncomplete = resolve;
+      tx.onerror = () => reject(tx.error);
+    });
+    db.close();
+  }
+
+  async function loadBackgroundBlob() {
+    try {
+      const db = await openThemeDB();
+      const blob = await new Promise((resolve, reject) => {
+        const tx = db.transaction(BG_DB_STORE, 'readonly');
+        const req = tx.objectStore(BG_DB_STORE).get(BG_DB_KEY);
+        req.onsuccess = () => resolve(req.result || null);
+        req.onerror = () => reject(req.error);
+      });
+      db.close();
+      return blob;
+    } catch {
+      return null;
+    }
+  }
+
+  async function clearBackgroundBlob() {
+    try {
+      const db = await openThemeDB();
+      await new Promise((resolve, reject) => {
+        const tx = db.transaction(BG_DB_STORE, 'readwrite');
+        tx.objectStore(BG_DB_STORE).delete(BG_DB_KEY);
+        tx.oncomplete = resolve;
+        tx.onerror = () => reject(tx.error);
+      });
+      db.close();
+    } catch {}
+  }
+
+  async function restoreSavedLocalBackground() {
+    const blob = await loadBackgroundBlob();
+    if (!blob) return false;
+    if (bgObjectUrl) URL.revokeObjectURL(bgObjectUrl);
+    bgObjectUrl = URL.createObjectURL(blob);
+    $('bgUrl').value = bgObjectUrl;
+    document.body.dataset.bgSource = 'local-file';
+    applyTheme();
+    return true;
+  }
+  function expandCodes(value) {
+    const result = [];
+
+    function lettersToNumber(text) {
+      let n = 0;
+      for (const ch of text.toUpperCase()) n = n * 26 + (ch.charCodeAt(0) - 64);
+      return n;
+    }
+
+    function numberToLetters(num) {
+      let out = '';
+      while (num > 0) {
+        num--;
+        out = String.fromCharCode(65 + (num % 26)) + out;
+        num = Math.floor(num / 26);
+      }
+      return out;
+    }
+
+    for (const raw of value.split(',').map(s=>s.trim()).filter(Boolean)) {
+      const numberRange = raw.match(/^(.*?)(-?\d+)\.\.(.*?)(-?\d+)$/);
+      if (numberRange && numberRange[1] === numberRange[3]) {
+        const startText = numberRange[2];
+        const endText = numberRange[4];
+        let a = Number(startText), b = Number(endText), step = a <= b ? 1 : -1;
+
+        const startDigits = startText.replace('-', '');
+
+        // 앞의 0은 시작 코드에 직접 적은 만큼만 유지
+        // 예:
+        // 1..102   -> 1, 2, 3 ... 102
+        // 01..102  -> 01, 02, 03 ... 102
+        // 001..102 -> 001, 002, 003 ... 102
+        const preservePadding = startDigits.length > 1 && startDigits.startsWith('0');
+        const width = preservePadding ? startDigits.length : 0;
+
+        for (let n=a; step>0 ? n<=b : n>=b; n+=step) {
+          let numberText;
+          if (preservePadding) {
+            const absText = String(Math.abs(n));
+            const padded = absText.length < width ? absText.padStart(width, '0') : absText;
+            numberText = n < 0 ? '-' + padded : padded;
+          } else {
+            numberText = String(n);
+          }
+          result.push(numberRange[1] + numberText);
+        }
+        continue;
+      }
+
+      // 영문 범위: AA..AQ -> AA, AB, AC ... AQ
+      const letterRange = raw.match(/^([A-Za-z]+)\.\.([A-Za-z]+)$/);
+      if (letterRange) {
+        const startText = letterRange[1].toUpperCase();
+        const endText = letterRange[2].toUpperCase();
+
+        if (startText.length !== endText.length) {
+          throw new Error('영문 범위는 시작과 끝의 글자 수를 같게 입력하세요. 예: AA..AQ');
+        }
+
+        const a = lettersToNumber(startText);
+        const b = lettersToNumber(endText);
+        const step = a <= b ? 1 : -1;
+
+        for (let n = a; step > 0 ? n <= b : n >= b; n += step) {
+          result.push(numberToLetters(n));
+        }
+        continue;
+      }
+
+      // 단일 코드는 그대로 유지
+      result.push(raw);
+    }
+    return [...new Set(result)];
+  }
+  function parseMapping() {
+    const map = {};
+    $('mapping').value.split('\n').forEach(line => {
+      const i = line.indexOf('=');
+      if (i < 1) return;
+      const code = line.slice(0,i).trim(), rest = line.slice(i+1).trim().split('|');
+      map[code] = {name:(rest[0]||code).trim(), desc:(rest[1]||'').trim()};
+    });
+    return map;
+  }
+  function expandNamedCodes(value) {
+    const codes = [], labels = {};
+    for (const raw of value.split(',').map(s=>s.trim()).filter(Boolean)) {
+      const i = raw.indexOf('=');
+      if (i > 0) {
+        const code = raw.slice(0,i).trim(), label = raw.slice(i+1).trim();
+        if (!code) continue;
+        codes.push(code);
+        labels[code] = label || code;
+      } else {
+        const expanded = expandCodes(raw);
+        expanded.forEach(code => codes.push(code));
+      }
+    }
+    return {codes:[...new Set(codes)], labels};
+  }
+  function buildUrl(template, person, outfit, scene) {
+    const tokenGroups = {
+      person: ['{person}','{character}','{캐릭터}','{인물}','{キャラクター}','{人物}','{角色}'],
+      outfit: ['{outfit}','{costume}','{의상}','{옷}','{衣装}','{服装}','{服裝}'],
+      scene:  ['{scene}','{situation}','{상황}','{장면}','{状況}','{シーン}','{场景}','{場景}','{情境}']
+    };
+    const hasTokens = Object.values(tokenGroups).flat().some(token => template.includes(token));
+    if (hasTokens) {
+      let url = template;
+      const values = {
+        person: encodeURIComponent(person),
+        outfit: encodeURIComponent(outfit),
+        scene: encodeURIComponent(scene)
+      };
+      for (const [key, aliases] of Object.entries(tokenGroups)) {
+        for (const alias of aliases) url = url.split(alias).join(values[key]);
+      }
+      return url;
+    }
+    // 변수가 없는 경우 기존 경로형 방식 유지
+    const clean = template.replace(/\/+$/,'');
+    const extMatch = clean.match(/(\.[a-zA-Z0-9]{2,5})(?:\?.*)?$/);
+    const ext = extMatch ? extMatch[1] : '.webp';
+    const base = extMatch ? clean.slice(0, -ext.length) : clean;
+    return `${base}/${encodeURIComponent(person)}/${encodeURIComponent(outfit)}/${encodeURIComponent(scene)}${ext}`;
+  }
+
+  function compareCode(a, b) {
+    const ax = String(a ?? '');
+    const bx = String(b ?? '');
+    const aNum = /^-?\d+$/.test(ax) ? Number(ax) : null;
+    const bNum = /^-?\d+$/.test(bx) ? Number(bx) : null;
+
+    if (aNum !== null && bNum !== null && aNum !== bNum) return aNum - bNum;
+    if (aNum !== null && bNum !== null) {
+      if (ax.length !== bx.length) return ax.length - bx.length;
+      return ax.localeCompare(bx, undefined, {numeric:true, sensitivity:'base'});
+    }
+    return ax.localeCompare(bx, undefined, {numeric:true, sensitivity:'base'});
+  }
+
+  function sortItemsForDisplay(items) {
+    return [...items].sort((a, b) => {
+      const sceneCmp = compareCode(a.scene, b.scene);
+      if (sceneCmp !== 0) return sceneCmp;
+      const outfitCmp = compareCode(a.outfit || '', b.outfit || '');
+      if (outfitCmp !== 0) return outfitCmp;
+      return compareCode(a.person, b.person);
+    });
+  }
+
+  function checkImageExists(url, timeout = 8000) {
+    return new Promise(resolve => {
+      const img = new Image();
+      let done = false;
+      const finish = ok => {
+        if (done) return;
+        done = true;
+        clearTimeout(timer);
+        img.onload = null;
+        img.onerror = null;
+        resolve(ok);
+      };
+      const timer = setTimeout(() => finish(false), timeout);
+      img.onload = () => finish(true);
+      img.onerror = () => finish(false);
+      img.src = url;
+    });
+  }
+
+  async function filterExistingItems(items) {
+    const valid = [];
+    const concurrency = 12;
+    let index = 0;
+    let checked = 0;
+
+    async function worker() {
+      while (index < items.length) {
+        const currentIndex = index++;
+        const item = items[currentIndex];
+        const ok = await checkImageExists(item.url);
+        checked++;
+        if (checked === 1 || checked % 20 === 0 || checked === items.length) {
+          status(`이미지 확인 중... ${checked}/${items.length}`);
+        }
+        if (ok) valid.push(item);
+      }
+    }
+
+    const workers = [];
+    const workerCount = Math.min(concurrency, items.length || 1);
+    for (let i = 0; i < workerCount; i++) workers.push(worker());
+    await Promise.all(workers);
+    return valid;
+  }
+  function makeBrokenThumb(svgText) {
+    return 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svgText);
+  }
+  function openAlbumViewer(items) {
+    const backdrop = $('viewerBackdrop');
+    const grid = $('viewerGrid');
+    const title = $('viewerTitle');
+    const sub = $('viewerSub');
+    if (!items?.length) return;
+
+    title.textContent = items[0].mapping ? items[0].mapping.name : items[0].personLabel;
+    sub.textContent = `${items.length}개의 존재하는 상황 이미지 · 코드 ${items[0].person}`;
+    grid.innerHTML = '';
+
+    items.forEach(item => {
+      const card = document.createElement('div');
+      card.className = 'viewer-item';
+
+      const img = document.createElement('img');
+      img.loading = 'lazy';
+      img.alt = `${item.personLabel} / ${item.sceneLabel}`;
+      img.src = item.url;
+      img.addEventListener('error', () => {
+        img.src = makeBrokenThumb('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 300"><rect width="220" height="300" fill="#292637"/><text x="110" y="145" fill="#a39bb8" font-size="14" text-anchor="middle">이미지 없음</text></svg>');
+      }, {once:true});
+
+      const info = document.createElement('div');
+      info.className = 'viewer-info';
+
+      const scene = document.createElement('div');
+      scene.className = 'viewer-scene';
+      scene.textContent = item.sceneLabel;
+
+      const code = document.createElement('div');
+      code.className = 'viewer-code';
+      code.textContent = `인물 ${item.person} · 의상 ${item.outfit || '-'} · 상황 ${item.scene}`;
+
+      const actions = document.createElement('div');
+      actions.className = 'viewer-actions';
+      const open = document.createElement('button');
+      open.type = 'button';
+      open.textContent = '이미지 열기';
+      open.onclick = () => window.open(item.url, '_blank', 'noopener');
+      const copy = document.createElement('button');
+      copy.type = 'button';
+      copy.textContent = '주소 복사';
+      copy.onclick = async () => {
+        try {
+          await navigator.clipboard.writeText(item.url);
+          status('이미지 주소를 복사했습니다.');
+        } catch {
+          prompt('이미지 주소를 복사하세요:', item.url);
+        }
+      };
+      actions.append(open, copy);
+      info.append(scene, code, actions);
+      card.append(img, info);
+      grid.append(card);
+    });
+
+    backdrop.classList.add('open');
+    backdrop.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeAlbumViewer() {
+    $('viewerBackdrop').classList.remove('open');
+    $('viewerBackdrop').setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
+  async function loadImages() {
+    try {
+      const template = $('template').value.trim();
+      if (!template) { status('먼저 템플릿 URL을 입력하세요.'); $('template').focus(); return; }
+      const peopleData = expandNamedCodes($('people').value);
+      const outfitData = $('outfits').value.trim() ? expandNamedCodes($('outfits').value) : {codes:[''],labels:{}};
+      const sceneData = expandNamedCodes($('scenes').value);
+      const people = peopleData.codes, outfits = outfitData.codes, scenes = sceneData.codes;
+      if (!people.length || !scenes.length) { status('인물 코드와 상황 코드를 하나 이상 입력하세요.'); return; }
+      const mappings = parseMapping();
+      const candidateItems = [];
+      for (const p of people) for (const o of outfits) for (const s of scenes) {
+        candidateItems.push({
+          person:p, outfit:o, scene:s,
+          personLabel:peopleData.labels[p] || p,
+          outfitLabel:outfitData.labels[o] || o,
+          sceneLabel:sceneData.labels[s] || s,
+          url:buildUrl(template,p,o,s), mapping:mappings[p]
+        });
+      }
+
+      $('gallery').className = 'gallery';
+      $('gallery').innerHTML = '<div class="empty"><div class="empty-icon"><img class="ubw-star" src="' + document.querySelector('.logo .ubw-star').src + '" alt=""></div><h2>이미지 확인 중입니다.</h2><p>존재하지 않는 이미지는 자동으로 제외됩니다.</p></div>';
+      $('count').innerHTML = `총 <strong>${people.length}명 캐릭터</strong> · 확인 대상 ${candidateItems.length}장`;
+
+      const existingItems = await filterExistingItems(candidateItems);
+
+      const grouped = new Map();
+      existingItems.forEach(item => {
+        if (!grouped.has(item.person)) grouped.set(item.person, []);
+        grouped.get(item.person).push(item);
+      });
+
+      allItems = [];
+      for (const [person, items] of grouped.entries()) {
+        const sorted = sortItemsForDisplay(items);
+        allItems.push(...sorted);
+      }
+
+      const visibleCharacterCount = grouped.size;
+      shown = 0;
+      $('gallery').innerHTML = '';
+      renderMore();
+      $('count').innerHTML = `총 <strong>${visibleCharacterCount}명 캐릭터</strong> · 존재하는 상황 이미지 ${allItems.length}장`;
+      status(allItems.length
+        ? `존재하는 이미지 ${allItems.length}장만 표시합니다. 없는 코드는 자동으로 숨겼습니다.`
+        : '표시할 수 있는 이미지가 없습니다. URL 또는 코드를 확인해주세요.');
+    } catch(e) { status(e.message || '코드를 확인해주세요.'); }
+  }
+  function renderMore() {
+    const gallery = $('gallery');
+    gallery.className = 'album-grid';
+    const peopleMap = new Map();
+    allItems.forEach(item => {
+      if (!peopleMap.has(item.person)) peopleMap.set(item.person, []);
+      peopleMap.get(item.person).push(item);
+    });
+    albumPeople = [...peopleMap.entries()];
+    const amount = Number($('pageSize').value) || 24;
+    const endIndex = Math.min(shown + amount, albumPeople.length);
+
+    for (; shown < endIndex; shown++) {
+      const [person, items] = albumPeople[shown];
+      const card = document.createElement('article');
+      card.className = 'album-card';
+
+      const coverWrap = document.createElement('div');
+      coverWrap.className = 'album-cover';
+      coverWrap.title = '클릭해서 전체화면 앨범 열기';
+
+      const cover = items[0];
+      const img = document.createElement('img');
+      img.loading = 'lazy';
+      img.alt = `${cover.personLabel} 대표 이미지`;
+      img.src = cover.url;
+      img.addEventListener('error', () => {
+        img.classList.add('broken');
+        img.alt = '대표 이미지를 불러올 수 없습니다';
+        img.src = makeBrokenThumb('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 380"><rect width="300" height="380" fill="#292637"/><text x="150" y="180" fill="#a39bb8" font-size="18" text-anchor="middle">이미지 없음</text><text x="150" y="210" fill="#a39bb8" font-size="12" text-anchor="middle">대표 이미지 URL 확인</text></svg>');
+      }, {once:true});
+
+      const badge = document.createElement('div');
+      badge.className = 'album-count';
+      badge.textContent = `상황 ${items.length}장`;
+
+      coverWrap.append(img, badge);
+
+      const name = document.createElement('div');
+      name.className = 'album-name';
+      const title = document.createElement('div');
+      title.className = 'album-title';
+      title.textContent = items[0].mapping ? items[0].mapping.name : items[0].personLabel;
+      const sub = document.createElement('div');
+      sub.className = 'album-sub';
+      sub.textContent = `${items[0].person} · 대표 코드 ${items[0].scene} · 클릭하면 전체화면으로 열림`;
+      name.append(title, sub);
+
+      coverWrap.addEventListener('click', () => openAlbumViewer(items));
+      card.append(coverWrap, name);
+      gallery.append(card);
+    }
+
+    $('moreBtn').hidden = shown >= albumPeople.length || !albumPeople.length;
+    if (!albumPeople.length) {
+      gallery.className = 'gallery';
+      gallery.innerHTML = '<div class="empty"><div class="empty-icon"><img class="ubw-star" src="data:image/png;base64,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" alt=""></div><h2>아직 불러온 이미지가 없습니다.</h2><p>템플릿 URL과 코드를 입력한 뒤 확인을 눌러보세요.</p></div>';
+    }
+  }
+
+  function applyTheme() {
+    const root = document.documentElement.style;
+    root.setProperty('--accent',$('accent').value);
+    root.setProperty('--accent-2',$('accent').value);
+    root.setProperty('--text',$('textColor').value);
+    const p = $('panelColor').value;
+    const r=parseInt(p.slice(1,3),16), g=parseInt(p.slice(3,5),16), b=parseInt(p.slice(5,7),16);
+    root.setProperty('--panelColor',p);
+    root.setProperty('--panel',`rgba(${r},${g},${b},.80)`);
+    root.setProperty('--overlay',Number($('overlay').value)/100);
+    root.setProperty('--blur',$('blur').value+'px');
+    root.setProperty('--radius',$('roundness').value+'px');
+    root.setProperty('--bg-overlay',Number($('overlay').value)/100);
+    $('overlayValue').textContent=$('overlay').value+'%';
+    $('blurValue').textContent=$('blur').value+'px';
+    $('roundValue').textContent=$('roundness').value+'px';
+    $('gallery').style.gridTemplateColumns=`repeat(${Number($('columns').value)},minmax(0,1fr))`;
+    document.body.style.backgroundImage = $('bgUrl').value.trim()
+      ? `linear-gradient(rgba(10,9,18,${Number($('overlay').value)/100}),rgba(10,9,18,${Number($('overlay').value)/100})), url("${$('bgUrl').value.trim().replace(/["\\]/g,'')}")`
+      : `linear-gradient(rgba(10,9,18,${Number($('overlay').value)/100}),rgba(10,9,18,${Number($('overlay').value)/100})), none`;
+  }
+  function saveTheme() {
+    const data={};
+    // 테마/표시 설정만 저장합니다.
+    // 템플릿 URL, 인물/의상/상황 코드, 매핑 내용은 저장하지 않습니다.
+    ['accent','panelColor','textColor','overlay','blur','roundness','columns','pageSize'].forEach(k=>data[k]=$(k).value);
+    data.bgSource = document.body.dataset.bgSource || ($('bgUrl').value.trim() ? 'url' : 'none');
+    data.bgUrl = data.bgSource === 'url' ? $('bgUrl').value.trim() : '';
+    try {
+      localStorage.setItem('roseImagePreviewSettings',JSON.stringify(data));
+      status(data.bgSource === 'local-file'
+        ? '테마와 배경 이미지만 저장했습니다. 링크와 코드는 저장하지 않습니다.'
+        : '테마 설정만 저장했습니다. 링크와 코드는 저장하지 않습니다.');
+    } catch {
+      status('브라우저 저장을 사용할 수 없습니다.');
+    }
+  }
+  async function readTheme() {
+    let data = null;
+    try {
+      data=JSON.parse(localStorage.getItem('roseImagePreviewSettings')||'null');
+      if(data) {
+        // 구버전 저장 데이터에 링크/코드가 남아 있어도 읽지 않습니다.
+        const themeKeys = ['accent','panelColor','textColor','overlay','blur','roundness','columns','pageSize'];
+        themeKeys.forEach(k=>{
+          if($(k) && data[k] !== undefined) $(k).value=data[k];
+        });
+
+        if (data.bgSource === 'url' && data.bgUrl) {
+          $('bgUrl').value = data.bgUrl;
+          document.body.dataset.bgSource = 'url';
+        } else if (data.bgSource === 'local-file') {
+          document.body.dataset.bgSource = 'local-file';
+          const restored = await restoreSavedLocalBackground();
+          if (!restored) document.body.dataset.bgSource = 'none';
+        } else {
+          $('bgUrl').value = '';
+          document.body.dataset.bgSource = 'none';
+        }
+      }
+    } catch {}
+    applyTheme();
+  }
+  function example() {
+    $('template').value='https://example.com/{캐릭터}/{의상}/{상황}.webp';
+    $('people').value='AY=아야,SH=시호,HM=히메,CH=치하야'; $('outfits').value='3=기본 의상'; $('scenes').value='1=대기,2=걷기,3=공격,4=피격,5=특수';
+    $('mapping').value='AY=아야 | 첫 번째 예시\\nSH=시호 | 두 번째 예시';
+    status('예시 설정을 불러왔습니다. 실제 이미지가 있는 URL로 바꿔주세요.');
+  }
+  async function reset() {
+    Object.keys(defaults).forEach(k=>{if($(k)) $(k).value=defaults[k];});
+    if(bgObjectUrl){URL.revokeObjectURL(bgObjectUrl);bgObjectUrl=null;}
+    document.body.dataset.bgSource = 'none';
+    $('bgFile').value='';
+    await clearBackgroundBlob();
+    try { localStorage.removeItem('roseImagePreviewSettings'); } catch {}
+    applyTheme(); allItems=[]; shown=0; $('gallery').innerHTML=''; renderMore();
+    $('count').innerHTML='총 <strong>0명 캐릭터</strong> · 상황 이미지 0장'; status('설정과 저장된 배경을 초기화했습니다.');
+  }
+  $('loadBtn').addEventListener('click',loadImages);
+  $('moreBtn').addEventListener('click',renderMore);
+  $('pageSize').addEventListener('change',()=>{if(allItems.length){shown=0;$('gallery').innerHTML='';renderMore();}});
+  $('exampleBtn').addEventListener('click',example);
+  $('resetBtn').addEventListener('click',reset);
+  $('themeToggle').addEventListener('click',()=>{$('themeSettings').open=true;$('themeSettings').scrollIntoView({behavior:'smooth',block:'center'});});
+  $('viewerClose').addEventListener('click', closeAlbumViewer);
+  $('viewerBackdrop').addEventListener('click', (e) => { if (e.target === $('viewerBackdrop')) closeAlbumViewer(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && $('viewerBackdrop').classList.contains('open')) closeAlbumViewer(); });
+
+  ['accent','panelColor','textColor','overlay','blur','roundness','columns'].forEach(id=>$(id).addEventListener('input',applyTheme));
+  $('bgUrl').addEventListener('input',()=>{
+    if (!$('bgUrl').value.startsWith('blob:')) document.body.dataset.bgSource = $('bgUrl').value.trim() ? 'url' : 'none';
+    applyTheme();
+  });
+  $('saveThemeBtn').addEventListener('click',saveTheme);
+  $('clearBgBtn').addEventListener('click',async()=>{ 
+    $('bgUrl').value='';
+    document.body.dataset.bgSource = 'none';
+    if(bgObjectUrl){URL.revokeObjectURL(bgObjectUrl);bgObjectUrl=null;}
+    $('bgFile').value='';
+    await clearBackgroundBlob();
+    applyTheme();
+    saveTheme();
+    status('저장된 배경 이미지까지 지웠습니다.');
+  });
+  $('bgFile').addEventListener('change',async e=>{
+    const file=e.target.files?.[0]; if(!file)return;
+    try {
+      await saveBackgroundBlob(file);
+      if(bgObjectUrl) URL.revokeObjectURL(bgObjectUrl);
+      bgObjectUrl=URL.createObjectURL(file);
+      $('bgUrl').value=bgObjectUrl;
+      document.body.dataset.bgSource = 'local-file';
+      applyTheme();
+      saveTheme();
+      status('선택한 배경 이미지를 저장했습니다. 다음에 이 HTML을 다시 열어도 같은 브라우저에서는 자동으로 복원됩니다.');
+    } catch {
+      status('배경 이미지를 저장하지 못했습니다. 브라우저 저장 권한이나 저장 공간을 확인해주세요.');
+    }
+  });
+  $('shareBtn').addEventListener('click',async()=>{
+    const params=new URLSearchParams();
+    ['template','people','outfits','scenes','mapping','accent','panelColor','textColor','bgUrl','overlay','blur','roundness','columns','pageSize'].forEach(k=>{if($(k).value!=='')params.set(k,$(k).value);});
+    const link=location.href.split('?')[0]+'?'+params.toString();
+    try { await navigator.clipboard.writeText(link); status('현재 설정이 포함된 공유 링크를 복사했습니다.'); }
+    catch { prompt('공유 링크를 복사하세요:',link); }
+  });
+  const params=new URLSearchParams(location.search);
+  (async()=>{
+    if([...params.keys()].length) {
+      [...params.keys()].forEach(k=>{if($(k))$(k).value=params.get(k);});
+      document.body.dataset.bgSource = $('bgUrl').value.trim() ? 'url' : 'none';
+      applyTheme();
+    } else {
+      await readTheme();
+    }
+    if(params.get('template')) loadImages();
+  })();
+})();
+</script>
+</body>
+</html>
