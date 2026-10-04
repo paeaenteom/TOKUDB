@@ -186,7 +186,7 @@
     <div class="fields">
       <div class="field full">
         <label for="template">템플릿 URL</label>
-        <input id="template" type="url" placeholder="https://example.com/{캐릭터}/{의상}/{상황}.webp">
+        <input id="template" type="url" placeholder="https://example.com/{캐릭터}/{의상}/{상황}">
         <div class="hint">
           같은 위치에 아래 표기 중 아무거나 사용할 수 있습니다.<br>
           한국어: <code>{캐릭터}</code> <code>{의상}</code> <code>{상황}</code> ·
@@ -195,6 +195,31 @@
           中文: <code>{角色}</code> <code>{服装}</code> <code>{场景}</code>
           <span style="opacity:.72">（繁體도 <code>{服裝}</code> <code>{場景}</code> 지원）</span>
         </div>
+      </div>
+
+      <div class="field">
+        <label for="suffixPreset">파일 확장자 / 뒷수식어</label>
+        <select id="suffixPreset">
+          <option value="" selected>없음 (공백)</option>
+          <option value=".png">.png</option>
+          <option value=".jpg">.jpg</option>
+          <option value=".jpeg">.jpeg</option>
+          <option value=".webp">.webp</option>
+          <option value=".gif">.gif</option>
+          <option value=".PNG">.PNG</option>
+          <option value=".JPG">.JPG</option>
+          <option value=".JPEG">.JPEG</option>
+          <option value=".WEBP">.WEBP</option>
+          <option value=".GIF">.GIF</option>
+          <option value="__custom__">직접 입력</option>
+        </select>
+        <div class="hint"><code>{상황}</code> 뒤에 붙일 값을 고릅니다. 확장자가 없으면 <b>없음 (공백)</b>을 선택하세요.</div>
+      </div>
+
+      <div class="field" id="suffixCustomWrap" hidden>
+        <label for="suffixCustom">뒷수식어 직접 입력</label>
+        <input id="suffixCustom" type="text" placeholder="예: .avif / _thumb.png / ?raw=1">
+        <div class="hint">입력한 문자열을 URL 맨 뒤에 그대로 붙입니다.</div>
       </div>
       <div class="field">
         <label for="people">인물 코드 / 한글 이름</label>
@@ -307,7 +332,7 @@
   let allItems = [], shown = 0, bgObjectUrl = null;
   let albumPeople = [];
 
-  const defaults = {template:'', people:'', outfits:'', scenes:'', mapping:'', accent:'#c9a7ff', panelColor:'#181723', textColor:'#f6f3ff', bgUrl:'', overlay:55, blur:16, roundness:20, columns:4, pageSize:24};
+  const defaults = {template:'', suffixPreset:'', suffixCustom:'', people:'', outfits:'', scenes:'', mapping:'', accent:'#c9a7ff', panelColor:'#181723', textColor:'#f6f3ff', bgUrl:'', overlay:55, blur:16, roundness:20, columns:4, pageSize:24};
   function status(msg) { $('status').textContent = msg || ''; }
 
   const BG_DB_NAME = 'RoseImagePreviewDB';
@@ -477,15 +502,21 @@
     }
     return {codes:[...new Set(codes)], labels};
   }
-  function buildUrl(template, person, outfit, scene) {
+  function getSelectedSuffix() {
+    const preset = $('suffixPreset').value;
+    return preset === '__custom__' ? $('suffixCustom').value : preset;
+  }
+
+  function buildUrl(template, person, outfit, scene, suffix = '') {
     const tokenGroups = {
       person: ['{person}','{character}','{캐릭터}','{인물}','{キャラクター}','{人物}','{角色}'],
       outfit: ['{outfit}','{costume}','{의상}','{옷}','{衣装}','{服装}','{服裝}'],
       scene:  ['{scene}','{situation}','{상황}','{장면}','{状況}','{シーン}','{场景}','{場景}','{情境}']
     };
     const hasTokens = Object.values(tokenGroups).flat().some(token => template.includes(token));
+    let url = template;
+
     if (hasTokens) {
-      let url = template;
       const values = {
         person: encodeURIComponent(person),
         outfit: encodeURIComponent(outfit),
@@ -494,14 +525,12 @@
       for (const [key, aliases] of Object.entries(tokenGroups)) {
         for (const alias of aliases) url = url.split(alias).join(values[key]);
       }
-      return url;
+      return url + suffix;
     }
-    // 변수가 없는 경우 기존 경로형 방식 유지
+
     const clean = template.replace(/\/+$/,'');
-    const extMatch = clean.match(/(\.[a-zA-Z0-9]{2,5})(?:\?.*)?$/);
-    const ext = extMatch ? extMatch[1] : '.webp';
-    const base = extMatch ? clean.slice(0, -ext.length) : clean;
-    return `${base}/${encodeURIComponent(person)}/${encodeURIComponent(outfit)}/${encodeURIComponent(scene)}${ext}`;
+    const parts = [person, outfit, scene].filter(v => v !== '').map(encodeURIComponent);
+    return clean + (parts.length ? '/' + parts.join('/') : '') + suffix;
   }
 
   function compareCode(a, b) {
@@ -651,6 +680,7 @@
       const people = peopleData.codes, outfits = outfitData.codes, scenes = sceneData.codes;
       if (!people.length || !scenes.length) { status('인물 코드와 상황 코드를 하나 이상 입력하세요.'); return; }
       const mappings = parseMapping();
+      const suffix = getSelectedSuffix();
       const candidateItems = [];
       for (const p of people) for (const o of outfits) for (const s of scenes) {
         candidateItems.push({
@@ -658,7 +688,7 @@
           personLabel:peopleData.labels[p] || p,
           outfitLabel:outfitData.labels[o] || o,
           sceneLabel:sceneData.labels[s] || s,
-          url:buildUrl(template,p,o,s), mapping:mappings[p]
+          url:buildUrl(template,p,o,s,suffix), mapping:mappings[p]
         });
       }
 
@@ -814,7 +844,7 @@
     applyTheme();
   }
   function example() {
-    $('template').value='https://example.com/{캐릭터}/{의상}/{상황}.webp';
+    $('template').value='https://example.com/{캐릭터}/{의상}/{상황}'; $('suffixPreset').value='.webp'; $('suffixCustom').value=''; $('suffixCustomWrap').hidden=true;
     $('people').value='AY=아야,SH=시호,HM=히메,CH=치하야'; $('outfits').value='3=기본 의상'; $('scenes').value='1=대기,2=걷기,3=공격,4=피격,5=특수';
     $('mapping').value='AY=아야 | 첫 번째 예시\\nSH=시호 | 두 번째 예시';
     status('예시 설정을 불러왔습니다. 실제 이미지가 있는 URL로 바꿔주세요.');
@@ -824,6 +854,7 @@
     if(bgObjectUrl){URL.revokeObjectURL(bgObjectUrl);bgObjectUrl=null;}
     document.body.dataset.bgSource = 'none';
     $('bgFile').value='';
+    $('suffixCustomWrap').hidden = true;
     await clearBackgroundBlob();
     try { localStorage.removeItem('roseImagePreviewSettings'); } catch {}
     applyTheme(); allItems=[]; shown=0; $('gallery').innerHTML=''; renderMore();
@@ -834,6 +865,11 @@
   $('pageSize').addEventListener('change',()=>{if(allItems.length){shown=0;$('gallery').innerHTML='';renderMore();}});
   $('exampleBtn').addEventListener('click',example);
   $('resetBtn').addEventListener('click',reset);
+  $('suffixPreset').addEventListener('change',()=>{
+    const isCustom = $('suffixPreset').value === '__custom__';
+    $('suffixCustomWrap').hidden = !isCustom;
+    if (isCustom) $('suffixCustom').focus();
+  });
   $('themeToggle').addEventListener('click',()=>{$('themeSettings').open=true;$('themeSettings').scrollIntoView({behavior:'smooth',block:'center'});});
   $('viewerClose').addEventListener('click', closeAlbumViewer);
   $('viewerBackdrop').addEventListener('click', (e) => { if (e.target === $('viewerBackdrop')) closeAlbumViewer(); });
@@ -872,7 +908,7 @@
   });
   $('shareBtn').addEventListener('click',async()=>{
     const params=new URLSearchParams();
-    ['template','people','outfits','scenes','mapping','accent','panelColor','textColor','bgUrl','overlay','blur','roundness','columns','pageSize'].forEach(k=>{if($(k).value!=='')params.set(k,$(k).value);});
+    ['template','suffixPreset','suffixCustom','people','outfits','scenes','mapping','accent','panelColor','textColor','bgUrl','overlay','blur','roundness','columns','pageSize'].forEach(k=>{if($(k).value!=='')params.set(k,$(k).value);});
     const link=location.href.split('?')[0]+'?'+params.toString();
     try { await navigator.clipboard.writeText(link); status('현재 설정이 포함된 공유 링크를 복사했습니다.'); }
     catch { prompt('공유 링크를 복사하세요:',link); }
@@ -881,6 +917,7 @@
   (async()=>{
     if([...params.keys()].length) {
       [...params.keys()].forEach(k=>{if($(k))$(k).value=params.get(k);});
+      $('suffixCustomWrap').hidden = $('suffixPreset').value !== '__custom__';
       document.body.dataset.bgSource = $('bgUrl').value.trim() ? 'url' : 'none';
       applyTheme();
     } else {
