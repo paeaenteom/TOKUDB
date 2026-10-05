@@ -90,10 +90,10 @@
 
   /* character album */
   .album-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:16px; }
-  .album-card { overflow:hidden; align-self:start; border:1px solid var(--border); border-radius:18px; background:rgba(20,18,30,.84); transition:.2s ease; }
+  .album-card { overflow:hidden; border:1px solid var(--border); border-radius:18px; background:rgba(20,18,30,.84); transition:.2s ease; }
   .album-card:hover { transform:translateY(-2px); border-color:color-mix(in srgb, var(--accent) 65%, var(--border)); }
   .album-cover { position:relative; cursor:pointer; }
-  .album-cover img { display:block; width:100%; height:auto; aspect-ratio:auto; object-fit:contain; background:rgba(255,255,255,.04); }
+  .album-cover img { display:block; width:100%; aspect-ratio:4/5; object-fit:cover; background:rgba(255,255,255,.04); }
   .album-cover img.broken { object-fit:contain; padding:30px; opacity:.45; }
   .album-count { position:absolute; right:10px; top:10px; padding:6px 9px; border-radius:10px; border:1px solid rgba(255,255,255,.16); background:rgba(0,0,0,.62); font-size:11px; }
   .album-name { padding:11px 12px 13px; }
@@ -106,7 +106,7 @@
   .album-close { padding:6px 9px; font-size:11px; }
   .album-scenes { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:9px; }
   .scene-tile { overflow:hidden; border:1px solid var(--border); border-radius:12px; background:rgba(0,0,0,.15); }
-  .scene-tile img { display:block; width:100%; height:auto; aspect-ratio:auto; object-fit:contain; background:rgba(255,255,255,.03); }
+  .scene-tile img { display:block; width:100%; aspect-ratio:1/1.1; object-fit:cover; background:rgba(255,255,255,.03); }
   .scene-info { padding:7px 8px 8px; }
   .scene-title { font-size:11px; font-weight:800; overflow-wrap:anywhere; }
   .scene-code { margin-top:3px; font-size:10px; color:var(--muted); }
@@ -126,9 +126,9 @@
   .viewer-sub { margin-top:5px; color:var(--muted); font-size:12px; }
   .viewer-close { flex:0 0 auto; }
   .viewer-body { padding:18px 20px 20px; overflow:auto; }
-  .viewer-grid { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:12px; align-items:start; }
+  .viewer-grid { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:12px; }
   .viewer-item { overflow:hidden; border:1px solid var(--border); border-radius:14px; background:rgba(255,255,255,.04); }
-  .viewer-item img { display:block; width:100%; height:auto; aspect-ratio:auto; object-fit:contain; background:rgba(255,255,255,.03); }
+  .viewer-item img { display:block; width:100%; aspect-ratio:3/4; object-fit:cover; background:rgba(255,255,255,.03); }
   .viewer-info { padding:9px 10px 10px; }
   .viewer-scene { font-size:12px; font-weight:800; }
   .viewer-code { margin-top:4px; color:var(--muted); font-size:10px; }
@@ -151,6 +151,98 @@
     background: transparent !important;
   }
 
+  /* 앨범 상단 의상 선택 */
+  .viewer-tools {
+    margin-left:auto;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    min-width:0;
+  }
+  .viewer-outfit-wrap {
+    display:flex;
+    align-items:center;
+    gap:8px;
+    min-width:0;
+  }
+  .viewer-outfit-label {
+    color:var(--muted);
+    font-size:11px;
+    white-space:nowrap;
+  }
+  .viewer-outfits {
+    display:flex;
+    align-items:center;
+    gap:6px;
+    max-width:min(48vw, 560px);
+    overflow-x:auto;
+    padding:2px;
+    scrollbar-width:none !important;
+  }
+  .viewer-outfits::-webkit-scrollbar { display:none !important; }
+  .outfit-chip {
+    min-width:44px;
+    padding:8px 11px;
+    border-radius:999px;
+    border:1px solid var(--border);
+    background:rgba(255,255,255,.045);
+    color:var(--muted);
+    font-size:11px;
+    font-weight:800;
+    white-space:nowrap;
+    box-shadow:none;
+  }
+  .outfit-chip:hover {
+    transform:none;
+    color:var(--text);
+    border-color:color-mix(in srgb, var(--accent) 55%, var(--border));
+    background:color-mix(in srgb, var(--accent) 8%, rgba(255,255,255,.04));
+  }
+  .outfit-chip.active {
+    color:#241a33;
+    background:var(--accent);
+    border-color:var(--accent);
+    box-shadow:0 0 0 1px color-mix(in srgb, var(--accent) 30%, transparent),
+               0 5px 18px color-mix(in srgb, var(--accent) 16%, transparent);
+  }
+
+  /* 사이트 전용: 전체 페이지에서는 숨기고, 앨범 안에서만 보이는 슬림 스크롤바 */
+  .viewer-body {
+    scrollbar-width:thin !important;
+    scrollbar-color:color-mix(in srgb, var(--accent) 72%, transparent) rgba(255,255,255,.035) !important;
+    scrollbar-gutter:stable;
+  }
+  .viewer-body::-webkit-scrollbar {
+    display:block !important;
+    width:7px !important;
+    height:7px !important;
+    background:transparent !important;
+  }
+  .viewer-body::-webkit-scrollbar-track {
+    display:block !important;
+    background:rgba(255,255,255,.035) !important;
+    border-radius:999px !important;
+    margin:10px 0 !important;
+  }
+  .viewer-body::-webkit-scrollbar-thumb {
+    display:block !important;
+    background:color-mix(in srgb, var(--accent) 68%, rgba(255,255,255,.25)) !important;
+    border:2px solid transparent !important;
+    background-clip:padding-box !important;
+    border-radius:999px !important;
+  }
+  .viewer-body::-webkit-scrollbar-thumb:hover {
+    background:color-mix(in srgb, var(--accent) 90%, white) !important;
+    background-clip:padding-box !important;
+  }
+
+  @media(max-width:760px) {
+    .viewer-top { flex-wrap:wrap; }
+    .viewer-tools { width:100%; margin-left:0; order:3; }
+    .viewer-outfit-wrap { width:100%; }
+    .viewer-outfits { max-width:none; flex:1; }
+  }
+
 
   .ubw-star {
     display:inline-block;
@@ -170,13 +262,6 @@
   .empty-icon .ubw-star {
     width:58px;
     height:58px;
-  }
-
-
-  .viewer-item.wide { grid-column:span 2; }
-  .viewer-item.wide img { width:100%; height:auto; }
-  @media(max-width:560px) {
-    .viewer-item.wide { grid-column:span 2; }
   }
 
 </style>
@@ -232,7 +317,7 @@
         <label for="people">인물 코드 / 한글 이름</label>
         <input id="people" type="text" value="" placeholder="AY=아야,SH=시호,HM=히메">
 
-        <div class="hint">쉼표로 구분하세요. <code>AY=아야</code>처럼 입력하면 URL에는 AY, 화면에는 아야로 표시됩니다. <code>AY,SH</code>, <code>AA..AQ</code>, <code>a1..3</code>도 지원합니다.</div>
+        <div class="hint">쉼표로 구분하세요. <code>AY=아야</code>처럼 입력하면 URL에는 AY, 화면에는 아야로 표시됩니다. <code>AY,SH</code>, <code>AA..AQ</code>, <code>A3..A9</code>, <code>A3..9</code>, <code>a1..3</code>도 지원합니다.</div>
       </div>
       <div class="field">
         <label for="outfits">의상 코드 / 한글 이름</label>
@@ -323,6 +408,12 @@
         <div class="viewer-title-wrap">
           <h2 class="viewer-title" id="viewerTitle">캐릭터 앨범</h2>
           <div class="viewer-sub" id="viewerSub">상황 이미지</div>
+        </div>
+        <div class="viewer-tools">
+          <div class="viewer-outfit-wrap" id="viewerOutfitWrap">
+            <span class="viewer-outfit-label">의상</span>
+            <div class="viewer-outfits" id="viewerOutfits" aria-label="의상 선택"></div>
+          </div>
         </div>
         <button class="viewer-close" id="viewerClose" type="button">닫기 ✕</button>
       </div>
@@ -427,34 +518,49 @@
       return out;
     }
 
-    for (const raw of value.split(',').map(s=>s.trim()).filter(Boolean)) {
-      const numberRange = raw.match(/^(.*?)(-?\d+)\.\.(.*?)(-?\d+)$/);
-      if (numberRange && numberRange[1] === numberRange[3]) {
-        const startText = numberRange[2];
-        const endText = numberRange[4];
-        let a = Number(startText), b = Number(endText), step = a <= b ? 1 : -1;
+    function pushNumberRange(prefix, startText, endText) {
+      let a = Number(startText);
+      let b = Number(endText);
+      const step = a <= b ? 1 : -1;
 
-        const startDigits = startText.replace('-', '');
+      const startDigits = startText.replace('-', '');
 
-        // 앞의 0은 시작 코드에 직접 적은 만큼만 유지
-        // 예:
-        // 1..102   -> 1, 2, 3 ... 102
-        // 01..102  -> 01, 02, 03 ... 102
-        // 001..102 -> 001, 002, 003 ... 102
-        const preservePadding = startDigits.length > 1 && startDigits.startsWith('0');
-        const width = preservePadding ? startDigits.length : 0;
+      // 앞의 0은 시작 코드에 직접 적은 만큼만 유지
+      // 1..9    -> 1,2,3 ... 9
+      // 01..9   -> 01,02,03 ... 09
+      // A3..9   -> A3,A4,A5 ... A9
+      // A03..9  -> A03,A04 ... A09
+      const preservePadding = startDigits.length > 1 && startDigits.startsWith('0');
+      const width = preservePadding ? startDigits.length : 0;
 
-        for (let n=a; step>0 ? n<=b : n>=b; n+=step) {
-          let numberText;
-          if (preservePadding) {
-            const absText = String(Math.abs(n));
-            const padded = absText.length < width ? absText.padStart(width, '0') : absText;
-            numberText = n < 0 ? '-' + padded : padded;
-          } else {
-            numberText = String(n);
-          }
-          result.push(numberRange[1] + numberText);
+      for (let n = a; step > 0 ? n <= b : n >= b; n += step) {
+        let numberText;
+        if (preservePadding) {
+          const absText = String(Math.abs(n));
+          const padded = absText.length < width ? absText.padStart(width, '0') : absText;
+          numberText = n < 0 ? '-' + padded : padded;
+        } else {
+          numberText = String(n);
         }
+        result.push(prefix + numberText);
+      }
+    }
+
+    for (const raw of value.split(',').map(s => s.trim()).filter(Boolean)) {
+      // 양쪽에 접두사가 있는 숫자 범위:
+      // A3..A9 -> A3,A4,...,A9
+      const fullNumberRange = raw.match(/^(.*?)(-?\d+)\.\.(.*?)(-?\d+)$/);
+      if (fullNumberRange && fullNumberRange[1] === fullNumberRange[3]) {
+        pushNumberRange(fullNumberRange[1], fullNumberRange[2], fullNumberRange[4]);
+        continue;
+      }
+
+      // 오른쪽 접두사를 생략한 축약 범위:
+      // A3..9 -> A3,A4,...,A9
+      // AA01..09 -> AA01,AA02,...,AA09
+      const shortNumberRange = raw.match(/^(.*?)(-?\d+)\.\.(-?\d+)$/);
+      if (shortNumberRange) {
+        pushNumberRange(shortNumberRange[1], shortNumberRange[2], shortNumberRange[3]);
         continue;
       }
 
@@ -481,6 +587,7 @@
       // 단일 코드는 그대로 유지
       result.push(raw);
     }
+
     return [...new Set(result)];
   }
   function parseMapping() {
@@ -616,61 +723,106 @@
     const grid = $('viewerGrid');
     const title = $('viewerTitle');
     const sub = $('viewerSub');
+    const outfitBar = $('viewerOutfits');
+    const outfitWrap = $('viewerOutfitWrap');
+    const body = backdrop.querySelector('.viewer-body');
     if (!items?.length) return;
 
-    title.textContent = items[0].mapping ? items[0].mapping.name : items[0].personLabel;
-    sub.textContent = `${items.length}개의 존재하는 상황 이미지 · 코드 ${items[0].person}`;
-    grid.innerHTML = '';
-
-    items.forEach(item => {
-      const card = document.createElement('div');
-      card.className = 'viewer-item';
-
-      const img = document.createElement('img');
-      img.loading = 'lazy';
-      img.alt = `${item.personLabel} / ${item.sceneLabel}`;
-      img.src = item.url;
-      img.addEventListener('load', () => {
-        // 가로로 긴 원본 이미지는 두 칸을 사용해 원본 비율이 잘 보이도록 표시
-        if (img.naturalWidth > img.naturalHeight * 1.25) card.classList.add('wide');
-      }, {once:true});
-      img.addEventListener('error', () => {
-        img.src = makeBrokenThumb('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 300"><rect width="220" height="300" fill="#292637"/><text x="110" y="145" fill="#a39bb8" font-size="14" text-anchor="middle">이미지 없음</text></svg>');
-      }, {once:true});
-
-      const info = document.createElement('div');
-      info.className = 'viewer-info';
-
-      const scene = document.createElement('div');
-      scene.className = 'viewer-scene';
-      scene.textContent = item.sceneLabel;
-
-      const code = document.createElement('div');
-      code.className = 'viewer-code';
-      code.textContent = `인물 ${item.person} · 의상 ${item.outfit || '-'} · 상황 ${item.scene}`;
-
-      const actions = document.createElement('div');
-      actions.className = 'viewer-actions';
-      const open = document.createElement('button');
-      open.type = 'button';
-      open.textContent = '이미지 열기';
-      open.onclick = () => window.open(item.url, '_blank', 'noopener');
-      const copy = document.createElement('button');
-      copy.type = 'button';
-      copy.textContent = '주소 복사';
-      copy.onclick = async () => {
-        try {
-          await navigator.clipboard.writeText(item.url);
-          status('이미지 주소를 복사했습니다.');
-        } catch {
-          prompt('이미지 주소를 복사하세요:', item.url);
-        }
-      };
-      actions.append(open, copy);
-      info.append(scene, code, actions);
-      card.append(img, info);
-      grid.append(card);
+    const sortedItems = sortItemsForDisplay(items);
+    const outfitMap = new Map();
+    sortedItems.forEach(item => {
+      const key = item.outfit ?? '';
+      if (!outfitMap.has(key)) outfitMap.set(key, {
+        code:key,
+        label:item.outfitLabel || key || '기본'
+      });
     });
+    const outfits = [...outfitMap.values()];
+
+    title.textContent = sortedItems[0].mapping ? sortedItems[0].mapping.name : sortedItems[0].personLabel;
+    outfitBar.innerHTML = '';
+    outfitWrap.hidden = outfits.length === 0;
+
+    function renderOutfit(outfitCode) {
+      const filtered = sortedItems.filter(item => (item.outfit ?? '') === outfitCode);
+      grid.innerHTML = '';
+      body.scrollTop = 0;
+
+      const selected = outfitMap.get(outfitCode);
+      const selectedName = selected?.label || selected?.code || '기본';
+      sub.textContent = `${selectedName} · ${filtered.length}개의 존재하는 상황 이미지 · 코드 ${sortedItems[0].person}`;
+
+      outfitBar.querySelectorAll('.outfit-chip').forEach(btn => {
+        const active = btn.dataset.outfit === outfitCode;
+        btn.classList.toggle('active', active);
+        btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+      });
+
+      filtered.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'viewer-item';
+
+        const img = document.createElement('img');
+        img.loading = 'lazy';
+        img.alt = `${item.personLabel} / ${item.outfitLabel || item.outfit || '기본'} / ${item.sceneLabel}`;
+        img.src = item.url;
+        img.addEventListener('error', () => {
+          // 존재 확인 후에도 네트워크 상태가 바뀐 경우 카드 자체를 숨김
+          card.remove();
+        }, {once:true});
+
+        const info = document.createElement('div');
+        info.className = 'viewer-info';
+
+        const scene = document.createElement('div');
+        scene.className = 'viewer-scene';
+        scene.textContent = item.sceneLabel;
+
+        const code = document.createElement('div');
+        code.className = 'viewer-code';
+        code.textContent = `인물 ${item.person} · 의상 ${item.outfit || '-'} · 상황 ${item.scene}`;
+
+        const actions = document.createElement('div');
+        actions.className = 'viewer-actions';
+        const open = document.createElement('button');
+        open.type = 'button';
+        open.textContent = '이미지 열기';
+        open.onclick = () => window.open(item.url, '_blank', 'noopener');
+
+        const copy = document.createElement('button');
+        copy.type = 'button';
+        copy.textContent = '주소 복사';
+        copy.onclick = async () => {
+          try {
+            await navigator.clipboard.writeText(item.url);
+            status('이미지 주소를 복사했습니다.');
+          } catch {
+            prompt('이미지 주소를 복사하세요:', item.url);
+          }
+        };
+
+        actions.append(open, copy);
+        info.append(scene, code, actions);
+        card.append(img, info);
+        grid.append(card);
+      });
+    }
+
+    outfits.forEach((outfit, index) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'outfit-chip';
+      btn.dataset.outfit = outfit.code;
+      btn.textContent = outfit.label === outfit.code || !outfit.code
+        ? (outfit.label || '기본')
+        : `${outfit.label} · ${outfit.code}`;
+      btn.setAttribute('aria-pressed', 'false');
+      btn.addEventListener('click', () => renderOutfit(outfit.code));
+      outfitBar.append(btn);
+    });
+
+    // 첫 번째로 존재하는 의상을 기본 선택
+    renderOutfit(outfits[0]?.code ?? '');
 
     backdrop.classList.add('open');
     backdrop.setAttribute('aria-hidden', 'false');
