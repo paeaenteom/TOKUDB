@@ -460,6 +460,7 @@
   const albums = new Map();      // person -> { person, items, sorted, card, img, badge, title, sub, coverUrl }
   let visibleLimit = 0;          // 현재 화면에 보여줄 앨범 수
   let loading = false, checkedCount = 0, totalCount = 0, retryPending = 0;
+  let checkQueue = [];           // 아직 확인하지 않은 항목
   let renderQueued = false;
   let viewer = null;             // 열린 앨범: { person, outfit, picked, outfitKeys, cards }
 
@@ -742,35 +743,46 @@
   async function checkItemsProgressively(items, onFound, isCancelled) {
     const slowItems = [];
 
-    async function runPass(list, concurrency, timeout, lastPass) {
-      let index = 0;
+    // 대기열(checkQueue)에서 하나씩 꺼내 확인. 앨범을 열면 그 캐릭터 항목이 맨 앞으로 옮겨집니다.
+    async function runPass(concurrency, timeout, lastPass) {
       async function worker() {
-        while (index < list.length && !isCancelled()) {
-          const item = list[index++];
+        let item;
+        while (!isCancelled() && (item = checkQueue.shift())) {
           const result = await checkImageExists(item.url, timeout);
           if (isCancelled()) return;
           if (lastPass) retryPending--;
           if (result === 'timeout' && !lastPass) { slowItems.push(item); continue; }
           checkedCount++;
+          const album = albums.get(item.person);
+          if (album) album.pending--;
           if (result === 'ok') onFound(item);
           scheduleRender();
         }
       }
       const workers = [];
-      const workerCount = Math.min(concurrency, list.length);
+      const workerCount = Math.min(concurrency, checkQueue.length);
       for (let i = 0; i < workerCount; i++) workers.push(worker());
       await Promise.all(workers);
     }
 
     // 1차: 전체를 빠르게 확인. 10초 안에 못 받은 이미지는 없음으로 단정하지 않고 뒤로 미룸
-    await runPass(items, 12, 10000, false);
+    checkQueue = items.slice();
+    await runPass(16, 10000, false);
     // 2차: 느린 이미지만 동시 수를 줄이고 넉넉한 시간으로 다시 확인 (있는데 느려서 빠지는 일 방지)
     if (slowItems.length && !isCancelled()) {
+      checkQueue = slowItems;
       retryPending = slowItems.length;
       scheduleRender();
-      await runPass(slowItems, 4, 45000, true);
+      await runPass(4, 45000, true);
     }
-    retryPending = 0;
+    if (!isCancelled()) retryPending = 0;
+  }
+
+  // 열어 본 캐릭터의 남은 확인 항목을 대기열 맨 앞으로 (상황 번호 순서 유지)
+  function prioritizePerson(person) {
+    const mine = [], rest = [];
+    checkQueue.forEach(item => (item.person === person ? mine : rest).push(item));
+    if (mine.length) checkQueue = mine.concat(rest);
   }
 
   function addFoundItem(item) {
@@ -924,7 +936,7 @@
 
     const selected = outfitMap.get(outfitCode);
     const selectedName = selected?.label || selected?.code || '기본';
-    sub.textContent = `${selectedName} · ${filtered.length}개의 존재하는 상황 이미지 · 코드 ${viewer.person}` + (loading ? ' · 확인 중…' : '');
+    sub.textContent = `${selectedName} · ${filtered.length}개의 존재하는 상황 이미지 · 코드 ${viewer.person}` + (loading && album.pending > 0 ? ` · 남은 확인 ${album.pending}개` : '');
   }
 
   function openAlbumViewer(person) {
@@ -956,6 +968,7 @@
     checkedCount = 0;
     totalCount = 0;
     retryPending = 0;
+    checkQueue = [];
     peopleOrder = [];
     albums.clear();
     closeAlbumViewer();
@@ -992,7 +1005,8 @@
       clearAlbums();
       const myRun = runId;
       peopleOrder = people;
-      people.forEach(p => albums.set(p, {person:p, items:[], sorted:null, card:null}));
+      people.forEach(p => albums.set(p, {person:p, items:[], sorted:null, card:null, pending:0}));
+      candidateItems.forEach(item => albums.get(item.person).pending++);
       totalCount = candidateItems.length;
       loading = true;
       visibleLimit = Number($('pageSize').value) || 24;
@@ -1041,7 +1055,7 @@
       sub.className = 'album-sub';
       name.append(title, sub);
 
-      coverWrap.addEventListener('click', () => openAlbumViewer(album.person));
+      coverWrap.addEventListener('click', () => { prioritizePerson(album.person); openAlbumViewer(album.person); });
       card.append(coverWrap, name);
       Object.assign(album, {card, img, badge, title, sub, coverUrl:null});
     }
@@ -1053,7 +1067,7 @@
       album.img.alt = `${cover.personLabel} 대표 이미지`;
       album.img.src = cover.url;
     }
-    album.badge.textContent = `상황 ${items.length}장`;
+    album.badge.textContent = `상황 ${items.length}장` + (loading && album.pending > 0 ? ' · 확인 중' : '');
     album.title.textContent = cover.mapping ? cover.mapping.name : cover.personLabel;
     album.sub.textContent = `${cover.person} · 대표 코드 ${cover.scene} · 클릭하면 전체화면으로 열림`;
   }
