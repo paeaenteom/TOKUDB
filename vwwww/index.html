@@ -285,6 +285,10 @@
     height:58px;
   }
 
+  /* 갤러리 열 수: 설정값(--cols)을 쓰되 좁은 화면에서는 최대 3열 / 2열로 제한 */
+  #gallery { grid-template-columns:repeat(var(--cols,4),minmax(0,1fr)); }
+  @media(max-width:850px) { #gallery:not([data-cols="2"]) { grid-template-columns:repeat(3,minmax(0,1fr)); } }
+  @media(max-width:560px) { #gallery[id] { grid-template-columns:repeat(2,minmax(0,1fr)); } }
 </style>
 </head>
 <body style="--user-bg: none">
@@ -455,12 +459,21 @@
   let peopleOrder = [];          // 입력한 인물 순서대로 앨범 표시
   const albums = new Map();      // person -> { person, items, sorted, card, img, badge, title, sub, coverUrl }
   let visibleLimit = 0;          // 현재 화면에 보여줄 앨범 수
-  let loading = false, checkedCount = 0, totalCount = 0;
+  let loading = false, checkedCount = 0, totalCount = 0, retryPending = 0;
   let renderQueued = false;
   let viewer = null;             // 열린 앨범: { person, outfit, picked, outfitKeys, cards }
 
   const defaults = {template:'', suffixPreset:'', suffixCustom:'', people:'', outfits:'', scenes:'', mapping:'', accent:'#c9a7ff', panelColor:'#181723', textColor:'#f6f3ff', bgUrl:'', overlay:55, blur:16, roundness:20, columns:4, pageSize:24};
-  function status(msg) { $('status').textContent = msg || ''; }
+  // holdMs 동안은 확인 진행 상황이 이 메시지를 덮어쓰지 않습니다. (복사 완료 안내 등)
+  let statusHoldUntil = 0;
+  function status(msg, holdMs = 0) {
+    $('status').textContent = msg || '';
+    statusHoldUntil = holdMs ? Date.now() + holdMs : 0;
+    if (holdMs) setTimeout(() => { if (loading) scheduleRender(); }, holdMs);
+  }
+  function progressStatus(msg) {
+    if (Date.now() >= statusHoldUntil) $('status').textContent = msg;
+  }
 
   const BG_DB_NAME = 'RoseImagePreviewDB';
   const BG_DB_STORE = 'themeAssets';
@@ -596,6 +609,8 @@
       // 영문 범위: AA..AQ -> AA, AB, AC ... AQ
       const letterRange = raw.match(/^([A-Za-z]+)\.\.([A-Za-z]+)$/);
       if (letterRange) {
+        // 시작 코드를 소문자로 적으면 결과도 소문자로 유지: aa..ac -> aa, ab, ac
+        const lower = letterRange[1] === letterRange[1].toLowerCase();
         const startText = letterRange[1].toUpperCase();
         const endText = letterRange[2].toUpperCase();
 
@@ -608,7 +623,8 @@
         const step = a <= b ? 1 : -1;
 
         for (let n = a; step > 0 ? n <= b : n >= b; n += step) {
-          result.push(numberToLetters(n));
+          const code = numberToLetters(n);
+          result.push(lower ? code.toLowerCase() : code);
         }
         continue;
       }
@@ -700,45 +716,61 @@
     });
   }
 
-  function checkImageExists(url, timeout = 8000) {
+  // 결과: 'ok' (있음) · 'missing' (없음) · 'timeout' (시간 안에 다 받지 못함)
+  function checkImageExists(url, timeout) {
     return new Promise(resolve => {
       const img = new Image();
       let done = false;
-      const finish = ok => {
+      const finish = result => {
         if (done) return;
         done = true;
         clearTimeout(timer);
         img.onload = null;
         img.onerror = null;
-        resolve(ok);
+        // 시간 초과된 다운로드는 끊어서 다른 이미지 확인에 대역폭을 양보
+        if (result === 'timeout') img.src = '';
+        resolve(result);
       };
-      const timer = setTimeout(() => finish(false), timeout);
-      img.onload = () => finish(true);
-      img.onerror = () => finish(false);
+      const timer = setTimeout(() => finish('timeout'), timeout);
+      img.onload = () => finish('ok');
+      img.onerror = () => finish('missing');
       img.src = url;
     });
   }
 
   // 전부 확인할 때까지 기다리지 않고, 존재가 확인된 이미지마다 onFound를 바로 호출합니다.
   async function checkItemsProgressively(items, onFound, isCancelled) {
-    const concurrency = 16;
-    let index = 0;
+    const slowItems = [];
 
-    async function worker() {
-      while (index < items.length && !isCancelled()) {
-        const item = items[index++];
-        const ok = await checkImageExists(item.url);
-        if (isCancelled()) return;
-        checkedCount++;
-        if (ok) onFound(item);
-        scheduleRender();
+    async function runPass(list, concurrency, timeout, lastPass) {
+      let index = 0;
+      async function worker() {
+        while (index < list.length && !isCancelled()) {
+          const item = list[index++];
+          const result = await checkImageExists(item.url, timeout);
+          if (isCancelled()) return;
+          if (lastPass) retryPending--;
+          if (result === 'timeout' && !lastPass) { slowItems.push(item); continue; }
+          checkedCount++;
+          if (result === 'ok') onFound(item);
+          scheduleRender();
+        }
       }
+      const workers = [];
+      const workerCount = Math.min(concurrency, list.length);
+      for (let i = 0; i < workerCount; i++) workers.push(worker());
+      await Promise.all(workers);
     }
 
-    const workers = [];
-    const workerCount = Math.min(concurrency, items.length);
-    for (let i = 0; i < workerCount; i++) workers.push(worker());
-    await Promise.all(workers);
+    // 1차: 전체를 빠르게 확인. 10초 안에 못 받은 이미지는 없음으로 단정하지 않고 뒤로 미룸
+    await runPass(items, 12, 10000, false);
+    // 2차: 느린 이미지만 동시 수를 줄이고 넉넉한 시간으로 다시 확인 (있는데 느려서 빠지는 일 방지)
+    if (slowItems.length && !isCancelled()) {
+      retryPending = slowItems.length;
+      scheduleRender();
+      await runPass(slowItems, 4, 45000, true);
+    }
+    retryPending = 0;
   }
 
   function addFoundItem(item) {
@@ -808,7 +840,7 @@
     copy.onclick = async () => {
       try {
         await navigator.clipboard.writeText(item.url);
-        status('이미지 주소를 복사했습니다.');
+        status('이미지 주소를 복사했습니다.', 2500);
       } catch {
         prompt('이미지 주소를 복사하세요:', item.url);
       }
@@ -923,6 +955,7 @@
     loading = false;
     checkedCount = 0;
     totalCount = 0;
+    retryPending = 0;
     peopleOrder = [];
     albums.clear();
     closeAlbumViewer();
@@ -941,14 +974,18 @@
       const suffix = getSelectedSuffix();
 
       // 상황 → 의상 → 인물 순으로 확인: 모든 캐릭터의 앞 번호(대표 이미지)가 먼저 나타납니다.
-      const candidateItems = [];
+      // 템플릿에 없는 칸(예: {의상})에 코드를 넣으면 같은 URL이 여러 번 생기므로 처음 것만 사용
+      const candidateItems = [], seenUrls = new Set();
       for (const s of scenes) for (const o of outfits) for (const p of people) {
+        const url = buildUrl(template,p,o,s,suffix);
+        if (seenUrls.has(url)) continue;
+        seenUrls.add(url);
         candidateItems.push({
           person:p, outfit:o, scene:s,
           personLabel:peopleData.labels[p] || p,
           outfitLabel:outfitData.labels[o] || o,
           sceneLabel:sceneData.labels[s] || s,
-          url:buildUrl(template,p,o,s,suffix), mapping:mappings[p]
+          url, mapping:mappings[p]
         });
       }
 
@@ -1058,9 +1095,10 @@
     const progress = loading ? ` · 확인 ${checkedCount}/${totalCount}` : '';
     $('count').innerHTML = `총 <strong>${ready.length}명 캐릭터</strong> · 존재하는 상황 이미지 ${found}장${progress}`;
     if (loading) {
-      status(`이미지 확인 중... ${checkedCount}/${totalCount} · 찾은 이미지 ${found}장 (찾는 즉시 표시)`);
+      const retry = retryPending ? ` · 느린 이미지 ${retryPending}장 다시 확인 중` : '';
+      progressStatus(`이미지 확인 중... ${checkedCount}/${totalCount} · 찾은 이미지 ${found}장 (찾는 즉시 표시)${retry}`);
     } else if (peopleOrder.length) {
-      status(found
+      progressStatus(found
         ? `존재하는 이미지 ${found}장만 표시합니다. 없는 코드는 자동으로 숨겼습니다.`
         : '표시할 수 있는 이미지가 없습니다. URL 또는 코드를 확인해주세요.');
     }
@@ -1083,7 +1121,8 @@
     $('overlayValue').textContent=$('overlay').value+'%';
     $('blurValue').textContent=$('blur').value+'px';
     $('roundValue').textContent=$('roundness').value+'px';
-    $('gallery').style.gridTemplateColumns=`repeat(${Number($('columns').value)},minmax(0,1fr))`;
+    $('gallery').style.setProperty('--cols', Number($('columns').value) || 4);
+    $('gallery').dataset.cols = $('columns').value;
     document.body.style.backgroundImage = $('bgUrl').value.trim()
       ? `linear-gradient(rgba(10,9,18,${Number($('overlay').value)/100}),rgba(10,9,18,${Number($('overlay').value)/100})), url("${$('bgUrl').value.trim().replace(/["\\]/g,'')}")`
       : `linear-gradient(rgba(10,9,18,${Number($('overlay').value)/100}),rgba(10,9,18,${Number($('overlay').value)/100})), none`;
@@ -1133,7 +1172,7 @@
   function example() {
     $('template').value='https://example.com/{캐릭터}/{의상}/{상황}'; $('suffixPreset').value='.webp'; $('suffixCustom').value=''; $('suffixCustomWrap').hidden=true;
     $('people').value='AY=아야,SH=시호,HM=히메,CH=치하야'; $('outfits').value='3=기본 의상'; $('scenes').value='1=대기,2=걷기,3=공격,4=피격,5=특수';
-    $('mapping').value='AY=아야 | 첫 번째 예시\\nSH=시호 | 두 번째 예시';
+    $('mapping').value='AY=아야 | 첫 번째 예시\nSH=시호 | 두 번째 예시';
     status('예시 설정을 불러왔습니다. 실제 이미지가 있는 URL로 바꿔주세요.');
   }
   async function reset() {
@@ -1196,8 +1235,9 @@
   $('shareBtn').addEventListener('click',async()=>{
     const params=new URLSearchParams();
     ['template','suffixPreset','suffixCustom','people','outfits','scenes','mapping','accent','panelColor','textColor','bgUrl','overlay','blur','roundness','columns','pageSize'].forEach(k=>{if($(k).value!=='')params.set(k,$(k).value);});
+    if ($('bgUrl').value.startsWith('blob:')) params.delete('bgUrl'); // 내 컴퓨터 배경은 다른 사람이 열 수 없음
     const link=location.href.split('?')[0]+'?'+params.toString();
-    try { await navigator.clipboard.writeText(link); status('현재 설정이 포함된 공유 링크를 복사했습니다.'); }
+    try { await navigator.clipboard.writeText(link); status('현재 설정이 포함된 공유 링크를 복사했습니다.', 2500); }
     catch { prompt('공유 링크를 복사하세요:',link); }
   });
   const params=new URLSearchParams(location.search);
